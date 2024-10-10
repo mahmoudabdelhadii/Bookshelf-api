@@ -1,0 +1,115 @@
+name: TypeScript CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - prod
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Use Node.js 20.14.0
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: 20.14.0
+      - name: Install node_modules
+        run: npm ci
+      - name: Run fmt
+        run: npm run --workspaces --if-present fmt:check
+  lint:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install just
+        uses: extractions/setup-just@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Use Node.js 20.14.0
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: 20.14.0
+      - name: Install node_modules
+        run: npm ci
+      - name: Run lint
+        run: just tslint
+  check:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install just
+        uses: extractions/setup-just@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Use Node.js 20.14.0
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: 20.14.0
+      - name: Install node_modules
+        run: npm ci
+      - name: Run check
+        run: just tscheck
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:45432/colony
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install just
+        uses: extractions/setup-just@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Use Node.js 20.14.0
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: 20.14.0
+      - name: Install node_modules
+        run: npm ci
+      - name: Run tests
+        run: |
+          just start-e2e postgres
+          just tstest
+      - name: Docker teardown
+        if: ${{ always() }}
+        run: |
+          just stop-e2e
+  build:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install just
+        uses: extractions/setup-just@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Use Node.js 20.14.0
+        uses: actions/setup-node@v4
+        with:
+          cache: npm
+          node-version: 20.14.0
+      - name: Install node_modules
+        run: npm ci
+      - name: Run build
+        run: just tsbuild

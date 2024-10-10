@@ -52,15 +52,7 @@ concurrently(apps, { prefixColors: "auto" });
 // @ts-expect-error -- types are wrong or something idk
 const filter = ignore().add(readFileSync("./.dockerignore", "utf-8"));
 const LIBS = {
-  llm: "build-llm",
   database: "build-database",
-  overworld: "build-overworld",
-  "basic-mine": "build-basic-mine",
-  "more-basic-mine": "build-more-basic-mine",
-  "recipe-craft": "build-recipe-craft",
-  gateway: "prepare-gateway",
-  activities: "build-activities",
-  tick: "build-tick",
 } as const;
 
 const isRebuilding = new Set();

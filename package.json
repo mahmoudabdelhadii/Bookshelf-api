@@ -4,8 +4,7 @@
     "eslint-plugin-bookshelf",
     "masjid-bookshelf-client",
     "database",
-    "server",
-    "client"
+    "server"
   ],
   "type": "module",
   "license": "ISC",
