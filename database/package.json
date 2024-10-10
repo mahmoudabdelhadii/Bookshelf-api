@@ -1,0 +1,62 @@
+{
+  "name": "database",
+  "version": "0.0.5",
+  "description": "bookshelf Database Shared Library",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . --max-warnings 0 --cache",
+    "lint:fix": "eslint . --max-warnings 0 --fix",
+    "lint-all": "eslint . --max-warnings 0",
+    "fmt": "prettier . --write --cache",
+    "fmt:check": "prettier . --check",
+    "check": "tsc --noEmit",
+    "clean": "tsc --build --clean",
+    "build": "tsc --build .",
+    "migrate": "tsx -r dotenv/config src/private/migrate.ts",
+    "postmigrate": "tsx -r dotenv/config src/private/postmigrate.ts",
+    "deploylocal": "tsx -r dotenv/config src/private/migrate.ts",
+    "postdeploylocal": "tsx -r dotenv/config src/private/postmigrate.ts",
+    "deploy": "tsx -r dotenv/config src/private/migrate.ts",
+    "postdeploy": "tsx -r dotenv/config src/private/postdeploy.ts",
+    "test": "DATABASE_URL=postgresql://postgres:postgres@localhost:45432/bookshelf globstar -- tsx --test --test-concurrency 1 'src/**/*.test.ts'"
+  },
+  "author": "Mahmoud Abdelhadi",
+  "license": "ISC",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.33.0",
+    "pg": "^8.12.0",
+    "pino": "^8.20.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@types/node": "^20.14.7",
+    "@types/pg": "^8.11.6",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
+    "dotenv": "^16.4.5",
+    "drizzle-kit": "^0.24.2",
+    "eslint": "^8.57.0",
+    "globstar": "^1.0.0",
+    "openai": "^4.67.1",
+    "postgrator": "^7.2.0",
+    "prettier": "^3.3.1",
+    "runtypes": "^6.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.2"
+  },
+  "peerDepedencies": {
+    "openai": "^4.63.0"
+  },
+  "peerDepedenciesMeta": {
+    "openai": {
+      "optional": true
+    }
+  },
+  "exports": {
+    ".": "./build/src/index.js",
+    "./drizzle": "./build/src/drizzle.js"
+  }
+}

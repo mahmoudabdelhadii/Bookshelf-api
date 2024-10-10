@@ -1,0 +1,6 @@
+{
+  "watch": ["src"],
+  "ext": ".ts,.tsx",
+  "ignore": [],
+  "exec": "npx tsx -r dotenv/config ./src/index.ts | pino-pretty"
+}

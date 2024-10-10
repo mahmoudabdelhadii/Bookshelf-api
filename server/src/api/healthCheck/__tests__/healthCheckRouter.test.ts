@@ -1,8 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
-import type { ServiceResponse } from "@/common/models/serviceResponse";
-import { app } from "@/server";
+import type { ServiceResponse } from "../../../common/models/serviceResponse.js";
+import { app } from "../../../server.js";
 
 describe("Health Check API endpoints", () => {
   it("GET / - success", async () => {

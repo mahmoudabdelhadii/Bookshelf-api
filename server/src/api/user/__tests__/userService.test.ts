@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import type { Mock } from "vitest";
+import { vi, type Mock } from "vitest";
 
-import type { User } from "@/api/user/userModel";
-import { UserRepository } from "@/api/user/userRepository";
-import { UserService } from "@/api/user/userService";
+import type { User } from "../../../api/user/userModel.js";
+import { UserRepository } from "../../../api/user/userRepository.js";
+import { UserService } from "../../../api/user/userService.js";
 
 vi.mock("@/api/user/userRepository");
 
@@ -46,7 +46,7 @@ describe("userService", () => {
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.OK);
       expect(result.success).toBeTruthy();
-      expect(result.message).equals("Users found");
+      expect(result.message).toEqual("Users found");
       expect(result.responseObject).toEqual(mockUsers);
     });
 
@@ -60,7 +60,7 @@ describe("userService", () => {
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.NOT_FOUND);
       expect(result.success).toBeFalsy();
-      expect(result.message).equals("No Users found");
+      expect(result.message).toEqual("No Users found");
       expect(result.responseObject).toBeNull();
     });
 
@@ -74,7 +74,7 @@ describe("userService", () => {
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
       expect(result.success).toBeFalsy();
-      expect(result.message).equals("An error occurred while retrieving users.");
+      expect(result.message).toEqual("An error occurred while retrieving users.");
       expect(result.responseObject).toBeNull();
     });
   });
@@ -92,7 +92,7 @@ describe("userService", () => {
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.OK);
       expect(result.success).toBeTruthy();
-      expect(result.message).equals("User found");
+      expect(result.message).toEqual("User found");
       expect(result.responseObject).toEqual(mockUser);
     });
 
@@ -107,7 +107,7 @@ describe("userService", () => {
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.INTERNAL_SERVER_ERROR);
       expect(result.success).toBeFalsy();
-      expect(result.message).equals("An error occurred while finding user.");
+      expect(result.message).toEqual("An error occurred while finding user.");
       expect(result.responseObject).toBeNull();
     });
 
@@ -122,7 +122,7 @@ describe("userService", () => {
       // Assert
       expect(result.statusCode).toEqual(StatusCodes.NOT_FOUND);
       expect(result.success).toBeFalsy();
-      expect(result.message).equals("User not found");
+      expect(result.message).toEqual("User not found");
       expect(result.responseObject).toBeNull();
     });
   });
