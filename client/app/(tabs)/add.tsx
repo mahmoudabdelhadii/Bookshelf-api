@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Text, Button } from "react-native";
-import { getLocales } from "expo-localization";
-import { I18n } from "i18n-js";
-import en from "../../locales/en/translation.json";
-import ar from "../../locales/ar/translation.json";
+import React, { useState } from 'react';
+import { View, StyleSheet, Text, Button } from 'react-native';
+import { getLocales } from 'expo-localization';
+import { I18n } from 'i18n-js';
+import en from '../../locales/en/translation.json';
+import ar from '../../locales/ar/translation.json';
 
 // Set the key-value pairs for the different languages you want to support.
 const translations = { en, ar };
@@ -15,7 +15,7 @@ i18n.enableFallback = true;
 export default function Tab() {
   // Set the initial language to the device's locale or default to English
   const deviceLocale = getLocales()[0].languageCode;
-  const [language, setLanguage] = useState(deviceLocale ?? "en");
+  const [language, setLanguage] = useState(deviceLocale ?? 'en');
 
   // Change i18n locale when language changes
   i18n.locale = language;
@@ -23,15 +23,15 @@ export default function Tab() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>
-        {i18n.t("welcome")} {i18n.t("description")}
+        {i18n.t('welcome')} {i18n.t('description')}
       </Text>
       <Text>Current locale: {i18n.locale}</Text>
       <Text>Device locale: {deviceLocale}</Text>
 
       {/* Buttons to Change Language */}
       <View style={styles.buttonContainer}>
-        <Button title="English" onPress={() => setLanguage("en")} />
-        <Button title="Arabic" onPress={() => setLanguage("ar")} />
+        <Button title="English" onPress={() => setLanguage('en')} />
+        <Button title="Arabic" onPress={() => setLanguage('ar')} />
       </View>
     </View>
   );
@@ -39,9 +39,9 @@ export default function Tab() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
     flex: 1,
   },
   text: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   buttonContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 16,
   },
 });
