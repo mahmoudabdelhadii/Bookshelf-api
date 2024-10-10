@@ -40,21 +40,13 @@
     "drizzle-kit": "^0.24.2",
     "eslint": "^8.57.0",
     "globstar": "^1.0.0",
-    "openai": "^4.67.1",
     "postgrator": "^7.2.0",
     "prettier": "^3.3.1",
-    "runtypes": "^6.7.0",
+  
     "tsx": "^4.19.0",
     "typescript": "^5.6.2"
   },
-  "peerDepedencies": {
-    "openai": "^4.63.0"
-  },
-  "peerDepedenciesMeta": {
-    "openai": {
-      "optional": true
-    }
-  },
+  
   "exports": {
     ".": "./build/src/index.js",
     "./drizzle": "./build/src/drizzle.js"
