@@ -54,15 +54,15 @@ tslint: lint-database lint-server lint-eslint-plugin-bookshelf
 
 # Format all TypeScript projects
 [group('typescript')]
-tsfmt: fmt-database fmt-server fmt-eslint-plugin-bookshelf
+tsfmt: fmt-database fmt-server fmt-eslint-plugin-bookshelf fmt-client
 
 # Clean all TypeScript projects
 [group('typescript')]
-tsclean: clean-database clean-server clean-eslint-plugin-bookshelf
+tsclean: clean-database clean-server clean-eslint-plugin-bookshelf clean-client
 
 # Typecheck all TypeScript projects
 [group('typescript')]
-tscheck: check-database check-server check-eslint-plugin-bookshelf
+tscheck: check-database check-server check-eslint-plugin-bookshelf check-client
 
 # Test all TypeScript projects
 [group('typescript')]
@@ -235,11 +235,24 @@ clean-e2e:
 
 [group('client')]
 lint-client:
-    npm -w masjid-bookshelf-client lint
+    npm -w masjid-bookshelf-client run lint
 
 [group('client')]
 test-client:
-    npm -w masjid-bookshelf-client test
+    npm -w masjid-bookshelf-client run test
 [group('client')]
 run-client:
     npm -w masjid-bookshelf-client start
+
+[group('client')]
+fmt-client:
+    npx -w masjid-bookshelf-client prettier . --write --cache
+
+[group('client')]
+clean-client:
+    npx -w masjid-bookshelf-client tsc --build --clean
+    rm -f masjid-bookshelf-client/.eslintcache
+    rm -rf masjid-bookshelf-client/node_modules/.cache/prettier/
+[group('client')]
+check-client:
+    npx -w masjid-bookshelf-client tsc --build

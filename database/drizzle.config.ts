@@ -9,7 +9,5 @@ export default defineConfig({
   verbose: true,
   strict: true,
   breakpoints: false,
-  schemaFilter: [
-    "server",
-  ],
+  schemaFilter: ["server"],
 });

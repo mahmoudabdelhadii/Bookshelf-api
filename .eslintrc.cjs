@@ -65,4 +65,13 @@ module.exports = {
     ],
     "@typescript-eslint/no-unused-vars": ["warn", { varsIgnorePattern: "^_.*", argsIgnorePattern: "^_.*" }],
   },
+  overrides: [
+    {
+      files: ["build/**/*.js"], // Exclude the build folder
+      rules: {
+        "@typescript-eslint/no-var-requires": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+      },
+    },
+  ],
 };

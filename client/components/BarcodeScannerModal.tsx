@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Modal, TouchableOpacity, StyleSheet } from "react-native";
-import {CameraView, Camera,  BarcodeScanningResult } from "expo-camera";
-import { Ionicons } from "@expo/vector-icons";
-import Colors from "../constants/Colors";
+import React, { useEffect, useState } from 'react';
+import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
+import { Ionicons } from '@expo/vector-icons';
+import Colors from '../constants/Colors';
 
 type BarcodeScannerModalProps = {
   visible: boolean;
@@ -26,7 +26,7 @@ export default function BarcodeScannerModal({
     // Request camera permission
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === "granted");
+      setHasPermission(status === 'granted');
     })();
   }, []);
 
@@ -39,7 +39,9 @@ export default function BarcodeScannerModal({
     return (
       <Modal visible={visible} transparent>
         <View style={styles.permissionContainer}>
-          <Text style={styles.permissionText}>Requesting camera permission...</Text>
+          <Text style={styles.permissionText}>
+            Requesting camera permission...
+          </Text>
         </View>
       </Modal>
     );
@@ -63,8 +65,7 @@ export default function BarcodeScannerModal({
       visible={visible}
       animationType="slide"
       onRequestClose={onClose}
-      statusBarTranslucent
-    >
+      statusBarTranslucent>
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -73,7 +74,7 @@ export default function BarcodeScannerModal({
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setTorchOn(!torchOn)}>
             <Ionicons
-              name={torchOn ? "flashlight" : "flashlight-outline"}
+              name={torchOn ? 'flashlight' : 'flashlight-outline'}
               size={30}
               color="white"
             />
@@ -85,11 +86,11 @@ export default function BarcodeScannerModal({
           <CameraView
             style={StyleSheet.absoluteFillObject}
             facing="back"
-            flash={torchOn ? "on" : "off"}
+            flash={torchOn ? 'on' : 'off'}
             onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
             barcodeScannerSettings={{
-                barcodeTypes: ["ean13"],
-              }}
+              barcodeTypes: ['ean13'],
+            }}
           />
         </View>
       </View>
@@ -100,14 +101,14 @@ export default function BarcodeScannerModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: 'black',
   },
   header: {
     height: 60,
-    backgroundColor: "black",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    backgroundColor: 'black',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 20, // For status bar height
   },
@@ -116,12 +117,12 @@ const styles = StyleSheet.create({
   },
   permissionContainer: {
     flex: 1,
-    backgroundColor: "black",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   permissionText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
     marginBottom: 20,
   },
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   closeButtonText: {
-    color: Colors.colors["primary-content"],
-    fontWeight: "bold",
+    color: Colors.colors['primary-content'],
+    fontWeight: 'bold',
   },
 });
