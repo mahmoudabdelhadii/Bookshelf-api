@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 
-import type { User } from "@/api/user/userModel";
-import { UserRepository } from "@/api/user/userRepository";
-import { ServiceResponse } from "@/common/models/serviceResponse";
-import { logger } from "@/server";
+import type { User } from "../../api/user/userModel.js";
+import { UserRepository } from "../../api/user/userRepository.js";
+import { ServiceResponse } from "../../common/models/serviceResponse.js";
+import { logger } from "../../server.js";
 
 export class UserService {
   private userRepository: UserRepository;
@@ -42,7 +42,11 @@ export class UserService {
     } catch (ex) {
       const errorMessage = `Error finding user with id ${id}:, ${(ex as Error).message}`;
       logger.error(errorMessage);
-      return ServiceResponse.failure("An error occurred while finding user.", null, StatusCodes.INTERNAL_SERVER_ERROR);
+      return ServiceResponse.failure(
+        "An error occurred while finding user.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

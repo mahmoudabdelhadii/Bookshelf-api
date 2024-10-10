@@ -1,0 +1,5 @@
+/node_modules/
+/build/
+/src/seedtypes.ts
+/src/schematypes.ts
+/src/drizzle/meta/

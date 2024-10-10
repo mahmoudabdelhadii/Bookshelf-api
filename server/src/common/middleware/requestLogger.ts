@@ -5,7 +5,7 @@ import { StatusCodes, getReasonPhrase } from "http-status-codes";
 import type { LevelWithSilent } from "pino";
 import { type CustomAttributeKeys, type Options, pinoHttp } from "pino-http";
 
-import { env } from "@/common/utils/envConfig";
+import { env } from "../utils/envConfig.js";
 
 enum LogLevel {
   Fatal = "fatal",
@@ -67,7 +67,11 @@ const responseBodyMiddleware: RequestHandler = (_req, res, next) => {
   next();
 };
 
-const customLogLevel = (_req: IncomingMessage, res: ServerResponse<IncomingMessage>, err?: Error): LevelWithSilent => {
+const customLogLevel = (
+  _req: IncomingMessage,
+  res: ServerResponse<IncomingMessage>,
+  err?: Error,
+): LevelWithSilent => {
   if (err || res.statusCode >= StatusCodes.INTERNAL_SERVER_ERROR) return LogLevel.Error;
   if (res.statusCode >= StatusCodes.BAD_REQUEST) return LogLevel.Warn;
   if (res.statusCode >= StatusCodes.MULTIPLE_CHOICES) return LogLevel.Silent;
