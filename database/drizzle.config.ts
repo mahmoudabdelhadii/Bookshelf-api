@@ -10,14 +10,6 @@ export default defineConfig({
   strict: true,
   breakpoints: false,
   schemaFilter: [
-    "gateway",
-    "memory",
-    "items",
-    "slackbot",
-    "flirt",
-    "basic_mine",
-    "summarizer",
-    "recipe_craft",
-    "npc",
+    "server",
   ],
 });
