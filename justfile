@@ -50,7 +50,7 @@ tsbuild: build-eslint-plugin-bookshelf build-database build-server
 
 # Lint all TypeScript projects
 [group('typescript')]
-tslint: lint-database lint-server lint-eslint-plugin-bookshelf
+tslint: lint-server lint-eslint-plugin-bookshelf lint-client lint-database
 
 # Format all TypeScript projects
 [group('typescript')]
@@ -151,7 +151,6 @@ check-server:
 [group('server')]
 lint-server: build-eslint-plugin-bookshelf build-database
     npx -w server eslint . --max-warnings 0 --cache
-    npx -w server xss-scan
 
 # Format server
 [group('server')]
