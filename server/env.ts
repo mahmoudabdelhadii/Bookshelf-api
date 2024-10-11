@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 function required(name: string) {
   const value = process.env[name];
   if (!value) throw new Error(`Environment variable ${name} is required`);
@@ -11,7 +12,7 @@ function number(name: string, fallback?: number): number {
   if (Number.isNaN(+value)) throw new Error(`Environment variable ${name} must be a number. Found: ${value}`);
   return +value;
 }
-
+// eslint-disable @typescript-eslint/no-unused-vars
 function boolean(name: string, fallback?: boolean): boolean {
   const value = process.env[name];
   if (!value && fallback === undefined) throw new Error(`Environment variable ${name} is required`);
