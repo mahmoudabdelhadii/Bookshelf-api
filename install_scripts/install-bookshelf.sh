@@ -26,7 +26,6 @@ _main()
   # to actually be able to use them
   fnm use
 
-  # Start the requisite 2 external services: https://dev.parallelbookshelf.com/manual/development/development-environment.html#docker-compose
   docker compose up -d
 
   # Create env file
@@ -47,7 +46,7 @@ _main()
   just build
 
   # Migrate the database
-  #npm -w database run migrate
+  npm -w database run migrate
 }
 
 _main
