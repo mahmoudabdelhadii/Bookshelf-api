@@ -4,7 +4,11 @@ import { userService } from "../../api/user/userService.js";
 import { handleServiceResponse } from "../../common/utils/httpHandlers.js";
 
 class UserController {
-  public getUsers: RequestHandler = async (_req: Request, res: Response) => {
+  public getUsers: RequestHandler = async (req: Request, res: Response) => {
+    const drizzle = req.drizzle;
+
+    const books = await drizzle.query.books.findMany()
+    console.log(books)
     const serviceResponse = await userService.findAll();
     return handleServiceResponse(serviceResponse, res);
   };

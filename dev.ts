@@ -38,8 +38,13 @@ const apps = [
     command: "npm run -w server dev",
     env: { ...process.env, LOG_LEVEL: logLevel("server") },
   },
-  
 
+  {
+    name: "client",
+    command: "npm run -w masjid-bookshelf-client ios",
+    env: { ...process.env, LOG_LEVEL: logLevel("client") },
+  },
+  
 ];
 
 

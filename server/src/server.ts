@@ -11,12 +11,32 @@ import rateLimiter from "./common/middleware/rateLimiter.js";
 import requestLogger from "./common/middleware/requestLogger.js";
 import { env } from "./common/utils/envConfig.js";
 
+import { connect, schema} from "database"
+import type { DrizzleClient } from "database";
+
+
+
+const { drizzle } = connect("server");
+declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Express {
+      interface Request {
+        drizzle: DrizzleClient;
+      }
+    }
+  }
+
+  
 const logger = pino({ name: "server start" });
 const app: Express = express();
 
 // Set the application to trust the reverse proxy
 app.set("trust proxy", true);
 
+app.use((req, _res, next) => {
+    req.drizzle = drizzle;
+    next();
+  });
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

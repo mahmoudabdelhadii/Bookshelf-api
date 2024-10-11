@@ -5,9 +5,13 @@ install:
 # Build anything that might be needed and then run the servers.
 default: build-database build-server && run
 
+dev:
+    just docker
+    npm run -w masjid-bookshelf-client ios
+# Default command: Build and run the server
+docker: docker-build-server && docker-run
 # Run the servers.
 run:
-    nohup npm -w masjid-bookshelf-client start > nohup.out 2> nohup.err < /dev/null &
     npx tsx -r dotenv/config dev.ts
     
 
@@ -255,3 +259,24 @@ clean-client:
 [group('client')]
 check-client:
     npx -w masjid-bookshelf-client tsc --build
+
+# Docker commands
+docker-build-server:
+    docker build -f Dockerfile.server -t bookshelf-server .
+
+docker-run:
+    docker-compose up -d
+
+docker-stop:
+    docker-compose down
+
+docker-restart:
+    just docker-stop
+    just docker-build-server
+    just docker-run
+
+# Other existing commands...
+
+# Clean up Docker resources
+docker-clean:
+    docker system prune -f

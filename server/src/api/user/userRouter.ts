@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import express, { type Router } from "express";
+import  { Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
@@ -8,7 +8,7 @@ import { validateRequest } from "../../common/utils/httpHandlers.js";
 import { userController } from "./userController.js";
 
 export const userRegistry = new OpenAPIRegistry();
-export const userRouter: Router = express.Router();
+export const userRouter:Router = Router();
 
 userRegistry.register("User", UserSchema);
 
