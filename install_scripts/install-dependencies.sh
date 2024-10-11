@@ -35,15 +35,15 @@ _main()
     git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0
     echo -e ". \"$HOME/.asdf/asdf.sh\"" >> ${SHELL_DOTFILE}
     source ${SHELL_DOTFILE}
-    if [[ "$SHELL_DOTFILE" == *".zshrc" ]]; then
-      echo -e "fpath=(${HOME}/.asdf/completions \$fpath)" >> ${SHELL_DOTFILE}
-      echo -e "autoload -Uz compinit && compinit"
-    elif [[ "$SHELL_DOTFILE" == *".bashrc" ]]; then
-      echo -e ". \"$HOME/.asdf/completions/asdf.bash\"" >> ${SHELL_DOTFILE}
-    else
-      echo "Unsupported shell configuration file. Please use .bashrc or .zshrc."
-      exit 1
-    fi
+    # if [[ "$SHELL_DOTFILE" == *".zshrc" ]]; then
+    #   echo -e "fpath=(${HOME}/.asdf/completions \$fpath)" >> ${SHELL_DOTFILE}
+    #   echo -e "autoload -Uz compinit && compinit"
+    # elif [[ "$SHELL_DOTFILE" == *".bashrc" ]]; then
+    #   echo -e ". \"$HOME/.asdf/completions/asdf.bash\"" >> ${SHELL_DOTFILE}
+    # else
+    #   echo "Unsupported shell configuration file. Please use .bashrc or .zshrc."
+    #   exit 1
+    # fi
     source ${SHELL_DOTFILE}
   else
     asdf update
