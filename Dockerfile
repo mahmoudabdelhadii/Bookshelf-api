@@ -1,37 +1,78 @@
-FROM node:20.14.0-alpine AS database
+# Dockerfile.database
+
+# Stage 1: Build the database package
+FROM node:20.14.0-alpine AS database-builder
+
 WORKDIR /workspace
-COPY package.json package-lock.json tsconfig.json       ./
-COPY database/package.json                              ./database/
-RUN npm ci
-COPY database                                           ./database/
-COPY --from=codegen /workspace/seeder/out/seedtypes.ts /workspace/seeder/out/schematypes.ts  ./database/src/
-RUN npm run build -w database
-ENTRYPOINT npm run deploy -w database
 
-
-FROM node:20.14.0-alpine AS gateway
-WORKDIR /workspace
-COPY package.json package-lock.json tsconfig.json       ./
-COPY database/package.json                              ./database/
-COPY server/package.json                               ./server/
-RUN npm ci
-COPY --from=database /workspace/database/               ./database/
-COPY server                                            ./server/
-RUN npm run build -w server
-ENV RUN_GATEWAY=true \
-    RUN_COORDINATOR=false \
-    NODE_ENV=production
-ENTRYPOINT npm start -w server
-
-
-FROM node:20.14.0-alpine AS coordinator
-WORKDIR /workspace
+# Copy root package files and database package.json
 COPY package.json package-lock.json tsconfig.json ./
-COPY ./database/package.json ./database/
-COPY ./server/package.json ./server/
+COPY database/package.json ./database/
+
+# Install dependencies
 RUN npm ci
-COPY ./database/ ./database/
-COPY ./server/ ./server/
-ENV RUN_COORDINATOR=true \
-    NODE_ENV=production
-ENTRYPOINT npx -w server node build/src/index.js
+
+# Copy database source code
+COPY database ./database
+
+# Build the database package
+RUN npm run build -w database
+
+# Stage 2: Prepare the database package
+FROM node:20.14.0-alpine AS database
+
+WORKDIR /workspace
+
+# Copy built database package from the builder stage
+COPY --from=database-builder /workspace/database ./database
+
+# Set the entrypoint if needed (e.g., for migrations)
+ENTRYPOINT ["npm", "run", "deploy", "-w", "database"]
+
+
+# Dockerfile.server
+
+# Stage 1: Build the server
+FROM node:20.14.0-alpine AS server-builder
+
+WORKDIR /workspace
+
+# Copy root package files and package.json files for database and server
+COPY package.json package-lock.json tsconfig.json ./
+COPY database/package.json ./database/
+COPY server/package.json ./server/
+
+# Install dependencies
+RUN npm ci
+
+# Copy database and server source code
+COPY database ./database
+COPY server ./server
+
+# Build the database package
+RUN npm run build -w database
+
+# Build the server package
+RUN npm run build -w server
+
+# Stage 2: Run the server
+FROM node:20.14.0-alpine AS server
+
+WORKDIR /workspace
+
+# Copy built server and database packages from the builder stage
+COPY --from=server-builder /workspace/database ./database
+COPY --from=server-builder /workspace/server ./server
+COPY package.json package-lock.json tsconfig.json ./
+
+# Install production dependencies
+RUN npm ci --only=production
+
+# Set environment variables
+ENV NODE_ENV=production
+
+# Expose the necessary port
+EXPOSE 8080
+
+# Start the server
+ENTRYPOINT ["npm", "start", "-w", "server"]
