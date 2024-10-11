@@ -2,9 +2,9 @@
 
 services:
   postgres:
-    image: postgres:13
+    image: postgres:15
     ports:
-      - "55432:55432"
+      - "5432:5433"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
