@@ -7,8 +7,8 @@ class UserController {
   public getUsers: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
 
-    const books = await drizzle.query.books.findMany()
-    console.log(books)
+    const books = await drizzle.query.books.findMany();
+    console.log(books);
     const serviceResponse = await userService.findAll();
     return handleServiceResponse(serviceResponse, res);
   };
