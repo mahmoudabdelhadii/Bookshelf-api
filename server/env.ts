@@ -25,7 +25,6 @@ console.log(`Running in ${ENV} mode`);
 
 export const IS_DEV = ENV === "development";
 
-
 export const PORT = number("PORT", 4050);
 export const HOST = process.env.HOST ?? "0.0.0.0";
 export const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";

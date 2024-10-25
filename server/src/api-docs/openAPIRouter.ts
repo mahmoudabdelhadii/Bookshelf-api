@@ -1,5 +1,5 @@
-import { type Request, type Response, Router} from "express";
-import {serve, setup} from "swagger-ui-express";
+import { type Request, type Response, Router } from "express";
+import { serve, setup } from "swagger-ui-express";
 
 import { generateOpenAPIDocument } from "../api-docs/openAPIDocumentGenerator.js";
 

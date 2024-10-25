@@ -1,4 +1,4 @@
-import {config} from "dotenv";
+import { config } from "dotenv";
 import { cleanEnv, host, num, port, str, testOnly } from "envalid";
 
 config();
