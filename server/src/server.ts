@@ -1,5 +1,5 @@
 import cors from "cors";
-import express, {  json,urlencoded } from "express";
+import express, { json, urlencoded } from "express";
 import helmet from "helmet";
 import { pino } from "pino";
 
@@ -11,10 +11,10 @@ import rateLimiter from "./common/middleware/rateLimiter.js";
 import requestLogger from "./common/middleware/requestLogger.js";
 import { env } from "./common/utils/envConfig.js";
 
-import { LOG_LEVEL} from "../env.js";
+import { LOG_LEVEL } from "../env.js";
 import { connect, schema } from "database";
 import type { DrizzleClient } from "database";
-import {pinoHttp} from "pino-http";
+import { pinoHttp } from "pino-http";
 
 const { drizzle } = connect("server");
 declare global {
@@ -26,10 +26,11 @@ declare global {
   }
 }
 
-const logger = pino({   
-    level: LOG_LEVEL,
-    base: { app: "server" },
-    customLevels: { http: 27 }, });
+const logger = pino({
+  level: LOG_LEVEL,
+  base: { app: "server" },
+  customLevels: { http: 27 },
+});
 const app = express();
 
 // Set the application to trust the reverse proxy
@@ -50,14 +51,14 @@ app.use(rateLimiter);
 app.use(requestLogger);
 
 app.use(
-    pinoHttp(
-      {
-        useLevel: "http",
-        logger,
-      },
-      undefined,
-    ),
-  );
+  pinoHttp(
+    {
+      useLevel: "http",
+      logger,
+    },
+    undefined,
+  ),
+);
 // Routes
 app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);

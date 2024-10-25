@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "references": [{ "path": "../database" }],
-  "include": ["src","*.ts", "package.json"],
+  "include": ["src", "*.ts", "package.json"],
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "build"
