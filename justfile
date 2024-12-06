@@ -6,7 +6,7 @@ install:
 default: build-database build-server && run
 
 dev:
-    just docker
+    just docker-start
     npm run -w masjid-bookshelf-client ios
 # Default command: Build and run the server
 # docker: docker-build-server && docker-start
