@@ -9,8 +9,8 @@ dev:
     just docker
     npm run -w masjid-bookshelf-client ios
 # Default command: Build and run the server
-docker: docker-build-server && docker-run
-# Run the servers.
+# docker: docker-build-server && docker-start
+# # Run the servers.
 run:
     npx tsx -r dotenv/config dev.ts
     
@@ -36,9 +36,6 @@ fmt: tsfmt
 
 # Typecheck all components
 check: tscheck
-
-# Run all tests
-test: (start-e2e "postgres") tstest test-database
 
 # Clean all
 clean: tsclean
@@ -264,7 +261,7 @@ check-client:
 docker-build-server:
     docker build -f Dockerfile.server -t bookshelf-server .
 
-docker-run:
+docker-start:
     docker-compose up -d
 
 docker-stop:
@@ -272,10 +269,8 @@ docker-stop:
 
 docker-restart:
     just docker-stop
-    just docker-build-server
-    just docker-run
-
-# Other existing commands...
+    # just docker-build-server
+    just docker-start
 
 # Clean up Docker resources
 docker-clean:
