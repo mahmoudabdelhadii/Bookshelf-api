@@ -70,7 +70,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:45432/colony
+      DATABASE_URL: postgresql://postgres:postgres@localhost:45432/bookshelf
     if: github.event.pull_request.draft == false
     steps:
       - name: Checkout code
