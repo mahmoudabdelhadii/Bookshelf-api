@@ -1,4 +1,6 @@
-CREATE SCHEMA IF NOT EXIST server;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+
+CREATE SCHEMA IF NOT EXISTS server;
 
 CREATE TABLE server.books (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
