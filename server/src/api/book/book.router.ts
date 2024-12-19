@@ -14,12 +14,13 @@ import {
 export const booksRouter = Router();
 export const booksRegistry = new OpenAPIRegistry();
 
+
 booksRegistry.register("Book", bookSchema);
 
 
 booksRegistry.registerPath({
   method: "post",
-  path: "/book",
+  path: "/books",
   tags: ["Books"],
   request: {
     body: {
@@ -36,12 +37,13 @@ booksRegistry.registerPath({
     ...createApiResponse(bookSchema, "Book created successfully", 201),
   },
 });
-booksRouter.post("/book", booksController.createBook);
+booksRouter.post("/", booksController.createBook);
 
 
 const createBooksBulkSchema = z.object({
   books: z.array(createBookSchema),
 });
+
 booksRegistry.registerPath({
   method: "post",
   path: "/books/bulk",
@@ -61,12 +63,12 @@ booksRegistry.registerPath({
     ...createApiResponse(z.array(bookSchema), "Books created successfully", 201),
   },
 });
-booksRouter.post("/books/bulk", booksController.createBooksBulk);
+booksRouter.post("/bulk", booksController.createBooksBulk);
 
 
 booksRegistry.registerPath({
   method: "get",
-  path: "/book/{id}",
+  path: "/books/{id}",
   tags: ["Books"],
   request: {
     params: getBookSchema.shape.params,
@@ -75,12 +77,12 @@ booksRegistry.registerPath({
     ...createApiResponse(bookSchema, "Book fetched successfully"),
   },
 });
-booksRouter.get("/book/:id", booksController.getBook);
+booksRouter.get("/:id", booksController.getBook);
 
 
 booksRegistry.registerPath({
   method: "patch",
-  path: "/book/{id}",
+  path: "/books/{id}",
   tags: ["Books"],
   request: {
     params: getBookSchema.shape.params,
@@ -98,12 +100,12 @@ booksRegistry.registerPath({
     ...createApiResponse(bookSchema, "Book updated successfully"),
   },
 });
-booksRouter.patch("/book/:id", booksController.updateBook);
+booksRouter.patch("/:id", booksController.updateBook);
 
 
 booksRegistry.registerPath({
   method: "delete",
-  path: "/book/{id}",
+  path: "/books/{id}",
   tags: ["Books"],
   request: { params: getBookSchema.shape.params },
   responses: {
@@ -120,7 +122,7 @@ booksRegistry.registerPath({
     },
   },
 });
-booksRouter.delete("/book/:id", booksController.deleteBook);
+booksRouter.delete("/:id", booksController.deleteBook);
 
 
 const listBooksQuerySchema = z.object({
@@ -140,7 +142,7 @@ booksRegistry.registerPath({
     ...createApiResponse(z.array(bookSchema), "Books fetched successfully"),
   },
 });
-booksRouter.get("/books", booksController.getBooks);
+booksRouter.get("/", booksController.getBooks);
 
 
 const searchBooksQuerySchema = z.object({
@@ -156,4 +158,36 @@ booksRegistry.registerPath({
     ...createApiResponse(z.array(bookSchema), "Books searched successfully"),
   },
 });
-booksRouter.get("/books/search", booksController.searchBooks);
+booksRouter.get("/search", booksController.searchBooks);
+
+
+const similaritySearchQuerySchema = z.object({
+  search: z.string(),
+});
+
+booksRegistry.registerPath({
+  method: "get",
+  path: "/books/similarity",
+  tags: ["Books"],
+  request: { query: similaritySearchQuerySchema },
+  responses: {
+    ...createApiResponse(z.array(bookSchema), "Books fetched successfully based on similarity"),
+  },
+});
+booksRouter.get("/similarity", booksController.searchBooksBySimilarity);
+
+
+const weightedSearchQuerySchema = z.object({
+  search: z.string(),
+});
+
+booksRegistry.registerPath({
+  method: "get",
+  path: "/books/weighted-search",
+  tags: ["Books"],
+  request: { query: weightedSearchQuerySchema },
+  responses: {
+    ...createApiResponse(z.array(bookSchema), "Books fetched successfully using weighted search"),
+  },
+});
+booksRouter.get("/weighted-search", booksController.searchBooksWeighted);

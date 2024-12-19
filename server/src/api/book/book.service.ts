@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { eq, like, sql, schema } from "database";
+import { eq, sql, schema } from "database";
 import {
   BadRequest,
   NotFound,
@@ -76,7 +76,7 @@ export class BookService {
     if (!book) {
       throw new NotFound("Book not found.", { bookId });
     }
-
+    console.log(book)
     return book;
   }
 
@@ -98,16 +98,17 @@ export class BookService {
   ) {
     try {
       return await drizzle.query.book.findMany({
-        where: (b, { and, eq, like }) => {
+        where: (b, { and, eq, ilike }) => {
           const conditions = [];
-          if (title) conditions.push(like(b.title, `%${title}%`));
+          if (title) conditions.push(ilike(b.title, `%${title}%`)); // Trigram index supports ILIKE for partial matches
           if (isbn) conditions.push(eq(b.isbn, isbn));
-          if (author) conditions.push(like(b.author, `%${author}%`));
-          if (genre) conditions.push(like(b.genre, `%${genre}%`));
+          if (author) conditions.push(ilike(b.author, `%${author}%`));
+          if (genre) conditions.push(ilike(b.genre, `%${genre}%`));
           if (publishedYear) conditions.push(eq(b.publishedYear, publishedYear));
-
+  
           return conditions.length > 0 ? and(...conditions) : undefined;
         },
+        limit: 50,
       });
     } catch (err) {
       throw new DatabaseError("Error fetching books.", { originalError: err });
@@ -160,6 +161,83 @@ export class BookService {
       return updatedBook;
     } catch (err) {
       throw new DatabaseError("Failed to update the book.", { bookId, originalError: err });
+    }
+  }
+  static async searchBooks(
+    drizzle: DrizzleClient,
+    searchTerm: string
+  ): Promise<any[]> {
+    if (!searchTerm) {
+      throw new BadRequest("Search term is required.");
+    }
+  
+    try {
+      const result = await drizzle.execute(
+        sql`
+          SELECT *,
+            ts_rank_cd(
+              setweight(to_tsvector('english', title), 'A') ||
+              setweight(to_tsvector('arabic', title), 'A'),
+              plainto_tsquery(${searchTerm})
+            ) AS rank,
+            similarity(title, ${searchTerm}) AS trigram_similarity
+          FROM ${schema.book}
+          WHERE
+            (
+              to_tsvector('english', title) ||
+              to_tsvector('arabic', title)
+            ) @@ plainto_tsquery(${searchTerm}) OR
+            title % ${searchTerm}
+          ORDER BY rank DESC, trigram_similarity DESC
+          LIMIT 50
+        `
+      );
+      return result.rows;
+    } catch (err) {
+      throw new DatabaseError("Error executing combined search.", {
+        searchTerm,
+        originalError: err,
+      });
+    }
+  }
+  
+  static async searchBooksWeighted(
+    drizzle: DrizzleClient,
+    searchTerm: string
+  ): Promise<any[]> {
+    if (!searchTerm) {
+      throw new BadRequest("Search term is required.");
+    }
+  
+    try {
+      const result = await drizzle.execute(
+        sql`
+          SELECT *,
+            ts_rank_cd(
+              setweight(to_tsvector('english', title), 'A') ||
+              setweight(to_tsvector('arabic', title), 'A') ||
+              setweight(to_tsvector('english', description), 'B') ||
+              setweight(to_tsvector('arabic', description), 'B'),
+              plainto_tsquery(${searchTerm})
+            ) AS rank
+          FROM ${schema.book}
+          WHERE
+            (
+              setweight(to_tsvector('english', title), 'A') ||
+              setweight(to_tsvector('arabic', title), 'A') ||
+              setweight(to_tsvector('english', description), 'B') ||
+              setweight(to_tsvector('arabic', description), 'B')
+            ) @@ plainto_tsquery(${searchTerm})
+          ORDER BY rank DESC
+          LIMIT 50
+        `
+      );
+      return result.rows;
+    } catch (err) {
+      throw new DatabaseError("Error executing weighted search.", {
+        searchTerm,
+        originalError: err,
+      });
     }
   }
 

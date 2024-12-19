@@ -58,6 +58,36 @@ class BooksController {
     return res.json(books);
   };
 
+  public searchBooksWeighted: RequestHandler = async (req: Request, res: Response) => {
+    const drizzle = req.drizzle;
+    const { search } = req.query;
+    if (!search || typeof search !== "string") {
+      return res.status(400).json({ message: "Missing 'search' query param" });
+    }
+
+    try {
+      const books = await BookService.searchBooksWeighted(drizzle, search);
+      return res.json(books);
+    } catch (error: any) {
+      return res.status(500).json({ message: "Error performing weighted search.", error: error.message });
+    }
+  };
+
+  public searchBooksBySimilarity: RequestHandler = async (req: Request, res: Response) => {
+    const drizzle = req.drizzle;
+    const { search } = req.query;
+    if (!search || typeof search !== "string") {
+      return res.status(400).json({ message: "Missing 'search' query param" });
+    }
+
+    try {
+      const books = await BookService.searchBooks(drizzle, search);
+      return res.json(books);
+    } catch (error: any) {
+      return res.status(500).json({ message: "Error performing similarity search.", error: error.message });
+    }
+  };
+
   public updateBook: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
     const id = req.params.id;
@@ -75,7 +105,7 @@ class BooksController {
     if (!deletedBook) {
       return res.status(404).json({ message: "Not found" });
     }
-    // If deletion is successful, no content is needed, just respond with 204
+
     return res.sendStatus(204);
   };
 }

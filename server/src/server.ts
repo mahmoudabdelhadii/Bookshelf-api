@@ -6,6 +6,7 @@ import { pino } from "pino";
 import { openAPIRouter } from "./api-docs/openAPIRouter.js";
 import { healthCheckRouter } from "./api/healthCheck/healthCheckRouter.js";
 import { userRouter } from "./api/user/user.router.js";
+import { booksRouter } from "./api/book/book.router.js";
 import errorHandler from "./common/middleware/errorHandler.js";
 import rateLimiter from "./common/middleware/rateLimiter.js";
 import requestLogger from "./common/middleware/requestLogger.js";
@@ -43,7 +44,7 @@ app.use((req, _res, next) => {
 
 app.use(json());
 app.use(urlencoded({ extended: true }));
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+// app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
 app.use(rateLimiter);
 
@@ -62,9 +63,10 @@ app.use(
 
 app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);
+app.use("/books", booksRouter)
 
 
-app.use(openAPIRouter);
+app.use("/docs", openAPIRouter);
 
 
 app.use(errorHandler());
