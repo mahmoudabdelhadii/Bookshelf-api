@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import { vi, type Mock } from "vitest";
 
-import type { User } from "../../../api/user/userModel.js";
+import type { User } from "../user.model.js";
 import { UserRepository } from "../../../api/user/userRepository.js";
-import { UserService } from "../../../api/user/userService.js";
+import { UserService } from "../user.service.js";
 
 vi.mock("@/api/user/userRepository");
 

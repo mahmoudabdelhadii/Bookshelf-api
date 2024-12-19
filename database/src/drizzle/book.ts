@@ -1,8 +1,8 @@
 import { uuid, text, integer, uniqueIndex, timestamp } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 
-export const books = server.table(
-  "books",
+export const book = server.table(
+  "book",
   {
     id: idpk("id"),
     title: text("title").notNull(),
