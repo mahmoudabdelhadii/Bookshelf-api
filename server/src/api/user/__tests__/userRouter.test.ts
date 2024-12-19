@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import request from "supertest";
 
-import type { User } from "../../../api/user/userModel.js";
+import type { User } from "../user.model.js";
 import { users } from "../../../api/user/userRepository.js";
 import type { ServiceResponse } from "../../../common/models/serviceResponse.js";
 import { app } from "../../../server.js";

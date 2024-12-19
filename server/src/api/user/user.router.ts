@@ -3,20 +3,20 @@ import { Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
-import { GetUserSchema, UserSchema } from "../../api/user/userModel.js";
+import { GetUserSchema, userSchema } from "./user.model.js";
 import { validateRequest } from "../../common/utils/httpHandlers.js";
-import { userController } from "./userController.js";
+import { userController } from "./user.controller.js";
 
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = Router();
 
-userRegistry.register("User", UserSchema);
+userRegistry.register("User", userSchema);
 
 userRegistry.registerPath({
   method: "get",
   path: "/users",
   tags: ["User"],
-  responses: createApiResponse(z.array(UserSchema), "Success"),
+  responses: createApiResponse(z.array(userSchema), "Success"),
 });
 
 userRouter.get("/", userController.getUsers);
@@ -26,7 +26,7 @@ userRegistry.registerPath({
   path: "/users/{id}",
   tags: ["User"],
   request: { params: GetUserSchema.shape.params },
-  responses: createApiResponse(UserSchema, "Success"),
+  responses: createApiResponse(userSchema, "Success"),
 });
 
 userRouter.get("/:id", validateRequest(GetUserSchema), userController.getUser);
