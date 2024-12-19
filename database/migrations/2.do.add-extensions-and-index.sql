@@ -1,7 +1,35 @@
+
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
-CREATE INDEX books_title_trgm_idx ON books USING GIN (title gin_trgm_ops);
 
-ALTER TABLE books ADD COLUMN title_tsv tsvector;
-UPDATE books SET title_tsv = to_tsvector('simple', title);
-CREATE INDEX books_title_tsv_idx ON books USING GIN (title_tsv);
+CREATE INDEX books_title_trgm_idx ON server.book USING GIN (title gin_trgm_ops);
+
+
+-- CREATE INDEX books_title_tsv_idx ON server.book USING GIN (
+--   to_tsvector('english', title) ||
+--   to_tsvector('arabic', title)
+-- );
+
+
+-- CREATE INDEX books_search_idx ON server.book USING GIN (
+--   setweight(to_tsvector('english', title), 'A') ||
+--   setweight(to_tsvector('arabic', title), 'A') ||
+--   setweight(to_tsvector('english', description), 'B') ||
+--   setweight(to_tsvector('arabic', description), 'B')
+-- );
+
+ALTER TABLE server.book
+ADD COLUMN title_tsv tsvector GENERATED ALWAYS AS (
+  to_tsvector('english', title) || to_tsvector('arabic', title)
+) STORED;
+
+ALTER TABLE server.book
+ADD COLUMN search_tsv tsvector GENERATED ALWAYS AS (
+  setweight(to_tsvector('english', title), 'A') ||
+  setweight(to_tsvector('arabic', title), 'A') ||
+  setweight(to_tsvector('english', description), 'B') ||
+  setweight(to_tsvector('arabic', description), 'B')
+) STORED;
+
+CREATE INDEX books_title_tsv_idx ON server.book USING GIN (title_tsv);
+CREATE INDEX books_search_idx ON server.book USING GIN (search_tsv);

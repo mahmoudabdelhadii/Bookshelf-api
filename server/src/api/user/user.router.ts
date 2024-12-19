@@ -8,7 +8,7 @@ import { validateRequest } from "../../common/utils/httpHandlers.js";
 import { userController } from "./user.controller.js";
 
 export const userRegistry = new OpenAPIRegistry();
-export const userRouter: Router = Router();
+export const userRouter = Router();
 
 userRegistry.register("User", userSchema);
 

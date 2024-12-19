@@ -1,5 +1,5 @@
 
-CREATE TABLE "user" (
+CREATE TABLE server."user" (
     id SERIAL PRIMARY KEY,
     username TEXT NOT NULL,
     email TEXT NOT NULL,
@@ -10,8 +10,12 @@ CREATE TABLE "user" (
 );
 
 
-CREATE UNIQUE INDEX "unique_email" ON "user"(email);
-CREATE UNIQUE INDEX "unique_username" ON "user"(username);
+CREATE UNIQUE INDEX "unique_email" ON server."user"(email);
+CREATE UNIQUE INDEX "unique_username" ON server."user"(username);
 
 
-ALTER TABLE "books" RENAME TO "book";
+
+CREATE TYPE server.role AS ENUM ('user', 'admin');
+
+ALTER TABLE server."user" 
+ADD COLUMN "role" server.role NOT NULL DEFAULT 'user';

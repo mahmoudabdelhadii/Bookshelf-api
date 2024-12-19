@@ -1,57 +1,134 @@
-import { StatusCodes } from "http-status-codes";
-
-import type { User } from "./user.model.js";
-import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import { logger } from "../../server.js";
-import { DrizzleClient, schema } from "database";
+import type { DrizzleClient } from "database";
+import { eq, schema } from "database";
+import {
+  ValidationError,
+  ResourceAlreadyExistsError,
+  NotFound,
+  DatabaseError,
+  BadRequest,
+} from "../../errors.js";
 
 export class UserService {
   
-  async findAll(drizzle:DrizzleClient): Promise<ServiceResponse<User[] | null>> {
+  static async createUser(drizzle: DrizzleClient, { id, username, email, firstName,lastName }: {
+    id: string;
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string
+  }) {
+    if (!id || !username || !email) {
+      throw new ValidationError("ID, username, and email are required fields.");
+    }
+
+    
+    const existingByEmail = await drizzle.query.user.findFirst({
+      where: (u, { eq }) => eq(u.email, email),
+    });
+    if (existingByEmail) {
+      throw new ResourceAlreadyExistsError("Email already in use.", { email });
+    }
+
+    
+    const existingByUsername = await drizzle.query.user.findFirst({
+      where: (u, { eq }) => eq(u.username, username),
+    });
+    if (existingByUsername) {
+      throw new ResourceAlreadyExistsError("Username already in use.", { username });
+    }
+
     try {
-      const users = await drizzle.query.user.findMany();
-
-      if (!users || users.length === 0) {
-        return ServiceResponse.failure("No Users found", null, StatusCodes.NOT_FOUND);
-      }
-
-      return ServiceResponse.success<User[]>("Users found", users);
-    } catch (ex) {
-      const errorMessage = `Error finding all users: ${(ex as Error).message}`;
-      logger.error(errorMessage);
-
-      return ServiceResponse.failure(
-        "An error occurred while retrieving users.",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
+      const [newUser] = await drizzle.insert(schema.user).values({ username, email, firstName, lastName }).returning();
+      return newUser;
+    } catch (err) {
+      throw new DatabaseError("Failed to create user.", { originalError: err });
     }
   }
 
   
-  async findById(drizzle:DrizzleClient,id: string): Promise<ServiceResponse<User | null>> {
+  static async findAll(drizzle: DrizzleClient, limit = 50) {
     try {
-      
+      return await drizzle.query.user.findMany({ limit });
+    } catch (err) {
+      throw new DatabaseError("Failed to fetch users.", { originalError: err });
+    }
+  }
+
+  
+  static async findById(drizzle: DrizzleClient, id: string) {
+    try {
       const user = await drizzle.query.user.findFirst({
-        where: (user, { eq }) => eq(user.id, id),
+        where: (u, { eq }) => eq(u.id, id),
       });
-
       if (!user) {
-        return ServiceResponse.failure("User not found", null, StatusCodes.NOT_FOUND);
+        throw new NotFound("User not found.", { userId: id });
       }
+      return user;
+    } catch (err) {
+      throw new DatabaseError("Failed to fetch user by ID.", { userId: id, originalError: err });
+    }
+  }
 
-      return ServiceResponse.success<User>("User found", user);
-    } catch (ex) {
-      const errorMessage = `Error finding user with id ${id}: ${(ex as Error).message}`;
-      logger.error(errorMessage);
+  
+  static async updateUser(drizzle: DrizzleClient, id: string, updates: {
+    username?: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+  }) {
+    if (!id) {
+      throw new BadRequest("User ID is required.");
+    }
+  
+    if (updates.email) {
+      const existingByEmail = await drizzle.query.user.findFirst({
+        where: (u, { eq }) => eq(u.email, updates.email!),
+      });
+      if (existingByEmail && existingByEmail.id !== id) {
+        throw new ResourceAlreadyExistsError("Email already in use.", { email: updates.email });
+      }
+    }
+  
+    if (updates.username) {
+      const existingByUsername = await drizzle.query.user.findFirst({
+        where: (u, { eq }) => eq(u.username, updates.username!),
+      });
+      if (existingByUsername && existingByUsername.id !== id) {
+        throw new ResourceAlreadyExistsError("Username already in use.", { username: updates.username });
+      }
+    }
+  
+    try {
+      const [updatedUser] = await drizzle
+        .update(schema.user)
+        .set(updates)
+        .where(eq(schema.user.id, id))
+        .returning();
+  
+      if (!updatedUser) {
+        throw new NotFound("User not found.", { userId: id });
+      }
+  
+      return updatedUser;
+    } catch (err) {
+      throw new DatabaseError("Failed to update user.", { userId: id, originalError: err });
+    }
+  }
 
-      return ServiceResponse.failure(
-        "An error occurred while finding user.",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
+  
+  static async deleteUser(drizzle: DrizzleClient, id: string) {
+    if (!id) {
+      throw new BadRequest("User ID is required.");
+    }
+
+    try {
+      const [deletedUser] = await drizzle.delete(schema.user).where(eq(schema.user.id, id)).returning();
+      if (!deletedUser) {
+        throw new NotFound("User not found.", { userId: id });
+      }
+      return deletedUser;
+    } catch (err) {
+      throw new DatabaseError("Failed to delete user.", { userId: id, originalError: err });
     }
   }
 }
-
-export const userService = new UserService();
