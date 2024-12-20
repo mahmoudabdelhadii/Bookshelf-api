@@ -2,7 +2,7 @@ import { text, timestamp, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 
 
-const userRole = pgEnum("role", ["user", "admin"]);
+const userRole = server.enum("role", ["user", "admin"]);
 
 export const user = server.table(
   "user",

@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { idSchema } from "../../types.js";
 
+const languageSchema = z.enum(["en", "ar", "other"]).describe("The language of the book.");
+
 const titleSchema = z
   .string()
   .min(2, "Title must be at least 2 characters long")
@@ -16,7 +18,7 @@ const authorSchema = z
 const isbnSchema = z
   .string()
   .regex(/^(97(8|9))?\d{9}(\d|X)$/, "Invalid ISBN format")
-  .max(20, "ISBN cannot exceed 20 characters") 
+  .max(20, "ISBN cannot exceed 20 characters")
   .describe("The ISBN of the book.");
 
 const genreSchema = z
@@ -33,7 +35,6 @@ const publishedYearSchema = z
   .optional()
   .describe("The year the book was published.");
 
-
 export const bookSchema = z.object({
   id: idSchema,
   title: titleSchema,
@@ -42,8 +43,8 @@ export const bookSchema = z.object({
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
   createdAt: z.date().describe("Timestamp when the book was created."),
+  language: languageSchema, // Add language here
 });
-
 
 export const getBookSchema = z.object({
   params: z.object({
@@ -51,15 +52,14 @@ export const getBookSchema = z.object({
   }),
 });
 
-
 export const createBookSchema = z.object({
   title: titleSchema,
   author: authorSchema,
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
   publishedYear: publishedYearSchema.optional(),
+  language: languageSchema, // Add language to create schema
 });
-
 
 export const updateBookSchema = z.object({
   title: titleSchema.optional(),
@@ -67,5 +67,5 @@ export const updateBookSchema = z.object({
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
   publishedYear: publishedYearSchema.optional(),
+  language: languageSchema.optional(), // Add language to update schema
 });
-

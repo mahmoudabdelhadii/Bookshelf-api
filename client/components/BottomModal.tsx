@@ -3,7 +3,7 @@ import { View, Text, Pressable, Animated } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
-import BarcodeScannerModal from '@/components/BarcodeScannerModal';
+// import BarcodeScannerModal from '@/app/BarcodeScannerModal';
 
 type BottomModalProps = {
   visible: boolean;
@@ -262,7 +262,7 @@ export default function BottomModal({
       </Modal>
 
       {/* Barcode Scanner Modal */}
-      <BarcodeScannerModal
+      {/* <BarcodeScannerModal
         visible={scannerVisible}
         onClose={() => {
           setScannerVisible(false);
@@ -271,7 +271,7 @@ export default function BottomModal({
         torchOn={torchOn}
         setTorchOn={setTorchOn}
         onBarcodeScanned={handleBarcodeScanned}
-      />
+      /> */}
     </>
   );
 }
