@@ -161,22 +161,6 @@ booksRegistry.registerPath({
 booksRouter.get("/search", booksController.searchBooks);
 
 
-const similaritySearchQuerySchema = z.object({
-  search: z.string(),
-});
-
-booksRegistry.registerPath({
-  method: "get",
-  path: "/books/similarity",
-  tags: ["Books"],
-  request: { query: similaritySearchQuerySchema },
-  responses: {
-    ...createApiResponse(z.array(bookSchema), "Books fetched successfully based on similarity"),
-  },
-});
-booksRouter.get("/similarity", booksController.searchBooksBySimilarity);
-
-
 const weightedSearchQuerySchema = z.object({
   search: z.string(),
 });
@@ -191,3 +175,51 @@ booksRegistry.registerPath({
   },
 });
 booksRouter.get("/weighted-search", booksController.searchBooksWeighted);
+
+
+booksRegistry.registerPath({
+  method: "get",
+  path: "/author/{name}",
+  tags: ["Author"],
+  request: { params: z.object({ name: z.string() }) },
+  responses: createApiResponse(z.any(), "Author details fetched successfully"),
+});
+booksRouter.get("/author/:name", booksController.getAuthorDetails);
+
+booksRegistry.registerPath({
+  method: "get",
+  path: "/authors/{query}",
+  tags: ["Author"],
+  request: { params: z.object({ query: z.string() }) },
+  responses: createApiResponse(z.any(), "Authors found"),
+});
+booksRouter.get("/authors/:query", booksController.searchAuthors);
+
+
+booksRegistry.registerPath({
+  method: "get",
+  path: "/publisher/{name}",
+  tags: ["Publisher"],
+  request: { params: z.object({ name: z.string() }) },
+  responses: createApiResponse(z.any(), "Publisher details fetched"),
+});
+booksRouter.get("/publisher/:name", booksController.getPublisherDetails);
+
+booksRegistry.registerPath({
+  method: "get",
+  path: "/publishers/{query}",
+  tags: ["Publisher"],
+  request: { params: z.object({ query: z.string() }) },
+  responses: createApiResponse(z.array(z.any()), "Publishers found"),
+});
+booksRouter.get("/publishers/:query", booksController.searchPublishers);
+
+
+booksRegistry.registerPath({
+  method: "get",
+  path: "/search/{index}",
+  tags: ["Search"],
+  request: { params: z.object({ index: z.enum(["books", "authors", "publishers"]) }) },
+  responses: createApiResponse(z.any(), "Search results"),
+});
+booksRouter.get("/search/:index", booksController.searchAll);

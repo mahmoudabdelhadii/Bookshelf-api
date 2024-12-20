@@ -13,9 +13,12 @@ CREATE TABLE server."user" (
 CREATE UNIQUE INDEX "unique_email" ON server."user"(email);
 CREATE UNIQUE INDEX "unique_username" ON server."user"(username);
 
-
-
 CREATE TYPE server.role AS ENUM ('user', 'admin');
 
 ALTER TABLE server."user" 
 ADD COLUMN "role" server.role NOT NULL DEFAULT 'user';
+
+CREATE TYPE server.language AS ENUM ('en', 'ar', 'other');
+
+ALTER TABLE server.book
+ADD COLUMN language server.language NOT NULL;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text,Platform, Modal, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
@@ -12,7 +12,7 @@ type BarcodeScannerModalProps = {
   onBarcodeScanned: (data: string) => void;
 };
 
-export default function BarcodeScannerModal({
+export default function barcodeScannerModal({
   visible,
   onClose,
   torchOn,
