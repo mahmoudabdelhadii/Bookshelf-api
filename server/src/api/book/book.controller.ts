@@ -8,7 +8,7 @@ class BooksController {
       const book = await BookService.createBook(drizzle, req.body);
       return res.status(201).json(book);
     } catch (error: any) {
-      return res.status(error.statusCode || 400).json({ message: error.message });
+      return res.status(error.statusCode ?? 400).json({ message: error.message });
     }
   };
 
@@ -19,7 +19,7 @@ class BooksController {
       const insertedBooks = await BookService.createBooksBulk(drizzle, books);
       return res.status(201).json(insertedBooks);
     } catch (error: any) {
-      return res.status(error.statusCode || 400).json({ message: error.message });
+      return res.status(error.statusCode ?? 400).json({ message: error.message });
     }
   };
 
@@ -30,7 +30,7 @@ class BooksController {
       const book = await BookService.getBookById(drizzle, id);
       return res.json(book);
     } catch (error: any) {
-      return res.status(error.statusCode || 404).json({ message: error.message });
+      return res.status(error.statusCode ?? 404).json({ message: error.message });
     }
   };
 
@@ -48,14 +48,14 @@ class BooksController {
       const books = await BookService.getBooks(drizzle, filters);
       return res.json(books);
     } catch (error: any) {
-      return res.status(error.statusCode || 400).json({ message: error.message });
+      return res.status(error.statusCode ?? 400).json({ message: error.message });
     }
   };
 
   public searchBooks: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
     const { search } = req.query;
-    if (!search || typeof search !== "string") {
+    if (!search ?? typeof search !== "string") {
       return res.status(400).json({ message: "Missing 'search' query param" });
     }
 
@@ -63,7 +63,7 @@ class BooksController {
       const books = await BookService.searchBooksByTrigram(drizzle, search);
       return res.json(books);
     } catch (error: any) {
-      return res.status(error.statusCode || 500).json({ message: error.message });
+      return res.status(error.statusCode ?? 500).json({ message: error.message });
     }
   };
 
@@ -74,7 +74,7 @@ class BooksController {
       const updatedBook = await BookService.updateBook(drizzle, id, req.body);
       return res.json(updatedBook);
     } catch (error: any) {
-      return res.status(error.statusCode || 404).json({ message: error.message });
+      return res.status(error.statusCode ?? 404).json({ message: error.message });
     }
   };
 
@@ -85,7 +85,7 @@ class BooksController {
       await BookService.deleteBook(drizzle, id);
       return res.sendStatus(204);
     } catch (error: any) {
-      return res.status(error.statusCode || 404).json({ message: error.message });
+      return res.status(error.statusCode ?? 404).json({ message: error.message });
     }
   };
 
@@ -103,7 +103,7 @@ class BooksController {
       );
       return res.json(data);
     } catch (error: any) {
-      return res.status(error.statusCode || 404).json({ message: error.message });
+      return res.status(error.statusCode ?? 404).json({ message: error.message });
     }
   };
 
@@ -120,7 +120,7 @@ class BooksController {
       );
       return res.json(data);
     } catch (error: any) {
-      return res.status(error.statusCode || 404).json({ message: error.message });
+      return res.status(error.statusCode ?? 404).json({ message: error.message });
     }
   };
 
@@ -132,13 +132,13 @@ class BooksController {
       const data = await BookService.getBookByISBN(drizzle, isbn);
       return res.json(data);
     } catch (error: any) {
-      return res.status(error.statusCode || 404).json({ message: error.message });
+      return res.status(error.statusCode ?? 404).json({ message: error.message });
     }
   };
   public searchBooksWeighted: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
     const { search } = req.query;
-    if (!search || typeof search !== "string") {
+    if (!search ?? typeof search !== "string") {
       return res.status(400).json({ message: "Missing 'search' query param" });
     }
 
@@ -146,7 +146,7 @@ class BooksController {
       const books = await BookService.searchBooksByWeighted(drizzle, search);
       return res.json(books);
     } catch (error: any) {
-      return res.status(error.statusCode || 500).json({ message: error.message });
+      return res.status(error.statusCode ?? 500).json({ message: error.message });
     }
   };
 
@@ -164,7 +164,7 @@ class BooksController {
       );
       return res.json(data);
     } catch (error: any) {
-      return res.status(error.statusCode || 404).json({ message: error.message });
+      return res.status(error.statusCode ?? 404).json({ message: error.message });
     }
   };
 
@@ -181,7 +181,7 @@ class BooksController {
       );
       return res.json(data);
     } catch (error: any) {
-      return res.status(error.statusCode || 404).json({ message: error.message });
+      return res.status(error.statusCode ?? 404).json({ message: error.message });
     }
   };
 

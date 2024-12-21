@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "masjid-bookshelf",
-    "slug": "masjid-bookshelf",
+    "name": "kitab",
+    "slug": "kitab",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,7 +12,7 @@
       "supportsRTL": true
     },
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/muslim-book.jpeg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

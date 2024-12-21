@@ -3,7 +3,7 @@
   "version": "1.0.14",
   "description": "",
   "author": "Mahmoud Abdelhadi",
-  "repository": "mahmoudabdelhadii/bookshelf",
+  "repository": "mahmoudabdelhadii/kitab",
   "license": "MIT",
   "main": "index.ts",
   "private": true,

@@ -52,6 +52,6 @@ database/src/schematypes.ts
 .terraform/
 .terraform.lock.hcl
 
-/eslint-plugin-bookshelf/
+/eslint-plugin-kitab/
 /e2e/
 /i2i/

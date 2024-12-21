@@ -22,7 +22,7 @@ _dotfile_location()
 _run_instructions()
 {
   echo -e $GREEN
-  echo "bookshelf Successfully Installed!! Run this to start the app and all the services!$NC"
+  echo "kitab Successfully Installed!! Run this to start the app and all the services!$NC"
   echo "npm run dev"
   echo -e $GREEN
 }
@@ -38,7 +38,7 @@ _main() {
   ./install_scripts/install-dependencies.sh "$(eval echo ${DOTFILE})"
 
   # install
-  ./install_scripts/install-bookshelf.sh 
+  ./install_scripts/install-kitab.sh 
 
   # Display instructions to run
   _run_instructions

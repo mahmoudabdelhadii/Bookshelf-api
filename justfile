@@ -7,7 +7,7 @@ default: build-database build-server && run
 
 dev:
     just docker-start
-    npm run -w masjid-bookshelf-client ios
+    npm run -w kitab-client ios
 # Default command: Build and run the server
 # docker: docker-build-server && docker-start
 # # Run the servers.
@@ -47,27 +47,27 @@ tsinit:
 
 # Build all TypeScript projects
 [group('typescript')]
-tsbuild: build-eslint-plugin-bookshelf build-database build-server
+tsbuild: build-eslint-plugin-kitab build-database build-server
 
 # Lint all TypeScript projects
 [group('typescript')]
-tslint: lint-server lint-eslint-plugin-bookshelf lint-client lint-database
+tslint: lint-server lint-eslint-plugin-kitab lint-client lint-database
 
 # Format all TypeScript projects
 [group('typescript')]
-tsfmt: fmt-database fmt-server fmt-eslint-plugin-bookshelf fmt-client
+tsfmt: fmt-database fmt-server fmt-eslint-plugin-kitab fmt-client
 
 # Clean all TypeScript projects
 [group('typescript')]
-tsclean: clean-database clean-server clean-eslint-plugin-bookshelf clean-client
+tsclean: clean-database clean-server clean-eslint-plugin-kitab clean-client
 
 # Typecheck all TypeScript projects
 [group('typescript')]
-tscheck: check-database check-server check-eslint-plugin-bookshelf check-client
+tscheck: check-database check-server check-eslint-plugin-kitab check-client
 
 # Test all TypeScript projects
 [group('typescript')]
-tstest: test-database test-server
+tstest: test-server
 
 # Build database package
 [group('database')]
@@ -81,7 +81,7 @@ check-database:
 
 # Lint database package
 [group('database')]
-lint-database: build-eslint-plugin-bookshelf
+lint-database: build-eslint-plugin-kitab
     npx -w database eslint . --max-warnings 0 --cache
 
 # Format database package
@@ -97,18 +97,6 @@ clean-database:
     rm -f database/.eslintcache
     rm -rf database/node_modules/.cache/prettier/
 
-# Run database tests
-[group('database')]
-test-database url="postgresql://postgres:postgres@localhost:45432/bookshelf": build-database
-    #!/usr/bin/env bash
-    set -e
-    cd database
-    for file in $(ls tests); do
-        docker compose -f ../e2e/docker-compose.yml exec postgres pg_prove -U postgres -d bookshelf "/tests/$file"
-    done
-
-    DATABASE_URL={{url}} npm -w database test
-
 # Generate a new (possibly empty) migration
 [group('database')]
 migration name:
@@ -122,9 +110,9 @@ migrate:
 # Migrate the test database to the latest state
 [group('database')]
 [private]
-migrate-test url="postgresql://postgres:postgres@localhost:45432/bookshelf":
-    docker compose -f ./e2e/docker-compose.yml exec postgres dropdb -U postgres bookshelf || true
-    docker compose -f ./e2e/docker-compose.yml exec postgres createdb -U postgres bookshelf
+migrate-test url="postgresql://postgres:postgres@localhost:45432/kitab":
+    docker compose -f ./e2e/docker-compose.yml exec postgres dropdb -U postgres kitab || true
+    docker compose -f ./e2e/docker-compose.yml exec postgres createdb -U postgres kitab
     DATABASE_URL={{url}} npm run -w database migrate
 
 # Clear the database and re-run all migrations
@@ -135,8 +123,8 @@ reset-database: clear-database && migrate
 [group('database')]
 [confirm("Are you sure you want to reset the database? This action cannot be undone.")]
 clear-database:
-    docker compose exec postgres dropdb -U postgres bookshelf || true
-    docker compose exec postgres createdb -U postgres bookshelf
+    docker compose exec postgres dropdb -U postgres kitab || true
+    docker compose exec postgres createdb -U postgres kitab
 
 # Build server package
 [group('server')]
@@ -150,7 +138,7 @@ check-server:
 
 # Lint server
 [group('server')]
-lint-server: build-eslint-plugin-bookshelf build-database
+lint-server: build-eslint-plugin-kitab build-database
     npx -w server eslint . --max-warnings 0 --cache
 
 # Format server
@@ -177,89 +165,58 @@ clean-server:
     rm -rf server/node_modules/.cache/prettier/
 
 [private]
-build-eslint-plugin-bookshelf:
-    npx tsc --build eslint-plugin-bookshelf
+build-eslint-plugin-kitab:
+    npx tsc --build eslint-plugin-kitab
 
 [private]
-check-eslint-plugin-bookshelf:
-    npx -w eslint-plugin-bookshelf tsc --build --emitDeclarationOnly
+check-eslint-plugin-kitab:
+    npx -w eslint-plugin-kitab tsc --build --emitDeclarationOnly
 
 [private]
-lint-eslint-plugin-bookshelf:
-    npx -w eslint-plugin-bookshelf eslint . --max-warnings 0 --cache
+lint-eslint-plugin-kitab:
+    npx -w eslint-plugin-kitab eslint . --max-warnings 0 --cache
 
 [private]
-fmt-eslint-plugin-bookshelf:
-    npx -w eslint-plugin-bookshelf prettier . --write --cache
+fmt-eslint-plugin-kitab:
+    npx -w eslint-plugin-kitab prettier . --write --cache
 
 [private]
-test-eslint-plugin-bookshelf: build-eslint-plugin-bookshelf
-    npm -w eslint-plugin-bookshelf test
+test-eslint-plugin-kitab: build-eslint-plugin-kitab
+    npm -w eslint-plugin-kitab test
 
 [private]
-clean-eslint-plugin-bookshelf:
-    npx -w eslint-plugin-bookshelf tsc --build --clean
-    rm -f eslint-plugin-bookshelf/.eslintcache
-    rm -rf eslint-plugin-bookshelf/node_modules/.cache/prettier/
-
-[group('e2e')]
-start-e2e service="": && migrate-test
-    docker compose -f ./e2e/docker-compose.yml up -d --wait --build {{service}}
-    sleep 2
-
-[group('e2e')]
-stop-e2e:
-    docker compose -f ./e2e/docker-compose.yml down
-
-# Typecheck e2e
-[group('e2e')]
-check-e2e:
-    npx -w e2e tsc --build
-
-# Lint e2e
-[group('e2e')]
-lint-e2e: build-eslint-plugin-bookshelf
-    npx -w e2e eslint . --max-warnings 0 --cache
-
-# Format e2e
-[group('e2e')]
-fmt-e2e:
-    npx -w e2e prettier . --write --cache
-
-# Clean generated files in e2e
-[group('e2e')]
-clean-e2e:
-    npx -w e2e tsc --build --clean
-    rm -f e2e/.eslintcache
-    rm -rf e2e/node_modules/.cache/prettier/
+clean-eslint-plugin-kitab:
+    npx -w eslint-plugin-kitab tsc --build --clean
+    rm -f eslint-plugin-kitab/.eslintcache
+    rm -rf eslint-plugin-kitab/node_modules/.cache/prettier/
 
 [group('client')]
 lint-client:
-    npm -w masjid-bookshelf-client run lint
+    npm -w kitab-client run lint
 
 [group('client')]
 test-client:
-    npm -w masjid-bookshelf-client run test
+    npm -w kitab-client run test
 [group('client')]
 run-client:
-    npm -w masjid-bookshelf-client start
+    npm -w kitab-client start
 
 [group('client')]
 fmt-client:
-    npx -w masjid-bookshelf-client prettier . --write --cache
+    npx -w kitab-client prettier . --write --cache
 
 [group('client')]
 clean-client:
-    npx -w masjid-bookshelf-client tsc --build --clean
-    rm -f masjid-bookshelf-client/.eslintcache
-    rm -rf masjid-bookshelf-client/node_modules/.cache/prettier/
+    npx -w kitab-client tsc --build --clean
+    rm -f kitab-client/.eslintcache
+    rm -rf kitab-client/node_modules/.cache/prettier/
 [group('client')]
 check-client:
-    npx -w masjid-bookshelf-client tsc --build
+    npx -w kitab-client tsc --build
 
 # Docker commands
 docker-build-server:
-    docker build -f Dockerfile.server -t bookshelf-server .
+    docker build -f Dockerfile.server -t kitab-server .
 
 docker-start:
     docker-compose up -d
