@@ -23,7 +23,7 @@ async function main() {
     const postgrator = new Postgrator({
       migrationPattern: join(migrationDir, "*"),
       driver: "pg",
-      database: "bookshelf",
+      database: "kitab",
       schemaTable: "public.__postgrator_migrations",
     });
     const last = await postgrator.getMaxVersion();

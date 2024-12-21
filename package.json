@@ -1,8 +1,8 @@
 {
-  "name": "bookshelf",
+  "name": "kitab",
   "workspaces": [
-    "eslint-plugin-bookshelf",
-    "masjid-bookshelf-client",
+    "eslint-plugin-kitab",
+    "kitab-client",
     "database",
     "server",
     "client"

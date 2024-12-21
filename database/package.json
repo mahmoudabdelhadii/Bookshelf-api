@@ -1,7 +1,7 @@
 {
   "name": "database",
   "version": "0.0.5",
-  "description": "bookshelf Database Shared Library",
+  "description": "kitab Database Shared Library",
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
@@ -19,7 +19,7 @@
     "postdeploylocal": "tsx -r dotenv/config src/private/postmigrate.ts",
     "deploy": "tsx -r dotenv/config src/private/migrate.ts",
     "postdeploy": "tsx -r dotenv/config src/private/postdeploy.ts",
-    "test": "DATABASE_URL=postgresql://postgres:postgres@localhost:45432/bookshelf globstar -- tsx --test --test-concurrency 1 'src/**/*.test.ts'"
+    "test": "DATABASE_URL=postgresql://postgres:postgres@localhost:45432/kitab globstar -- tsx --test --test-concurrency 1 'src/**/*.test.ts'"
   },
   "author": "Mahmoud Abdelhadi",
   "license": "ISC",

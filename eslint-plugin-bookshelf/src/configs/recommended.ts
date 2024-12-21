@@ -1,14 +1,14 @@
 export default {
-  plugins: ["bookshelf"],
+  plugins: ["kitab"],
   rules: {
-    "bookshelf/log-format": [
+    "kitab/log-format": [
       "warn",
       {
         loggerNames: ["logger"],
         logMethods: ["silent", "fatal", "error", "warn", "info", "debug", "trace"],
       },
     ],
-    "bookshelf/drizzle": [
+    "kitab/drizzle": [
       "warn",
       {
         drizzleNames: ["drizzle"],

@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-bookshelf",
+  "name": "eslint-plugin-kitab",
   "version": "0.0.5",
   "description": "Custom eslint plugin",
   "main": "build/src/index.js",

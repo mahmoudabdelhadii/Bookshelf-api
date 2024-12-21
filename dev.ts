@@ -41,7 +41,7 @@ const apps = [
 
   // {
   //   name: "client",
-  //   command: "npm run -w masjid-bookshelf-client ios",
+  //   command: "npm run -w kitab-client ios",
   //   env: { ...process.env, LOG_LEVEL: logLevel("client") },
   // },
   

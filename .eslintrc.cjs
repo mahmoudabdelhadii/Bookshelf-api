@@ -20,7 +20,7 @@ module.exports = {
     "plugin:@typescript-eslint/strict",
     "plugin:@typescript-eslint/strict-type-checked",
     "prettier",
-    "plugin:bookshelf/recommended",
+    "plugin:kitab/recommended",
   ],
   rules: {
     "no-console": "error",
