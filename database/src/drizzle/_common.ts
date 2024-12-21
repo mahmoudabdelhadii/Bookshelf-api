@@ -9,4 +9,3 @@ export function idpk(name: string) {
 }
 
 export const server = pgSchema("server");
-

@@ -19,7 +19,6 @@ import { pinoHttp } from "pino-http";
 
 const { drizzle } = connect("server");
 declare global {
-  
   namespace Express {
     interface Request {
       drizzle: DrizzleClient;
@@ -34,7 +33,6 @@ const logger = pino({
 });
 const app = express();
 
-
 app.set("trust proxy", true);
 
 app.use((req, _res, next) => {
@@ -47,7 +45,6 @@ app.use(urlencoded({ extended: true }));
 // app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
 app.use(rateLimiter);
-
 
 app.use(requestLogger);
 
@@ -63,11 +60,9 @@ app.use(
 
 app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);
-app.use("/books", booksRouter)
-
+app.use("/books", booksRouter);
 
 app.use("/docs", openAPIRouter);
-
 
 app.use(errorHandler());
 

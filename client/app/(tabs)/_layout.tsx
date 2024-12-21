@@ -1,23 +1,21 @@
-import React, { useState } from "react";
-import { Tabs } from "expo-router";
-import { View, Pressable, GestureResponderEvent } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useColorScheme } from "nativewind";
-import * as Haptics from "expo-haptics";
-import Colors from "../../constants/Colors";
-import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import BottomModal from "@/components/BottomModal";
+import React, { useState } from 'react';
+import { Tabs } from 'expo-router';
+import { View, Pressable, GestureResponderEvent } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useColorScheme } from 'nativewind';
+import * as Haptics from 'expo-haptics';
+import Colors from '../../constants/Colors';
+import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import BottomModal from '@/components/BottomModal';
 
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
 
-  
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
-  const closeModal = () => {
-  }
+  const closeModal = () => {};
   const handleModalAction = (action: string) => {
     console.log(`Action selected: ${action}`);
   };
@@ -28,12 +26,13 @@ export default function TabLayout() {
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
-          tabBarActiveTintColor: Colors.colors["primary-light"],
-          tabBarInactiveTintColor: colorScheme === "light"
-          ? Colors.colors["copy"]
-          : Colors.colors["foreground"],
+          tabBarActiveTintColor: Colors.colors['primary-light'],
+          tabBarInactiveTintColor:
+            colorScheme === 'light'
+              ? Colors.colors['copy']
+              : Colors.colors['foreground'],
           tabBarStyle: {
-            position: "absolute",
+            position: 'absolute',
             bottom: 25,
             marginRight: 15,
             marginLeft: 15,
@@ -42,23 +41,22 @@ export default function TabLayout() {
             borderRadius: 15,
             height: 50,
             backgroundColor:
-              colorScheme === "light"
-                ? Colors.colors["foreground"]
-                : Colors.colors["copy"],
+              colorScheme === 'light'
+                ? Colors.colors['foreground']
+                : Colors.colors['copy'],
             borderTopWidth: 0,
             borderWidth: 2,
             borderColor: Colors.colors.border,
           },
-        }}
-      >
+        }}>
         <Tabs.Screen
           name="index"
           options={{
-            title: "Books",
+            title: 'Books',
             tabBarIcon: ({ color, size }) => (
               <TabBarIcon name="library-outline" color={color} size={size} />
             ),
-            tabBarButton: (props) => (
+            tabBarButton: props => (
               <Pressable
                 {...props}
                 onPress={(e: GestureResponderEvent) => {
@@ -73,11 +71,11 @@ export default function TabLayout() {
         <Tabs.Screen
           name="compass"
           options={{
-            title: "Compass",
+            title: 'Compass',
             tabBarIcon: ({ color, size }) => (
               <TabBarIcon name="compass" color={color} size={size} />
             ),
-            tabBarButton: (props) => (
+            tabBarButton: props => (
               <Pressable
                 {...props}
                 onPress={(e: GestureResponderEvent) => {
@@ -92,7 +90,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="add"
           options={{
-            tabBarLabel: "Add",
+            tabBarLabel: 'Add',
             tabBarIcon: () => (
               <View
                 style={{
@@ -100,22 +98,23 @@ export default function TabLayout() {
                   width: 50,
                   height: 50,
                   borderRadius: 35,
-                  backgroundColor: Colors.colors["primary"],
-                  justifyContent: "center",
-                  alignItems: "center",
+                  backgroundColor: Colors.colors['primary'],
+                  justifyContent: 'center',
+                  alignItems: 'center',
                   elevation: 10,
-                }}
-              >
+                }}>
                 <Ionicons
                   name="add"
-                  color={colorScheme === "light"
-                    ? Colors.colors["foreground"]
-                    : Colors.colors["copy"]}
+                  color={
+                    colorScheme === 'light'
+                      ? Colors.colors['foreground']
+                      : Colors.colors['copy']
+                  }
                   size={40}
                 />
               </View>
             ),
-            tabBarButton: (props) => (
+            tabBarButton: props => (
               <Pressable
                 {...props}
                 onPress={(e: GestureResponderEvent) => {
@@ -130,11 +129,11 @@ export default function TabLayout() {
         <Tabs.Screen
           name="other"
           options={{
-            title: "Other",
+            title: 'Other',
             tabBarIcon: ({ color, size }) => (
               <TabBarIcon name="star" color={color} size={size} />
             ),
-            tabBarButton: (props) => (
+            tabBarButton: props => (
               <Pressable
                 {...props}
                 onPress={(e: GestureResponderEvent) => {
@@ -149,11 +148,11 @@ export default function TabLayout() {
         <Tabs.Screen
           name="settings"
           options={{
-            title: "Settings",
+            title: 'Settings',
             tabBarIcon: ({ color, size }) => (
               <TabBarIcon name="menu-outline" color={color} size={size} />
             ),
-            tabBarButton: (props) => (
+            tabBarButton: props => (
               <Pressable
                 {...props}
                 onPress={(e: GestureResponderEvent) => {

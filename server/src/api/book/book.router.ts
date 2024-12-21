@@ -4,19 +4,12 @@ import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
-import {
-  bookSchema,
-  getBookSchema,
-  createBookSchema,
-  updateBookSchema,
-} from "./book.model.js";
+import { bookSchema, getBookSchema, createBookSchema, updateBookSchema } from "./book.model.js";
 
 export const booksRouter = Router();
 export const booksRegistry = new OpenAPIRegistry();
 
-
 booksRegistry.register("Book", bookSchema);
-
 
 booksRegistry.registerPath({
   method: "post",
@@ -38,7 +31,6 @@ booksRegistry.registerPath({
   },
 });
 booksRouter.post("/", booksController.createBook);
-
 
 const createBooksBulkSchema = z.object({
   books: z.array(createBookSchema),
@@ -65,7 +57,6 @@ booksRegistry.registerPath({
 });
 booksRouter.post("/bulk", booksController.createBooksBulk);
 
-
 booksRegistry.registerPath({
   method: "get",
   path: "/books/{id}",
@@ -78,7 +69,6 @@ booksRegistry.registerPath({
   },
 });
 booksRouter.get("/:id", booksController.getBook);
-
 
 booksRegistry.registerPath({
   method: "patch",
@@ -102,7 +92,6 @@ booksRegistry.registerPath({
 });
 booksRouter.patch("/:id", booksController.updateBook);
 
-
 booksRegistry.registerPath({
   method: "delete",
   path: "/books/{id}",
@@ -124,7 +113,6 @@ booksRegistry.registerPath({
 });
 booksRouter.delete("/:id", booksController.deleteBook);
 
-
 const listBooksQuerySchema = z.object({
   title: z.string().optional(),
   isbn: z.string().optional(),
@@ -144,7 +132,6 @@ booksRegistry.registerPath({
 });
 booksRouter.get("/", booksController.getBooks);
 
-
 const searchBooksQuerySchema = z.object({
   search: z.string(),
 });
@@ -160,7 +147,6 @@ booksRegistry.registerPath({
 });
 booksRouter.get("/search", booksController.searchBooks);
 
-
 const weightedSearchQuerySchema = z.object({
   search: z.string(),
 });
@@ -175,7 +161,6 @@ booksRegistry.registerPath({
   },
 });
 booksRouter.get("/weighted-search", booksController.searchBooksWeighted);
-
 
 booksRegistry.registerPath({
   method: "get",
@@ -195,7 +180,6 @@ booksRegistry.registerPath({
 });
 booksRouter.get("/authors/:query", booksController.searchAuthors);
 
-
 booksRegistry.registerPath({
   method: "get",
   path: "/publisher/{name}",
@@ -213,7 +197,6 @@ booksRegistry.registerPath({
   responses: createApiResponse(z.array(z.any()), "Publishers found"),
 });
 booksRouter.get("/publishers/:query", booksController.searchPublishers);
-
 
 booksRegistry.registerPath({
   method: "get",

@@ -15,15 +15,12 @@ interface SearchParams {
 }
 
 type SearchResponse = {
-  data:
-    | BookSearchResponse
-    | AuthorSearchResponse
-    | PublisherSearchResponse;
+  data: BookSearchResponse | AuthorSearchResponse | PublisherSearchResponse;
 };
 
 export async function searchISBNdb(
   index: "books" | "authors" | "publishers",
-  params: SearchParams
+  params: SearchParams,
 ): Promise<SearchResponse> {
   if (!["books", "authors", "publishers"].includes(index)) {
     throw new Error(`Invalid index: ${index}. Valid indices are books, authors, publishers.`);

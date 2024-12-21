@@ -4,7 +4,7 @@ export async function callISBNdb<T>(path: string, options?: RequestInit): Promis
     headers: {
       ...(options?.headers || {}),
       "Content-Type": "application/json",
-      "Authorization": ISBNDB_API_KEY,
+      Authorization: ISBNDB_API_KEY,
     },
   });
   if (!response.ok) {

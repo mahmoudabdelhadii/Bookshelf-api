@@ -7,7 +7,6 @@ extendZodWithOpenApi(z);
 
 export type User = z.infer<typeof userSchema>;
 
-
 const usernameSchema = z.string().min(2, "Username must be at least 2 characters").max(50);
 
 export const userSchema = z.object({
@@ -32,11 +31,9 @@ export const createUserSchema = z.object({
   lastName: nameSchema,
 });
 
-
 export const updateUserSchema = z.object({
   username: usernameSchema.optional(),
   email: emailSchema.optional(),
   firstName: nameSchema,
   lastName: nameSchema,
 });
-
