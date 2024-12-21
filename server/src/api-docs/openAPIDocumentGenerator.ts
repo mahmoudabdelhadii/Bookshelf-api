@@ -5,7 +5,7 @@ import { userRegistry } from "../api/user/user.router.js";
 import { booksRegistry } from "../api/book/book.router.js";
 
 export function generateOpenAPIDocument() {
-  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry,booksRegistry]);
+  const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry, booksRegistry]);
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
   return generator.generateDocument({

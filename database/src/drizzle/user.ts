@@ -1,7 +1,6 @@
 import { text, timestamp, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 
-
 const userRole = server.enum("role", ["user", "admin"]);
 
 export const user = server.table(
@@ -13,12 +12,8 @@ export const user = server.table(
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull(),
     role: userRole("role").default("user").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
   (table) => {
     return {

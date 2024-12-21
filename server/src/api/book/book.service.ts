@@ -18,23 +18,20 @@ export class BookService {
       isbn?: string;
       genre?: string;
       publishedYear?: number;
-    }
+    },
   ) {
-    
     if (!bookData.title || !bookData.author) {
       throw new ValidationError("Title and author are required fields.", { bookData });
     }
 
-    
     if (bookData.isbn) {
       const existing = await drizzle.query.book.findFirst({
         where: (books, { eq }) => eq(books.isbn, bookData.isbn!),
       });
       if (existing) {
-        throw new ResourceAlreadyExistsError(
-          "A book with the provided ISBN already exists.",
-          { isbn: bookData.isbn }
-        );
+        throw new ResourceAlreadyExistsError("A book with the provided ISBN already exists.", {
+          isbn: bookData.isbn,
+        });
       }
     }
 
@@ -42,7 +39,6 @@ export class BookService {
       const [insertedBook] = await drizzle.insert(schema.book).values(bookData).returning();
       return insertedBook;
     } catch (err) {
-      
       throw new DatabaseError("Failed to create a new book.", { originalError: err });
     }
   }
@@ -55,7 +51,7 @@ export class BookService {
       isbn?: string;
       genre?: string;
       publishedYear?: number;
-    }[]
+    }[],
   ) {
     if (!Array.isArray(bookList) || bookList.length === 0) {
       throw new ValidationError("The 'books' array must contain at least one book.", { bookList });
@@ -69,7 +65,6 @@ export class BookService {
   }
 
   static async getBookById(drizzle: DrizzleClient, bookId: string) {
-   
     const book = await drizzle.query.book.findFirst({
       where: (b, { eq }) => eq(b.id, bookId),
     });
@@ -77,7 +72,7 @@ export class BookService {
     if (!book) {
       throw new NotFound("Book not found.", { bookId });
     }
-    console.log(book)
+    console.log(book);
     return book;
   }
 
@@ -90,9 +85,8 @@ export class BookService {
       isbn: string;
       genre: string;
       publishedYear: number;
-    }>
+    }>,
   ) {
-    
     try {
       const [updatedBook] = await drizzle
         .update(schema.book)
@@ -111,7 +105,6 @@ export class BookService {
   }
 
   static async deleteBook(drizzle: DrizzleClient, bookId: string) {
-   
     try {
       const [deletedBook] = await drizzle.delete(schema.book).where(eq(schema.book.id, bookId)).returning();
       if (!deletedBook) {
@@ -123,8 +116,6 @@ export class BookService {
       throw new DatabaseError("Failed to delete the book.", { bookId, originalError: err });
     }
   }
-  
-
 
   static async getBooks(
     drizzle: DrizzleClient,
@@ -139,7 +130,7 @@ export class BookService {
       author?: string;
       genre?: string;
       datePublished?: Date;
-    } = {}
+    } = {},
   ) {
     try {
       return await drizzle.query.book.findMany({
@@ -171,7 +162,7 @@ export class BookService {
           FROM ${schema.book}
           WHERE title % ${searchTerm}
           ORDER BY similarity DESC
-        `
+        `,
       );
       return result.rows;
     } catch (err) {
@@ -205,7 +196,7 @@ export class BookService {
             ) @@ plainto_tsquery(${searchTerm})
           ORDER BY rank DESC
           LIMIT 50
-        `
+        `,
       );
       return result.rows;
     } catch (err) {
@@ -222,7 +213,7 @@ export class BookService {
 
     const newBook = await isbndb.fetchBookDetails(isbn);
     if (!newBook) throw new NotFound("Book not found");
-    
+
     await drizzle.insert(schema.book).values(newBook).onConflictDoNothing();
 
     return { book: newBook };
@@ -233,7 +224,7 @@ export class BookService {
     name: string,
     page: number = 1,
     pageSize: number = 20,
-    language?: "en"| "ar"| "other"
+    language?: "en" | "ar" | "other",
   ) {
     const localAuthor = await drizzle.query.author.findFirst({
       where: (a, { eq }) => eq(a.name, name),
@@ -241,8 +232,7 @@ export class BookService {
 
     if (localAuthor) {
       const books = await drizzle.query.book.findMany({
-        where: (b, { eq, and }) =>
-          and(eq(b.author, name), language ? eq(b.language, language) : sql`TRUE`),
+        where: (b, { eq, and }) => and(eq(b.author, name), language ? eq(b.language, language) : sql`TRUE`),
         limit: pageSize,
         offset: (page - 1) * pageSize,
       });
@@ -261,18 +251,14 @@ export class BookService {
     return authorDetails;
   }
 
-  static async searchAuthors(
-    drizzle: DrizzleClient,
-    query: string,
-    page: number = 1,
-    pageSize: number = 20
-  ) {
+  static async searchAuthors(drizzle: DrizzleClient, query: string, page: number = 1, pageSize: number = 20) {
     const authorsData = await isbndb.searchAuthors(query, { page, pageSize });
     if (!authorsData.authors || authorsData.authors.length === 0) throw new NotFound("No authors found");
 
-    await drizzle.insert(schema.author).values(
-      authorsData.authors.map((name) => ({ name }))
-    ).onConflictDoNothing();
+    await drizzle
+      .insert(schema.author)
+      .values(authorsData.authors.map((name) => ({ name })))
+      .onConflictDoNothing();
 
     return authorsData;
   }
@@ -282,7 +268,7 @@ export class BookService {
     name: string,
     page: number = 1,
     pageSize: number = 20,
-    language?: string
+    language?: string,
   ) {
     const localPublisher = await drizzle.query.publisher.findFirst({
       where: (p, { eq }) => eq(p.name, name),
@@ -314,14 +300,16 @@ export class BookService {
     drizzle: DrizzleClient,
     query: string,
     page: number = 1,
-    pageSize: number = 20
+    pageSize: number = 20,
   ) {
     const publishersData = await isbndb.searchPublishers(query, { page, pageSize });
-    if (!publishersData.publishers || publishersData.publishers.length === 0) throw new NotFound("No publishers found");
+    if (!publishersData.publishers || publishersData.publishers.length === 0)
+      throw new NotFound("No publishers found");
 
-    await drizzle.insert(schema.publisher).values(
-      publishersData.publishers.map((name) => ({ name }))
-    ).onConflictDoNothing();
+    await drizzle
+      .insert(schema.publisher)
+      .values(publishersData.publishers.map((name) => ({ name })))
+      .onConflictDoNothing();
 
     return publishersData;
   }
@@ -338,32 +326,32 @@ export class BookService {
       text?: string;
       subject?: string;
       publisher?: string;
-    } = {}
+    } = {},
   ) {
     const data = await isbndb.searchISBNdb(index, { page, pageSize, ...filters });
 
-  //   switch (index) {
-  //     case "books":
-  //       if (data.books && data.books.length > 0) {
-  //         await drizzle.insert(schema.book).values(data.books.map((b) => b.book)).onConflictDoNothing();
-  //       }
-  //       return data;
+    //   switch (index) {
+    //     case "books":
+    //       if (data.books && data.books.length > 0) {
+    //         await drizzle.insert(schema.book).values(data.books.map((b) => b.book)).onConflictDoNothing();
+    //       }
+    //       return data;
 
-  //     case "authors":
-  //       if (data.authors && data.authors.length > 0) {
-  //         await drizzle.insert(schema.author).values(data.authors.map((name) => ({ name }))).onConflictDoNothing();
-  //       }
-  //       return data;
+    //     case "authors":
+    //       if (data.authors && data.authors.length > 0) {
+    //         await drizzle.insert(schema.author).values(data.authors.map((name) => ({ name }))).onConflictDoNothing();
+    //       }
+    //       return data;
 
-  //     case "publishers":
-  //       if (data.publishers && data.publishers.length > 0) {
-  //         await drizzle.insert(schema.publisher).values(data.publishers.map((name) => ({ name }))).onConflictDoNothing();
-  //       }
-  //       return data;
+    //     case "publishers":
+    //       if (data.publishers && data.publishers.length > 0) {
+    //         await drizzle.insert(schema.publisher).values(data.publishers.map((name) => ({ name }))).onConflictDoNothing();
+    //       }
+    //       return data;
 
-  //     default:
-  //       throw new BadRequest("Invalid search index");
-  //   }
-  // }
+    //     default:
+    //       throw new BadRequest("Invalid search index");
+    //   }
+    // }
   }
 }

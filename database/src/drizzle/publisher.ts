@@ -7,9 +7,7 @@ export const publisher = server.table(
   {
     id: idpk("id"),
     name: text("name").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
   (table) => ({
     publisherNameIndex: uniqueIndex("unique_publisher_name").on(table.name),

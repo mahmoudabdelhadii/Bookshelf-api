@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text,Platform, Modal, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  Platform,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+} from 'react-native';
 import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';

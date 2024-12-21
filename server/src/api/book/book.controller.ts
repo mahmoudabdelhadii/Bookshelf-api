@@ -99,7 +99,7 @@ class BooksController {
         name,
         parseInt(page as string, 10),
         parseInt(pageSize as string, 10),
-        language as "en"|"ar"|"other"
+        language as "en" | "ar" | "other",
       );
       return res.json(data);
     } catch (error: any) {
@@ -116,7 +116,7 @@ class BooksController {
         drizzle,
         query,
         parseInt(page as string, 10),
-        parseInt(pageSize as string, 10)
+        parseInt(pageSize as string, 10),
       );
       return res.json(data);
     } catch (error: any) {
@@ -160,7 +160,7 @@ class BooksController {
         name,
         parseInt(page as string, 10),
         parseInt(pageSize as string, 10),
-        language as "en" | "ar" | "other"
+        language as "en" | "ar" | "other",
       );
       return res.json(data);
     } catch (error: any) {
@@ -177,7 +177,7 @@ class BooksController {
         drizzle,
         query,
         parseInt(page as string, 10),
-        parseInt(pageSize as string, 10)
+        parseInt(pageSize as string, 10),
       );
       return res.json(data);
     } catch (error: any) {
@@ -189,12 +189,14 @@ class BooksController {
     const drizzle = req.drizzle;
     const { index } = req.params;
     const { page = "1", pageSize = "20", isbn, isbn13, author, text, subject, publisher } = req.query;
-  
+
     try {
       if (!["books", "authors", "publishers"].includes(index)) {
-        return res.status(400).json({ message: "Invalid index. Valid indices are 'books', 'authors', 'publishers'." });
+        return res
+          .status(400)
+          .json({ message: "Invalid index. Valid indices are 'books', 'authors', 'publishers'." });
       }
-  
+
       const data = await BookService.searchAll(
         drizzle,
         index as "books" | "authors" | "publishers",
@@ -207,9 +209,9 @@ class BooksController {
           text: text as string | undefined,
           subject: subject as string | undefined,
           publisher: publisher as string | undefined,
-        }
+        },
       );
-  
+
       return res.json({ data });
     } catch (error: any) {
       return res.status(error.statusCode ?? 500).json({ message: error.message });
