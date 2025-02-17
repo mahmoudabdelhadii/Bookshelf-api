@@ -7,30 +7,40 @@ import * as Haptics from 'expo-haptics';
 import Colors from '../../constants/Colors';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import BottomModal from '@/components/BottomModal';
+import { DrawerActions, useNavigation } from '@react-navigation/native'
 
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
+  const navigation = useNavigation() ;
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
-  const closeModal = () => {};
-  const handleModalAction = (action: string) => {
-    console.log(`Action selected: ${action}`);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleAddBook = () => {
+    console.log('Add Book clicked');
   };
 
+  const handleAddMultipleBooks = () => {
+    console.log('Add Multiple Books clicked');
+  };
+
+  const handleAddBookManually = () => {
+    console.log('Add Book Manually clicked');
+  };
+  const closeModal = () => {
+    setModalVisible(false);
+  };
   return (
     <>
       <Tabs
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
-          tabBarActiveTintColor: Colors.colors['primary-light'],
-          tabBarInactiveTintColor:
-            colorScheme === 'light'
-              ? Colors.colors['copy']
-              : Colors.colors['foreground'],
+          tabBarActiveTintColor: Colors.colors['primary'],
+          tabBarInactiveTintColor: Colors.colors.foreground,
           tabBarStyle: {
             position: 'absolute',
             bottom: 25,
@@ -90,7 +100,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="add"
           options={{
-            tabBarLabel: 'Add',
+            tabBarLabel: 'add',
             tabBarIcon: () => (
               <View
                 style={{
@@ -105,11 +115,7 @@ export default function TabLayout() {
                 }}>
                 <Ionicons
                   name="add"
-                  color={
-                    colorScheme === 'light'
-                      ? Colors.colors['foreground']
-                      : Colors.colors['copy']
-                  }
+                  color={Colors.colors.foreground}
                   size={40}
                 />
               </View>
@@ -119,6 +125,7 @@ export default function TabLayout() {
                 {...props}
                 onPress={(e: GestureResponderEvent) => {
                   e.preventDefault();
+                  setModalVisible(true);
                   handleHapticFeedback();
                 }}
               />
@@ -156,7 +163,9 @@ export default function TabLayout() {
               <Pressable
                 {...props}
                 onPress={(e: GestureResponderEvent) => {
+                  e.preventDefault();
                   handleHapticFeedback();
+                  navigation.dispatch(DrawerActions.toggleDrawer())
                   props.onPress?.(e);
                 }}
               />
@@ -166,9 +175,12 @@ export default function TabLayout() {
       </Tabs>
 
       <BottomModal
-        visible={false}
+        visible={modalVisible}
         onClose={closeModal}
-        onPress={handleModalAction}
+        onPress={action => {
+          // Handle modal actions here
+          console.log(`Action selected: ${action}`);
+        }}
       />
     </>
   );
