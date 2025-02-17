@@ -3,7 +3,7 @@ import { View, Text, Pressable, Animated } from 'react-native';
 import Modal from 'react-native-modal';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
-// import BarcodeScannerModal from '@/app/BarcodeScannerModal';
+import ScannerModal from './barcodeScannerModal';
 
 type BottomModalProps = {
   visible: boolean;
@@ -17,15 +17,9 @@ export default function BottomModal({
   onPress,
 }: BottomModalProps) {
   const [scannerVisible, setScannerVisible] = useState(false);
+  const [scannerMode, setScannerMode] = useState<'single' | 'batch'>('single');
   const [torchOn, setTorchOn] = useState(false);
 
-  const handleBarcodeScanned = (data: any) => {
-    console.log('Scanned data:', data);
-    setScannerVisible(false);
-    setTorchOn(false); // Reset torch state
-  };
-
-  // Animated values for each button (now four buttons)
   const buttonAnimations = [
     useRef(new Animated.Value(0)).current, // Bottom button
     useRef(new Animated.Value(0)).current, // 3rd button
@@ -33,58 +27,96 @@ export default function BottomModal({
     useRef(new Animated.Value(0)).current, // Top button
   ];
 
+  // Handle single or batch mode scanning
+  const openScanner = (mode: 'single' | 'batch') => {
+    setScannerMode(mode);
+    setScannerVisible(true);
+    // close the bottom modal
+    closeBottomModal();
+  };
+
+  // Animate open/close
   useEffect(() => {
     if (visible) {
-      // Staggered animations from bottom to top
-      Animated.stagger(100, [
-        Animated.timing(buttonAnimations[0], {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(buttonAnimations[1], {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(buttonAnimations[2], {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(buttonAnimations[3], {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.stagger(
+        100,
+        buttonAnimations.map((anim) =>
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          })
+        )
+      ).start();
     } else {
-      // Reset animations
-      buttonAnimations.forEach(animation => animation.setValue(0));
+      Animated.stagger(
+        100,
+        buttonAnimations.map((anim) =>
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          })
+        )
+      ).start(() => {
+        // Once animation finishes, call onClose
+        onClose();
+      });
     }
   }, [visible]);
 
+  // Called when user taps outside the modal or hits back
+  const closeBottomModal = () => {
+    // This triggers the reverse animation in the useEffect above
+    // which eventually calls `onClose()` after animation
+    // so you do not call onClose() directly here
+    if (visible) {
+      // Force re-render to run the closing animation
+      Animated.stagger(
+        100,
+        buttonAnimations.map((anim) =>
+          Animated.timing(anim, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          })
+        )
+      ).start(() => {
+        onClose();
+      });
+    }
+  };
+
+  // When a barcode is scanned
+  const handleBarcodeScanned = (data: string) => {
+    console.log('Scanned data:', data);
+    setTorchOn(false); // reset torch
+    setScannerVisible(false);
+  };
+
   return (
     <>
-      {/* Main Modal with Buttons */}
+      {/* Bottom Modal with Buttons */}
       <Modal
         isVisible={visible}
-        onBackdropPress={onClose}
-        onBackButtonPress={onClose}
-        useNativeDriver={true}
+        useNativeDriver
         backdropOpacity={0.2}
         style={{ justifyContent: 'flex-end', margin: 0 }}
         animationIn="fadeIn"
         animationOut="fadeOut"
-        animationInTiming={100}
-        animationOutTiming={100}>
+        animationInTiming={150}
+        animationOutTiming={150}
+        onBackdropPress={closeBottomModal}
+        onBackButtonPress={closeBottomModal}
+      >
         <View
           style={{
             backgroundColor: 'transparent',
             alignItems: 'center',
             marginBottom: 110,
-          }}>
-          {/* Top Button - Scan Book ISBN */}
+          }}
+        >
+          {/* Top Button - Single Scan */}
           <Animated.View
             style={{
               opacity: buttonAnimations[3],
@@ -96,12 +128,10 @@ export default function BottomModal({
                   }),
                 },
               ],
-            }}>
+            }}
+          >
             <Pressable
-              onPress={() => {
-                setScannerVisible(true); // Open the Barcode Scanner modal
-                onClose(); // Close the bottom modal
-              }}
+              onPress={() => openScanner('single')}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -111,7 +141,8 @@ export default function BottomModal({
                 paddingHorizontal: 20,
                 marginBottom: 8,
                 width: 220,
-              }}>
+              }}
+            >
               <Ionicons
                 name="barcode-outline"
                 size={24}
@@ -122,13 +153,14 @@ export default function BottomModal({
                 style={{
                   color: Colors.colors['primary-content'],
                   fontWeight: 'bold',
-                }}>
+                }}
+              >
                 Scan Book ISBN
               </Text>
             </Pressable>
           </Animated.View>
 
-          {/* 2nd Button - Batch Scan Books */}
+          {/* 2nd Button - Batch Scan */}
           <Animated.View
             style={{
               opacity: buttonAnimations[2],
@@ -140,11 +172,12 @@ export default function BottomModal({
                   }),
                 },
               ],
-            }}>
+            }}
+          >
             <Pressable
               onPress={() => {
                 if (onPress) onPress('batchScan');
-                onClose();
+                openScanner('batch');
               }}
               style={{
                 flexDirection: 'row',
@@ -155,7 +188,8 @@ export default function BottomModal({
                 paddingHorizontal: 20,
                 marginBottom: 8,
                 width: 220,
-              }}>
+              }}
+            >
               <Ionicons
                 name="scan-outline"
                 size={24}
@@ -166,7 +200,8 @@ export default function BottomModal({
                 style={{
                   color: Colors.colors['primary-content'],
                   fontWeight: 'bold',
-                }}>
+                }}
+              >
                 Batch Scan Books
               </Text>
             </Pressable>
@@ -184,11 +219,12 @@ export default function BottomModal({
                   }),
                 },
               ],
-            }}>
+            }}
+          >
             <Pressable
               onPress={() => {
                 if (onPress) onPress('searchBooks');
-                onClose();
+                closeBottomModal();
               }}
               style={{
                 flexDirection: 'row',
@@ -199,7 +235,8 @@ export default function BottomModal({
                 paddingHorizontal: 20,
                 marginBottom: 8,
                 width: 220,
-              }}>
+              }}
+            >
               <Ionicons
                 name="search-outline"
                 size={24}
@@ -210,13 +247,14 @@ export default function BottomModal({
                 style={{
                   color: Colors.colors['primary-content'],
                   fontWeight: 'bold',
-                }}>
+                }}
+              >
                 Search New Books
               </Text>
             </Pressable>
           </Animated.View>
 
-          {/* Bottom Button - Add New Book Manually */}
+          {/* Bottom Button - Add Book Manually */}
           <Animated.View
             style={{
               opacity: buttonAnimations[0],
@@ -228,11 +266,12 @@ export default function BottomModal({
                   }),
                 },
               ],
-            }}>
+            }}
+          >
             <Pressable
               onPress={() => {
                 if (onPress) onPress('addBookManually');
-                onClose();
+                closeBottomModal();
               }}
               style={{
                 flexDirection: 'row',
@@ -242,7 +281,8 @@ export default function BottomModal({
                 paddingVertical: 12,
                 paddingHorizontal: 20,
                 width: 220,
-              }}>
+              }}
+            >
               <Ionicons
                 name="create-outline"
                 size={24}
@@ -253,7 +293,8 @@ export default function BottomModal({
                 style={{
                   color: Colors.colors['primary-content'],
                   fontWeight: 'bold',
-                }}>
+                }}
+              >
                 Add Book Manually
               </Text>
             </Pressable>
@@ -261,17 +302,18 @@ export default function BottomModal({
         </View>
       </Modal>
 
-      {/* Barcode Scanner Modal */}
-      {/* <BarcodeScannerModal
+      {/* Full-Screen Scanner Modal */}
+      <ScannerModal
         visible={scannerVisible}
         onClose={() => {
           setScannerVisible(false);
-          setTorchOn(false);
+          setTorchOn(false); // reset torch
         }}
         torchOn={torchOn}
         setTorchOn={setTorchOn}
+        mode={scannerMode}
         onBarcodeScanned={handleBarcodeScanned}
-      /> */}
+      />
     </>
   );
 }

@@ -116,6 +116,7 @@ export default function ScannerModal({
             flash={torchOn ? 'on' : 'off'}
             onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
             barcodeScannerSettings={{
+              // Adjust as needed (e.g., ['ean13', 'qr'] if you want more types)
               barcodeTypes: ['ean13'],
             }}
           />
