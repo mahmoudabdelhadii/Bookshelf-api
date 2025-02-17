@@ -16,7 +16,7 @@ async function main() {
   const postgrator = new Postgrator({
     migrationPattern: join(migrationDir, "*"),
     driver: "pg",
-    database: "colony",
+    database: "kitab",
     schemaTable: "public.__postgrator_migrations",
   });
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
