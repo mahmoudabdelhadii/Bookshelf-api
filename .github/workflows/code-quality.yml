@@ -20,11 +20,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Use Node.js 20.14.0
+      - name: Use Node.js v22.9.0
         uses: actions/setup-node@v4
         with:
           cache: npm
-          node-version: 20.14.0
+          node-version: v22.9.0
       - name: Install node_modules
         run: npm ci
       - name: Run fmt
@@ -39,7 +39,7 @@ jobs:
         uses: extractions/setup-just@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Use Node.js 20.14.0
+      - name: Use Node.js v22.9.0
         uses: actions/setup-node@v4
         with:
           cache: npm
@@ -58,11 +58,11 @@ jobs:
         uses: extractions/setup-just@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Use Node.js 20.14.0
+      - name: Use Node.js v22.9.0
         uses: actions/setup-node@v4
         with:
           cache: npm
-          node-version: 20.14.0
+          node-version: v22.9.0
       - name: Install node_modules
         run: npm ci
       - name: Run check
@@ -79,11 +79,11 @@ jobs:
         uses: extractions/setup-just@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Use Node.js 20.14.0
+      - name: Use Node.js v22.9.0
         uses: actions/setup-node@v4
         with:
           cache: npm
-          node-version: 20.14.0
+          node-version: v22.9.0
       - name: Install node_modules
         run: npm ci
       - name: Run tests
@@ -104,11 +104,11 @@ jobs:
         uses: extractions/setup-just@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Use Node.js 20.14.0
+      - name: Use Node.js v22.9.0
         uses: actions/setup-node@v4
         with:
           cache: npm
-          node-version: 20.14.0
+          node-version: v22.9.0
       - name: Install node_modules
         run: npm ci
       - name: Run build
