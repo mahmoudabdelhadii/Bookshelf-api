@@ -54,7 +54,7 @@ class BooksController {
 
   public searchBooks: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
-    const { search } = req.query as {search: string};
+    const { search } = req.query as { search: string };
     if (!search) {
       return res.status(400).json({ message: "Missing 'search' query param" });
     }
@@ -137,7 +137,7 @@ class BooksController {
   };
   public searchBooksWeighted: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
-    const { search } = req.query as { search: string};
+    const { search } = req.query as { search: string };
     if (!search) {
       return res.status(400).json({ message: "Missing 'search' query param" });
     }
