@@ -1,10 +1,11 @@
 import { callISBNdb } from "./callISBNdb.js";
+import { schema } from "database";
 interface AuthorBook {
   title: string;
   titleLong?: string;
   isbn: string;
   isbn13?: string;
-  language?: string;
+  language?: (typeof schema.book.language.enumValues)[number];
   datePublished?: string;
   overview?: string;
   authors?: string[];
