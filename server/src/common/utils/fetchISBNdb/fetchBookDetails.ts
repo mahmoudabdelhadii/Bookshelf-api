@@ -1,5 +1,6 @@
 import { NotFound } from "../../../errors.js";
 import { callISBNdb } from "./callISBNdb.js";
+import {schema} from "database"
 export interface BookDetails {
   title: string;
   titleLong?: string;
@@ -8,7 +9,7 @@ export interface BookDetails {
   deweyDecimal?: string;
   binding?: string;
   publisher?: string;
-  language?: string;
+  language?: (typeof schema.book.language.enumValues)[number];
   datePublished?: string;
   edition?: string;
   pages?: number;

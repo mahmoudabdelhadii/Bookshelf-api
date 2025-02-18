@@ -268,7 +268,7 @@ export class BookService {
     name: string,
     page: number = 1,
     pageSize: number = 20,
-    language?: string,
+    language?: (typeof schema.book.language.enumValues)[number],
   ) {
     const localPublisher = await drizzle.query.publisher.findFirst({
       where: (p, { eq }) => eq(p.name, name),
@@ -277,7 +277,7 @@ export class BookService {
     if (localPublisher) {
       const books = await drizzle.query.book.findMany({
         where: (b, { eq, and }) =>
-          and(eq(b.publisher, name), language ? eq(b.language, language) : sql`TRUE`),
+          and(eq(b.publisher, name), language ? eq(b.language, language) : undefined),
         limit: pageSize,
         offset: (page - 1) * pageSize,
       });

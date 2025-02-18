@@ -29,3 +29,4 @@ export const PORT = number("PORT", 4050);
 export const HOST = process.env.HOST ?? "0.0.0.0";
 export const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 export const DATABASE_URL = ENV !== "test" ? required("DATABASE_URL") : null;
+export const ISBNDB_API_KEY = process.env.ISBNDB_API_KEY ?? ""
