@@ -1,10 +1,11 @@
+import { env } from "../envConfig.js";
+
 export async function callISBNdb<T>(path: string, options?: RequestInit): Promise<T> {
-  const ISBNDB_API_KEY = process.env.ISBNDB_API_KEY;
   const response = await fetch(`https://api2.isbndb.com${path}`, {
     headers: {
       ...(options?.headers ?? {}),
       "Content-Type": "application/json",
-      Authorization: ISBNDB_API_KEY,
+      Authorization: env.ISBNDB_API_KEY,
     },
   });
   if (!response.ok) {

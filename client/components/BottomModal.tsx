@@ -40,24 +40,24 @@ export default function BottomModal({
     if (visible) {
       Animated.stagger(
         100,
-        buttonAnimations.map((anim) =>
+        buttonAnimations.map(anim =>
           Animated.timing(anim, {
             toValue: 1,
             duration: 300,
             useNativeDriver: true,
-          })
-        )
+          }),
+        ),
       ).start();
     } else {
       Animated.stagger(
         100,
-        buttonAnimations.map((anim) =>
+        buttonAnimations.map(anim =>
           Animated.timing(anim, {
             toValue: 0,
             duration: 300,
             useNativeDriver: true,
-          })
-        )
+          }),
+        ),
       ).start(() => {
         // Once animation finishes, call onClose
         onClose();
@@ -74,13 +74,13 @@ export default function BottomModal({
       // Force re-render to run the closing animation
       Animated.stagger(
         100,
-        buttonAnimations.map((anim) =>
+        buttonAnimations.map(anim =>
           Animated.timing(anim, {
             toValue: 0,
             duration: 300,
             useNativeDriver: true,
-          })
-        )
+          }),
+        ),
       ).start(() => {
         onClose();
       });
@@ -107,15 +107,13 @@ export default function BottomModal({
         animationInTiming={150}
         animationOutTiming={150}
         onBackdropPress={closeBottomModal}
-        onBackButtonPress={closeBottomModal}
-      >
+        onBackButtonPress={closeBottomModal}>
         <View
           style={{
             backgroundColor: 'transparent',
             alignItems: 'center',
             marginBottom: 110,
-          }}
-        >
+          }}>
           {/* Top Button - Single Scan */}
           <Animated.View
             style={{
@@ -128,8 +126,7 @@ export default function BottomModal({
                   }),
                 },
               ],
-            }}
-          >
+            }}>
             <Pressable
               onPress={() => openScanner('single')}
               style={{
@@ -141,8 +138,7 @@ export default function BottomModal({
                 paddingHorizontal: 20,
                 marginBottom: 8,
                 width: 220,
-              }}
-            >
+              }}>
               <Ionicons
                 name="barcode-outline"
                 size={24}
@@ -153,8 +149,7 @@ export default function BottomModal({
                 style={{
                   color: Colors.colors['primary-content'],
                   fontWeight: 'bold',
-                }}
-              >
+                }}>
                 Scan Book ISBN
               </Text>
             </Pressable>
@@ -172,8 +167,7 @@ export default function BottomModal({
                   }),
                 },
               ],
-            }}
-          >
+            }}>
             <Pressable
               onPress={() => {
                 if (onPress) onPress('batchScan');
@@ -188,8 +182,7 @@ export default function BottomModal({
                 paddingHorizontal: 20,
                 marginBottom: 8,
                 width: 220,
-              }}
-            >
+              }}>
               <Ionicons
                 name="scan-outline"
                 size={24}
@@ -200,8 +193,7 @@ export default function BottomModal({
                 style={{
                   color: Colors.colors['primary-content'],
                   fontWeight: 'bold',
-                }}
-              >
+                }}>
                 Batch Scan Books
               </Text>
             </Pressable>
@@ -219,8 +211,7 @@ export default function BottomModal({
                   }),
                 },
               ],
-            }}
-          >
+            }}>
             <Pressable
               onPress={() => {
                 if (onPress) onPress('searchBooks');
@@ -235,8 +226,7 @@ export default function BottomModal({
                 paddingHorizontal: 20,
                 marginBottom: 8,
                 width: 220,
-              }}
-            >
+              }}>
               <Ionicons
                 name="search-outline"
                 size={24}
@@ -247,8 +237,7 @@ export default function BottomModal({
                 style={{
                   color: Colors.colors['primary-content'],
                   fontWeight: 'bold',
-                }}
-              >
+                }}>
                 Search New Books
               </Text>
             </Pressable>
@@ -266,8 +255,7 @@ export default function BottomModal({
                   }),
                 },
               ],
-            }}
-          >
+            }}>
             <Pressable
               onPress={() => {
                 if (onPress) onPress('addBookManually');
@@ -281,8 +269,7 @@ export default function BottomModal({
                 paddingVertical: 12,
                 paddingHorizontal: 20,
                 width: 220,
-              }}
-            >
+              }}>
               <Ionicons
                 name="create-outline"
                 size={24}
@@ -293,8 +280,7 @@ export default function BottomModal({
                 style={{
                   color: Colors.colors['primary-content'],
                   fontWeight: 'bold',
-                }}
-              >
+                }}>
                 Add Book Manually
               </Text>
             </Pressable>

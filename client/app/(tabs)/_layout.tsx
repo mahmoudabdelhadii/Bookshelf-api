@@ -7,11 +7,11 @@ import * as Haptics from 'expo-haptics';
 import Colors from '../../constants/Colors';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import BottomModal from '@/components/BottomModal';
-import { DrawerActions, useNavigation } from '@react-navigation/native'
+import { DrawerActions, useNavigation } from '@react-navigation/native';
 
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
-  const navigation = useNavigation() ;
+  const navigation = useNavigation();
 
   const handleHapticFeedback = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -165,7 +165,7 @@ export default function TabLayout() {
                 onPress={(e: GestureResponderEvent) => {
                   e.preventDefault();
                   handleHapticFeedback();
-                  navigation.dispatch(DrawerActions.toggleDrawer())
+                  navigation.dispatch(DrawerActions.toggleDrawer());
                   props.onPress?.(e);
                 }}
               />

@@ -1,8 +1,8 @@
 import { callISBNdb } from "./callISBNdb.js";
-
+import { schema } from "database";
 export interface PublisherResponse {
   name: string;
-  books: { isbn: string }[];
+  books: (typeof schema.book.$inferSelect)[];
 }
 
 export async function fetchPublisherDetails(

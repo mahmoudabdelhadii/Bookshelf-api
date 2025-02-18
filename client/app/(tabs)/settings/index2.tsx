@@ -3,16 +3,13 @@ import { View, StyleSheet, Text, Button } from 'react-native';
 import { getLocales } from 'expo-localization';
 import { I18n } from 'i18n-js';
 
-
 export default function Tab() {
   // Set the initial language to the device's locale or default to English
   const deviceLocale = getLocales()[0].languageCode;
   const [language, setLanguage] = useState(deviceLocale ?? 'en');
 
- 
   return (
     <View style={styles.container}>
-      
       <Text>Device locale: {deviceLocale}</Text>
 
       {/* Buttons to Change Language */}
