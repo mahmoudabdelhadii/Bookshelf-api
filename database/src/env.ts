@@ -14,7 +14,6 @@ function number(name: string, fallback?: number | null): number | null {
 export const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 export const SQL_LOG_LEVEL = process.env.SQL_LOG_LEVEL ?? LOG_LEVEL;
 
-
 const DATABASE_URL = process.env.DATABASE_URL;
 export const DATABASE_CONNECTION_LIMIT = number("DATABASE_CONNECTION_LIMIT", null);
 const FULL_DATABASE_URL =
