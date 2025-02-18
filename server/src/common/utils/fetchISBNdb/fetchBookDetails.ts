@@ -1,6 +1,6 @@
 import { NotFound } from "../../../errors.js";
 import { callISBNdb } from "./callISBNdb.js";
-import {schema} from "database"
+import { schema } from "database";
 export interface BookDetails {
   title: string;
   titleLong?: string;

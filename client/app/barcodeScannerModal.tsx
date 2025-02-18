@@ -53,7 +53,7 @@ export default function ScannerModal({
       }, 800);
     } else {
       // if batch, do not auto-close
-      // you can remove this setScanned(false) if you want to avoid re-scanning 
+      // you can remove this setScanned(false) if you want to avoid re-scanning
       // the same barcode. Or keep it to re-scan new barcodes:
       setTimeout(() => setScanned(false), 800);
     }
@@ -63,7 +63,9 @@ export default function ScannerModal({
     return (
       <Modal isVisible={visible} style={styles.modal} statusBarTranslucent>
         <View style={styles.permissionContainer}>
-          <Text style={styles.permissionText}>Requesting camera permission...</Text>
+          <Text style={styles.permissionText}>
+            Requesting camera permission...
+          </Text>
         </View>
       </Modal>
     );
@@ -88,8 +90,7 @@ export default function ScannerModal({
       style={styles.modal}
       animationIn="slideInUp"
       animationOut="slideOutDown"
-      statusBarTranslucent
-    >
+      statusBarTranslucent>
       <View style={styles.container}>
         {/* Header with Close and Torch Toggle */}
         <View style={styles.header}>
