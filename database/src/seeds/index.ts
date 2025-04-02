@@ -4,6 +4,7 @@ import path from "path";
 import { connect } from "../drizzle.js"; 
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { seed, reset } from "drizzle-seed";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -12,6 +13,7 @@ async function main() {
   const seedsDir = __dirname; 
   
 try{
+  
     const seedFiles = fs.readdirSync(seedsDir)
     .filter((file) => file.endsWith(".ts") && file !== "index.ts");
   
