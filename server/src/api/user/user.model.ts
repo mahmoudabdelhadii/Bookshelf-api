@@ -1,8 +1,7 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
-
-import { commonValidations } from "../../common/utils/commonValidation.js";
 import { idSchema, emailSchema, nameSchema } from "../../types.js";
+
 extendZodWithOpenApi(z);
 
 export type User = z.infer<typeof userSchema>;
@@ -20,7 +19,7 @@ export const userSchema = z.object({
 });
 
 export const GetUserSchema = z.object({
-  params: z.object({ id: commonValidations.id }),
+  params: z.object({ id: idSchema }),
 });
 
 export const createUserSchema = z.object({
