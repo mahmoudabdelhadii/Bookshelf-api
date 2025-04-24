@@ -3,7 +3,7 @@ import { app, logger } from "./server.js";
 
 const server = app.listen(env.PORT, () => {
   const { NODE_ENV, HOST, PORT } = env;
-  logger.info(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`);
+  logger.info("Server (%s) running on port http://%s:%s", NODE_ENV, HOST, PORT);
 });
 
 const onCloseSignal = () => {
@@ -12,7 +12,7 @@ const onCloseSignal = () => {
     logger.info("server closed");
     process.exit();
   });
-  setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
+  setTimeout(() => process.exit(1), 10000).unref();
 };
 
 process.on("SIGINT", onCloseSignal);
