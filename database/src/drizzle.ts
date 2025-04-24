@@ -10,7 +10,7 @@ export { alias, getTableConfig, type PgUpdateSetSource, type PgInsertValue } fro
 export { schema };
 
 export function connect(appName: string) {
-  console.log(DATABASE_URL)
+  console.log(DATABASE_URL);
   // eslint-disable-next-line import/no-named-as-default-member -- it's wrong!
   const client = new pg.Pool({
     connectionString: DATABASE_URL,
@@ -20,7 +20,7 @@ export function connect(appName: string) {
     query_timeout: 10_000,
     application_name: appName,
     idle_in_transaction_session_timeout: 10_000,
-    ssl: false
+    ssl: false,
   });
   const drizzle = createDrizzle(client, {
     schema,

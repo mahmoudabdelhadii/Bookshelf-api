@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { eq, sql, schema } from "database";
+import { eq, sql, schema, ilike, or, and } from "database";
 import {
   BadRequest,
   NotFound,
@@ -8,6 +8,8 @@ import {
   ValidationError,
 } from "../../errors.js";
 import * as isbndb from "../../common/utils/fetchISBNdb/index.js";
+
+type Language = (typeof schema.book.language.enumValues)[number];
 
 export class BookService {
   static async createBook(
@@ -117,39 +119,6 @@ export class BookService {
     }
   }
 
-  static async getBooks(
-    drizzle: DrizzleClient,
-    {
-      title,
-      isbn,
-      author,
-      genre,
-    }: {
-      title?: string;
-      isbn?: string;
-      author?: string;
-      genre?: string;
-      datePublished?: Date;
-    } = {},
-  ) {
-    try {
-      return await drizzle.query.book.findMany({
-        where: (b, { and, eq, ilike }) => {
-          const conditions = [];
-          if (title) conditions.push(ilike(b.title, `%${title}%`));
-          if (isbn) conditions.push(eq(b.isbn, isbn));
-          if (author) conditions.push(ilike(b.author, `%${author}%`));
-          if (genre) conditions.push(ilike(b.genre, `%${genre}%`));
-
-          return conditions.length > 0 ? and(...conditions) : undefined;
-        },
-        limit: 50,
-      });
-    } catch (err) {
-      throw new DatabaseError("Error fetching books.", { originalError: err });
-    }
-  }
-
   static async searchBooksByTrigram(drizzle: DrizzleClient, searchTerm: string) {
     if (!searchTerm) {
       throw new BadRequest("Search term is required.");
@@ -219,23 +188,66 @@ export class BookService {
     return { book: newBook };
   }
 
+  static async getBooks(
+    drizzle: DrizzleClient,
+    {
+      title,
+      isbn,
+      author,
+      genre,
+    }: {
+      title?: string;
+      isbn?: string;
+      author?: string;
+      genre?: string;
+    } = {},
+  ) {
+    try {
+      const conditions = [sql`TRUE`];
+      if (title) conditions.push(ilike(schema.book.title, `%${title}%`));
+      if (isbn) conditions.push(eq(schema.book.isbn, isbn));
+      if (author) conditions.push(ilike(schema.author.name, `%${author}%`));
+      if (genre) conditions.push(ilike(schema.book.genre, `%${genre}%`));
+
+      return await drizzle
+        .select({
+          book: schema.book,
+          author: schema.author,
+        })
+        .from(schema.book)
+        .leftJoin(schema.author, eq(schema.book.authorId, schema.author.id))
+        .where(and(...conditions))
+        .limit(50);
+    } catch (err) {
+      throw new DatabaseError("Error fetching books.", { originalError: err });
+    }
+  }
+
   static async getAuthorDetails(
     drizzle: DrizzleClient,
     name: string,
-    page: number = 1,
-    pageSize: number = 20,
-    language?: "en" | "ar" | "other",
+    page = 1,
+    pageSize = 20,
+    language?: Language,
   ) {
+    const offset = (page - 1) * pageSize;
     const localAuthor = await drizzle.query.author.findFirst({
       where: (a, { eq }) => eq(a.name, name),
     });
 
     if (localAuthor) {
-      const books = await drizzle.query.book.findMany({
-        where: (b, { eq, and }) => and(eq(b.author, name), language ? eq(b.language, language) : sql`TRUE`),
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-      });
+      const books = await drizzle
+        .select()
+        .from(schema.book)
+        .where(
+          and(
+            eq(schema.book.authorId, localAuthor.id),
+            language ? eq(schema.book.language, language) : sql`TRUE`,
+          ),
+        )
+        .limit(pageSize)
+        .offset(offset);
+
       return { author: localAuthor.name, books };
     }
 
@@ -243,17 +255,57 @@ export class BookService {
     if (!authorDetails.author) throw new NotFound("Author not found");
 
     await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
-    if (authorDetails.books && authorDetails.books.length > 0) {
-      const books = authorDetails.books.map((b) => b);
-      await drizzle.insert(schema.book).values(books).onConflictDoNothing();
+
+    if (authorDetails.books.length) {
+      await drizzle.insert(schema.book).values(authorDetails.books).onConflictDoNothing();
     }
 
     return authorDetails;
   }
 
+  static async getPublisherDetails(
+    drizzle: DrizzleClient,
+    name: string,
+    page = 1,
+    pageSize = 20,
+    language?: Language,
+  ) {
+    const offset = (page - 1) * pageSize;
+    const localPublisher = await drizzle.query.publisher.findFirst({
+      where: (p, { eq }) => eq(p.name, name),
+    });
+
+    if (localPublisher) {
+      const books = await drizzle
+        .select()
+        .from(schema.book)
+        .where(
+          and(
+            eq(schema.book.publisherId, localPublisher.id),
+            language ? eq(schema.book.language, language) : sql`TRUE`,
+          ),
+        )
+        .limit(pageSize)
+        .offset(offset);
+
+      return { publisher: localPublisher.name, books };
+    }
+
+    const publisherDetails = await isbndb.fetchPublisherDetails(name, { page, pageSize, language });
+    if (!publisherDetails.name) throw new NotFound("Publisher not found");
+
+    await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
+
+    if (publisherDetails.books.length) {
+      await drizzle.insert(schema.book).values(publisherDetails.books).onConflictDoNothing();
+    }
+
+    return publisherDetails;
+  }
+
   static async searchAuthors(drizzle: DrizzleClient, query: string, page: number = 1, pageSize: number = 20) {
     const authorsData = await isbndb.searchAuthors(query, { page, pageSize });
-    if (!authorsData.authors || authorsData.authors.length === 0) throw new NotFound("No authors found");
+    if (authorsData.authors.length === 0) throw new NotFound("No authors found");
 
     await drizzle
       .insert(schema.author)
@@ -263,39 +315,6 @@ export class BookService {
     return authorsData;
   }
 
-  static async getPublisherDetails(
-    drizzle: DrizzleClient,
-    name: string,
-    page: number = 1,
-    pageSize: number = 20,
-    language?: (typeof schema.book.language.enumValues)[number],
-  ) {
-    const localPublisher = await drizzle.query.publisher.findFirst({
-      where: (p, { eq }) => eq(p.name, name),
-    });
-
-    if (localPublisher) {
-      const books = await drizzle.query.book.findMany({
-        where: (b, { eq, and }) =>
-          and(eq(b.publisher, name), language ? eq(b.language, language) : undefined),
-        limit: pageSize,
-        offset: (page - 1) * pageSize,
-      });
-      return { publisher: localPublisher.name, books };
-    }
-
-    const publisherDetails = await isbndb.fetchPublisherDetails(name, { page, pageSize, language });
-    if (!publisherDetails.name) throw new NotFound("Publisher not found");
-
-    await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
-    if (publisherDetails.books && publisherDetails.books.length > 0) {
-      const books = publisherDetails.books.map((b) => b);
-      await drizzle.insert(schema.book).values(books).onConflictDoNothing();
-    }
-
-    return publisherDetails;
-  }
-
   static async searchPublishers(
     drizzle: DrizzleClient,
     query: string,
@@ -303,8 +322,7 @@ export class BookService {
     pageSize: number = 20,
   ) {
     const publishersData = await isbndb.searchPublishers(query, { page, pageSize });
-    if (!publishersData.publishers || publishersData.publishers.length === 0)
-      throw new NotFound("No publishers found");
+    if (publishersData.publishers.length === 0) throw new NotFound("No publishers found");
 
     await drizzle
       .insert(schema.publisher)
@@ -328,30 +346,69 @@ export class BookService {
       publisher?: string;
     } = {},
   ) {
-    const data = await isbndb.searchISBNdb(index, { page, pageSize, ...filters });
+    const offset = (page - 1) * pageSize;
+    const conditions = [sql`TRUE`];
 
-    //   switch (index) {
-    //     case "books":
-    //       if (data.books && data.books.length > 0) {
-    //         await drizzle.insert(schema.book).values(data.books.map((b) => b.book)).onConflictDoNothing();
-    //       }
-    //       return data;
+    if (filters.isbn) conditions.push(ilike(schema.book.isbn, `%${filters.isbn}%`));
+    if (filters.isbn13) conditions.push(ilike(schema.book.isbn13, `%${filters.isbn13}%`));
 
-    //     case "authors":
-    //       if (data.authors && data.authors.length > 0) {
-    //         await drizzle.insert(schema.author).values(data.authors.map((name) => ({ name }))).onConflictDoNothing();
-    //       }
-    //       return data;
+    if (filters.text) {
+      const clauses = [
+        ilike(schema.book.title, `%${filters.text}%`),
+        ilike(schema.book.overview, `%${filters.text}%`),
+        ilike(schema.book.synopsis, `%${filters.text}%`),
+      ];
+      const textSearch = or(...clauses);
+      if (textSearch) {
+        conditions.push(textSearch);
+      }
+    }
 
-    //     case "publishers":
-    //       if (data.publishers && data.publishers.length > 0) {
-    //         await drizzle.insert(schema.publisher).values(data.publishers.map((name) => ({ name }))).onConflictDoNothing();
-    //       }
-    //       return data;
+    if (filters.author) conditions.push(ilike(schema.author.name, `%${filters.author}%`));
+    if (filters.subject) conditions.push(ilike(schema.subject.name, `%${filters.subject}%`));
+    if (filters.publisher) conditions.push(ilike(schema.publisher.name, `%${filters.publisher}%`));
 
-    //     default:
-    //       throw new BadRequest("Invalid search index");
-    //   }
-    // }
+    const finalWhereClause = and(...conditions);
+    switch (index) {
+      case "books": {
+        const books = await drizzle
+          .select({
+            book: schema.book,
+            author: schema.author,
+            publisher: schema.publisher,
+            subject: schema.subject,
+          })
+          .from(schema.book)
+          .leftJoin(schema.author, eq(schema.book.authorId, schema.author.id))
+          .leftJoin(schema.publisher, eq(schema.book.publisherId, schema.publisher.id))
+          .leftJoin(schema.subject, eq(schema.book.subjectId, schema.subject.id))
+          .where(finalWhereClause)
+          .limit(pageSize)
+          .offset(offset);
+
+        return { books };
+      }
+
+      case "authors": {
+        const authors = await drizzle.query.author.findMany({
+          where: (a, { ilike }) => (filters.author ? ilike(a.name, `%${filters.author}%`) : undefined),
+          limit: pageSize,
+          offset,
+        });
+        return { authors };
+      }
+
+      case "publishers": {
+        const publishers = await drizzle.query.publisher.findMany({
+          where: (p, { ilike }) => (filters.publisher ? ilike(p.name, `%${filters.publisher}%`) : undefined),
+          limit: pageSize,
+          offset,
+        });
+        return { publishers };
+      }
+
+      default:
+        throw new BadRequest("Invalid search index");
+    }
   }
 }

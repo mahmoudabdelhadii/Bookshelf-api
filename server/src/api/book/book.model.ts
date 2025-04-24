@@ -43,7 +43,7 @@ export const bookSchema = z.object({
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
   createdAt: z.date().describe("Timestamp when the book was created."),
-  language: languageSchema, // Add language here
+  language: languageSchema,
 });
 
 export const getBookSchema = z.object({
@@ -58,7 +58,7 @@ export const createBookSchema = z.object({
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
   publishedYear: publishedYearSchema.optional(),
-  language: languageSchema, // Add language to create schema
+  language: languageSchema,
 });
 
 export const updateBookSchema = z.object({
@@ -67,5 +67,5 @@ export const updateBookSchema = z.object({
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
   publishedYear: publishedYearSchema.optional(),
-  language: languageSchema.optional(), // Add language to update schema
+  language: languageSchema.optional(),
 });

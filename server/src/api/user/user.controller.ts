@@ -2,81 +2,88 @@ import type { Request, RequestHandler, Response } from "express";
 import { UserService } from "./user.service.js";
 import { handleServiceResponse } from "../../common/utils/httpHandlers.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
+import { createUserSchema, updateUserSchema, userSchema } from "./user.model.js";
 import { StatusCodes } from "http-status-codes";
 
 class UserController {
   public createUser: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
-    const { id, username, email, firstName, lastName } = req.body;
-    let serviceResponse;
+    const { id, username, email, firstName, lastName } = createUserSchema.parse(req.body);
+
     try {
       const user = await UserService.createUser(drizzle, { id, username, email, firstName, lastName });
-      serviceResponse = ServiceResponse.success("User created", user, StatusCodes.CREATED);
-    } catch (error: any) {
-      serviceResponse = ServiceResponse.failure(error.message, null, StatusCodes.BAD_REQUEST);
+      return handleServiceResponse(ServiceResponse.success("User created", user, StatusCodes.CREATED), res);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to create user";
+      return handleServiceResponse(ServiceResponse.failure(message, null, StatusCodes.BAD_REQUEST), res);
     }
-
-    return handleServiceResponse(serviceResponse, res);
   };
 
   public getUsers: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
-    const { limit } = req.query;
-    let serviceResponse;
-    try {
-      const users = await UserService.findAll(drizzle, limit ? Number(limit) : 50);
-      serviceResponse = ServiceResponse.success("Users retrieved", users, StatusCodes.OK);
-    } catch (error: any) {
-      serviceResponse = ServiceResponse.failure(error.message, null, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+    const limit = req.query.limit ? Number(req.query.limit) : 50;
 
-    return handleServiceResponse(serviceResponse, res);
+    try {
+      const users = await UserService.findAll(drizzle, limit);
+      return handleServiceResponse(ServiceResponse.success("Users retrieved", users), res);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to retrieve users";
+      return handleServiceResponse(
+        ServiceResponse.failure(message, null, StatusCodes.INTERNAL_SERVER_ERROR),
+        res,
+      );
+    }
   };
 
   public getUser: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
     const { id } = req.params;
-    let serviceResponse;
+
     try {
       const user = await UserService.findById(drizzle, id);
-      serviceResponse = ServiceResponse.success("User retrieved", user, StatusCodes.OK);
-    } catch (error: any) {
-      serviceResponse = ServiceResponse.failure(error.message, null, StatusCodes.NOT_FOUND);
+      return handleServiceResponse(ServiceResponse.success("User retrieved", user), res);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "User not found";
+      return handleServiceResponse(ServiceResponse.failure(message, null, StatusCodes.NOT_FOUND), res);
     }
-
-    return handleServiceResponse(serviceResponse, res);
   };
 
   public updateUser: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
     const { id } = req.params;
-    const updates = req.body;
-    let serviceResponse;
+    const updates = updateUserSchema.parse(req.body);
+
     try {
       const user = await UserService.updateUser(drizzle, id, updates);
-      serviceResponse = ServiceResponse.success("User updated", user, StatusCodes.OK);
-    } catch (error: any) {
-      const status = error.code === "Not Found" ? StatusCodes.NOT_FOUND : StatusCodes.BAD_REQUEST;
-      serviceResponse = ServiceResponse.failure(error.message, null, status);
+      return handleServiceResponse(ServiceResponse.success("User updated", user), res);
+    } catch (error) {
+      const status =
+        typeof error === "object" && error !== null && "code" in error && error.code === "Not Found"
+          ? StatusCodes.NOT_FOUND
+          : StatusCodes.BAD_REQUEST;
+      const message = error instanceof Error ? error.message : "Update failed";
+      return handleServiceResponse(ServiceResponse.failure(message, null, status), res);
     }
-
-    return handleServiceResponse(serviceResponse, res);
   };
 
   public deleteUser: RequestHandler = async (req: Request, res: Response) => {
     const drizzle = req.drizzle;
     const { id } = req.params;
-    let serviceResponse;
+
     try {
       await UserService.deleteUser(drizzle, id);
-      // User deleted successfully, no content
-      serviceResponse = ServiceResponse.success("User deleted", null, StatusCodes.NO_CONTENT);
-    } catch (error: any) {
-      const status = error.code === "Not Found" ? StatusCodes.NOT_FOUND : StatusCodes.BAD_REQUEST;
-      serviceResponse = ServiceResponse.failure(error.message, null, status);
+      return handleServiceResponse(
+        ServiceResponse.success("User deleted", null, StatusCodes.NO_CONTENT),
+        res,
+      );
+    } catch (error) {
+      const status =
+        typeof error === "object" && error !== null && "code" in error && error.code === "Not Found"
+          ? StatusCodes.NOT_FOUND
+          : StatusCodes.BAD_REQUEST;
+      const message = error instanceof Error ? error.message : "Delete failed";
+      return handleServiceResponse(ServiceResponse.failure(message, null, status), res);
     }
-
-    return handleServiceResponse(serviceResponse, res);
   };
 }
 

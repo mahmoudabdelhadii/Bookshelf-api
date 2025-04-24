@@ -15,6 +15,6 @@ export const libraryBooks = server.table("library_books", {
     .references(() => book.id, { onDelete: "cascade", onUpdate: "cascade" }),
 
   shelfLocation: text("shelf_location"),
-  condition: text("condition"), 
+  condition: text("condition"),
   addedAt: timestamp("added_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
 });
