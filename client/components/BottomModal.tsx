@@ -81,18 +81,6 @@ export default function BottomModal({ visible, onClose }: BottomModalProps) {
                 </View>
                 <Text style={styles.buttonText}>Search New Books</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => {
-                  navigation.dispatch(DrawerActions.toggleDrawer());
-                  onClose();
-                }}>
-                <View style={styles.buttonIcon}>
-                  <Ionicons name="settings-outline" size={24} color="white" />
-                </View>
-                <Text style={styles.buttonText}>Settings</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </View>

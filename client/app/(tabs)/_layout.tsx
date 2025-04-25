@@ -40,7 +40,7 @@ export default function TabLayout() {
           headerShown: false,
           tabBarShowLabel: false,
           tabBarActiveTintColor: Colors.colors['primary'],
-          tabBarInactiveTintColor: Colors.colors.foreground,
+          tabBarInactiveTintColor: colorScheme === 'light' ? Colors.colors['foreground'] : Colors.colors['copy'],
           tabBarStyle: {
             position: 'absolute',
             bottom: 25,
@@ -50,10 +50,7 @@ export default function TabLayout() {
             elevation: 10,
             borderRadius: 15,
             height: 50,
-            backgroundColor:
-              colorScheme === 'light'
-                ? Colors.colors['foreground']
-                : Colors.colors['copy'],
+            backgroundColor: colorScheme === 'light' ? Colors.colors['copy'] : Colors.colors['foreground'],
             borderTopWidth: 0,
             borderWidth: 2,
             borderColor: Colors.colors.border,
@@ -103,14 +100,22 @@ export default function TabLayout() {
             tabBarLabel: 'add',
             tabBarIcon: () => (
               <View
-                className="top-[-30px] w-[50px] h-[50px] rounded-[35px] bg-primary justify-center items-center elevation-10">
+                style={{
+                  top: -30,
+                  width: 50,
+                  height: 50,
+                  borderRadius: 35,
+                  backgroundColor: Colors.colors['primary'],
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  elevation: 10,
+                }}>
                 <Ionicons
                   name="add"
                   color={Colors.colors.foreground}
                   size={40}
                 />
-              </View>
-            ),
+              </View>),
             tabBarButton: props => (
               <Pressable
                 {...props}

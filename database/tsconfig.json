@@ -4,6 +4,7 @@
   "references": [],
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "build"
+    "outDir": "build",
+    "noEmit": false
   }
 }
