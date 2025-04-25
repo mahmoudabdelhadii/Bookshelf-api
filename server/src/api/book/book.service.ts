@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { eq, sql, schema, ilike, or, and } from "database";
+import { eq, sql, schema, ilike, and, or } from "database";
 import {
   BadRequest,
   NotFound,
@@ -17,18 +17,21 @@ export class BookService {
     bookData: {
       title: string;
       author: string;
+      publisher: string;
       isbn?: string;
       genre?: string;
       publishedYear?: number;
+      language: (typeof schema.book.language.enumValues)[number];
     },
   ) {
-    if (!bookData.title || !bookData.author) {
-      throw new ValidationError("Title and author are required fields.", { bookData });
+    if (!bookData.title || !bookData.author || !bookData.publisher) {
+      throw new ValidationError("Title, author, and publisher are required fields.", { bookData });
     }
-
-    if (bookData.isbn) {
+    const { isbn, title, author, publisher, genre, publishedYear, language } = bookData;
+    // Check for existing ISBN
+    if (isbn) {
       const existing = await drizzle.query.book.findFirst({
-        where: (books, { eq }) => eq(books.isbn, bookData.isbn!),
+        where: (b, { eq }) => eq(b.isbn, isbn),
       });
       if (existing) {
         throw new ResourceAlreadyExistsError("A book with the provided ISBN already exists.", {
@@ -38,7 +41,34 @@ export class BookService {
     }
 
     try {
-      const [insertedBook] = await drizzle.insert(schema.book).values(bookData).returning();
+      // Ensure author exists
+      let authorRec = await drizzle.query.author.findFirst({
+        where: (a, { eq }) => eq(a.name, bookData.author),
+      });
+      if (!authorRec) {
+        [authorRec] = await drizzle.insert(schema.author).values({ name: bookData.author }).returning();
+      }
+      // Ensure publisher exists
+      let publisherRec = await drizzle.query.publisher.findFirst({
+        where: (p, { eq }) => eq(p.name, bookData.publisher),
+      });
+      if (!publisherRec) {
+        [publisherRec] = await drizzle
+          .insert(schema.publisher)
+          .values({ name: bookData.publisher })
+          .returning();
+      }
+      // Insert book with correct foreign keys
+      const insertData = {
+        title: bookData.title,
+        authorId: authorRec.id,
+        publisherId: publisherRec.id,
+        isbn: bookData.isbn,
+        genre: bookData.genre,
+        publishedYear: bookData.publishedYear,
+        language: bookData.language,
+      };
+      const [insertedBook] = await drizzle.insert(schema.book).values(insertData).returning();
       return insertedBook;
     } catch (err) {
       throw new DatabaseError("Failed to create a new book.", { originalError: err });
@@ -50,8 +80,8 @@ export class BookService {
     bookList: {
       title: string;
       author: string;
-      isbn?: string;
-      genre?: string;
+      isbn: string;
+      genre: string;
       publishedYear?: number;
     }[],
   ) {
