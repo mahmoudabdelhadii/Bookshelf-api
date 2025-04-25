@@ -1,305 +1,153 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, Pressable, Animated } from 'react-native';
-import Modal from 'react-native-modal';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from 'nativewind';
 import Colors from '../constants/Colors';
-import ScannerModal from './barcodeScannerModal';
+import { DrawerActions, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import ScannerModal from './ScannerModal';
 
-type BottomModalProps = {
-  visible: boolean;
-  onClose: () => void;
-  onPress?: (action: string) => void;
+type RootStackParamList = {
+  search: undefined;
 };
 
-export default function BottomModal({
-  visible,
-  onClose,
-  onPress,
-}: BottomModalProps) {
-  const [scannerVisible, setScannerVisible] = useState(false);
-  const [scannerMode, setScannerMode] = useState<'single' | 'batch'>('single');
-  const [torchOn, setTorchOn] = useState(false);
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-  const buttonAnimations = [
-    useRef(new Animated.Value(0)).current, // Bottom button
-    useRef(new Animated.Value(0)).current, // 3rd button
-    useRef(new Animated.Value(0)).current, // 2nd button
-    useRef(new Animated.Value(0)).current, // Top button
-  ];
+interface BottomModalProps {
+  visible: boolean;
+  onClose: () => void;
+}
 
-  // Handle single or batch mode scanning
-  const openScanner = (mode: 'single' | 'batch') => {
-    setScannerMode(mode);
-    setScannerVisible(true);
-    // close the bottom modal
-    closeBottomModal();
+export default function BottomModal({ visible, onClose }: BottomModalProps) {
+  const { colorScheme } = useColorScheme();
+  const navigation = useNavigation<NavigationProp>();
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleSingleScan = () => {
+    setShowScanner(true);
+    onClose();
   };
 
-  // Animate open/close
-  useEffect(() => {
-    if (visible) {
-      Animated.stagger(
-        100,
-        buttonAnimations.map(anim =>
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ),
-      ).start();
-    } else {
-      Animated.stagger(
-        100,
-        buttonAnimations.map(anim =>
-          Animated.timing(anim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ),
-      ).start(() => {
-        // Once animation finishes, call onClose
-        onClose();
-      });
-    }
-  }, [visible]);
-
-  // Called when user taps outside the modal or hits back
-  const closeBottomModal = () => {
-    // This triggers the reverse animation in the useEffect above
-    // which eventually calls `onClose()` after animation
-    // so you do not call onClose() directly here
-    if (visible) {
-      // Force re-render to run the closing animation
-      Animated.stagger(
-        100,
-        buttonAnimations.map(anim =>
-          Animated.timing(anim, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ),
-      ).start(() => {
-        onClose();
-      });
-    }
+  const handleBatchScan = () => {
+    // TODO: Implement batch scan
+    onClose();
   };
 
-  // When a barcode is scanned
-  const handleBarcodeScanned = (data: string) => {
-    console.log('Scanned data:', data);
-    setTorchOn(false); // reset torch
-    setScannerVisible(false);
+  const handleSearchBooks = () => {
+    navigation.navigate('search');
+    onClose();
   };
 
   return (
     <>
-      {/* Bottom Modal with Buttons */}
       <Modal
-        isVisible={visible}
-        useNativeDriver
-        backdropOpacity={0.2}
-        style={{ justifyContent: 'flex-end', margin: 0 }}
-        animationIn="fadeIn"
-        animationOut="fadeOut"
-        animationInTiming={150}
-        animationOutTiming={150}
-        onBackdropPress={closeBottomModal}
-        onBackButtonPress={closeBottomModal}>
-        <View
-          style={{
-            backgroundColor: 'transparent',
-            alignItems: 'center',
-            marginBottom: 110,
-          }}>
-          {/* Top Button - Single Scan */}
-          <Animated.View
-            style={{
-              opacity: buttonAnimations[3],
-              transform: [
-                {
-                  translateY: buttonAnimations[3].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                },
-              ],
-            }}>
-            <Pressable
-              onPress={() => openScanner('single')}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: Colors.colors.primary,
-                borderRadius: 10,
-                paddingVertical: 12,
-                paddingHorizontal: 20,
-                marginBottom: 8,
-                width: 220,
-              }}>
-              <Ionicons
-                name="barcode-outline"
-                size={24}
-                color={Colors.colors['primary-content']}
-                style={{ marginRight: 10 }}
-              />
-              <Text
-                style={{
-                  color: Colors.colors['primary-content'],
-                  fontWeight: 'bold',
-                }}>
-                Scan Book ISBN
-              </Text>
-            </Pressable>
-          </Animated.View>
+        visible={visible}
+        transparent
+        animationType="slide"
+        onRequestClose={onClose}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Add Books</Text>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <Ionicons name="close" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
 
-          {/* 2nd Button - Batch Scan */}
-          <Animated.View
-            style={{
-              opacity: buttonAnimations[2],
-              transform: [
-                {
-                  translateY: buttonAnimations[2].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                },
-              ],
-            }}>
-            <Pressable
-              onPress={() => {
-                if (onPress) onPress('batchScan');
-                openScanner('batch');
-              }}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: Colors.colors.primary,
-                borderRadius: 10,
-                paddingVertical: 12,
-                paddingHorizontal: 20,
-                marginBottom: 8,
-                width: 220,
-              }}>
-              <Ionicons
-                name="scan-outline"
-                size={24}
-                color={Colors.colors['primary-content']}
-                style={{ marginRight: 10 }}
-              />
-              <Text
-                style={{
-                  color: Colors.colors['primary-content'],
-                  fontWeight: 'bold',
-                }}>
-                Batch Scan Books
-              </Text>
-            </Pressable>
-          </Animated.View>
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSingleScan}>
+                <View style={styles.buttonIcon}>
+                  <Ionicons name="barcode" size={24} color="white" />
+                </View>
+                <Text style={styles.buttonText}>Scan Book ISBN</Text>
+              </TouchableOpacity>
 
-          {/* 3rd Button - Search New Books */}
-          <Animated.View
-            style={{
-              opacity: buttonAnimations[1],
-              transform: [
-                {
-                  translateY: buttonAnimations[1].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                },
-              ],
-            }}>
-            <Pressable
-              onPress={() => {
-                if (onPress) onPress('searchBooks');
-                closeBottomModal();
-              }}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: Colors.colors.primary,
-                borderRadius: 10,
-                paddingVertical: 12,
-                paddingHorizontal: 20,
-                marginBottom: 8,
-                width: 220,
-              }}>
-              <Ionicons
-                name="search-outline"
-                size={24}
-                color={Colors.colors['primary-content']}
-                style={{ marginRight: 10 }}
-              />
-              <Text
-                style={{
-                  color: Colors.colors['primary-content'],
-                  fontWeight: 'bold',
-                }}>
-                Search New Books
-              </Text>
-            </Pressable>
-          </Animated.View>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleBatchScan}>
+                <View style={styles.buttonIcon}>
+                  <Ionicons name="scan" size={24} color="white" />
+                </View>
+                <Text style={styles.buttonText}>Batch Scan Books</Text>
+              </TouchableOpacity>
 
-          {/* Bottom Button - Add Book Manually */}
-          <Animated.View
-            style={{
-              opacity: buttonAnimations[0],
-              transform: [
-                {
-                  translateY: buttonAnimations[0].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                },
-              ],
-            }}>
-            <Pressable
-              onPress={() => {
-                if (onPress) onPress('addBookManually');
-                closeBottomModal();
-              }}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: Colors.colors.primary,
-                borderRadius: 10,
-                paddingVertical: 12,
-                paddingHorizontal: 20,
-                width: 220,
-              }}>
-              <Ionicons
-                name="create-outline"
-                size={24}
-                color={Colors.colors['primary-content']}
-                style={{ marginRight: 10 }}
-              />
-              <Text
-                style={{
-                  color: Colors.colors['primary-content'],
-                  fontWeight: 'bold',
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSearchBooks}>
+                <View style={styles.buttonIcon}>
+                  <Ionicons name="search" size={24} color="white" />
+                </View>
+                <Text style={styles.buttonText}>Search New Books</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  navigation.dispatch(DrawerActions.toggleDrawer());
+                  onClose();
                 }}>
-                Add Book Manually
-              </Text>
-            </Pressable>
-          </Animated.View>
+                <View style={styles.buttonIcon}>
+                  <Ionicons name="settings-outline" size={24} color="white" />
+                </View>
+                <Text style={styles.buttonText}>Settings</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
 
-      {/* Full-Screen Scanner Modal */}
       <ScannerModal
-        visible={scannerVisible}
-        onClose={() => {
-          setScannerVisible(false);
-          setTorchOn(false); // reset torch
-        }}
-        torchOn={torchOn}
-        setTorchOn={setTorchOn}
-        mode={scannerMode}
-        onBarcodeScanned={handleBarcodeScanned}
+        visible={showScanner}
+        onClose={() => setShowScanner(false)}
       />
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#000',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    padding: 10,
+  },
+  buttonsContainer: {
+    gap: 15,
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.colors.primary,
+    padding: 15,
+    borderRadius: 10,
+  },
+  buttonIcon: {
+    marginRight: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});

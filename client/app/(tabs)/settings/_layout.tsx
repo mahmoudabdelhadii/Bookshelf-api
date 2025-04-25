@@ -1,34 +1,61 @@
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
+import { useColorScheme } from 'react-native';
+import Colors from '../../../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function Layout() {
+export default function SettingsLayout() {
+  const colorScheme = useColorScheme();
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer
-        screenOptions={{
-          drawerPosition: 'right',
-          drawerStyle: {
-            width: 250,
-            backgroundColor: 'white',
-          },
-          // Adjust overlay color, gestures, etc.
-          overlayColor: 'rgba(0, 0, 0, 0.5)',
-        }}>
-        <Drawer.Screen
-          name="index" // This is the name of the page and must match the url from root
-          options={{
-            drawerLabel: 'Home',
-            title: 'overview',
-          }}
-        />
-        <Drawer.Screen
-          name="index2" // This is the name of the page and must match the url from root
-          options={{
-            drawerLabel: 'User',
-            title: 'overview',
-          }}
-        />
-      </Drawer>
-    </GestureHandlerRootView>
+    <Drawer
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: Colors.colors.primary,
+        },
+        headerTintColor: Colors.colors['primary-content'],
+        drawerStyle: {
+          backgroundColor: Colors.colors.background,
+        },
+        drawerActiveTintColor: Colors.colors.primary,
+        drawerInactiveTintColor: Colors.colors.copy,
+        drawerPosition: 'right',
+      }}>
+      <Drawer.Screen
+        name="index"
+        options={{
+          title: 'Settings',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="about"
+        options={{
+          title: 'About',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="information-circle-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="support"
+        options={{
+          title: 'Help & Support',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="help-circle-outline" size={size} color={color} />
+          ),
+        }}
+      />
+    </Drawer>
   );
 }
