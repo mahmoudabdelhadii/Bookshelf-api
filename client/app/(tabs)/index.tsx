@@ -3,7 +3,6 @@ import { View, Text, Button } from 'react-native';
 import { useLocalization } from '@/hooks/useLocalization';
 
 export default function Tab() {
-  // Set the initial language to the device's locale or default to English
 
   const { language, setLanguage, t } = useLocalization();
   return (

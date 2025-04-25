@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Tabs } from 'expo-router';
 import { View, Pressable, GestureResponderEvent } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
 import * as Haptics from 'expo-haptics';
 import Colors from '../../constants/Colors';
@@ -103,16 +103,7 @@ export default function TabLayout() {
             tabBarLabel: 'add',
             tabBarIcon: () => (
               <View
-                style={{
-                  top: -30,
-                  width: 50,
-                  height: 50,
-                  borderRadius: 35,
-                  backgroundColor: Colors.colors['primary'],
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  elevation: 10,
-                }}>
+                className="top-[-30px] w-[50px] h-[50px] rounded-[35px] bg-primary justify-center items-center elevation-10">
                 <Ionicons
                   name="add"
                   color={Colors.colors.foreground}
@@ -177,10 +168,6 @@ export default function TabLayout() {
       <BottomModal
         visible={modalVisible}
         onClose={closeModal}
-        onPress={action => {
-          // Handle modal actions here
-          console.log(`Action selected: ${action}`);
-        }}
       />
     </>
   );
