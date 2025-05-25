@@ -10,16 +10,13 @@ export function idpk(name: string) {
 
 export const server = pgSchema("server");
 
-
 function genExpWithWeights(input: string[]) {
   const columnExpressions = input.map((column, index) => {
     const weight = String.fromCharCode(index + 65);
     return `setweight(to_tsvector('english', coalesce(${column}, '')), '${weight}')`;
   });
 
-  const tsvectorColumn = `tsvector GENERATED ALWAYS AS (${columnExpressions.join(
-    " || "
-  )}) STORED`;
+  const tsvectorColumn = `tsvector GENERATED ALWAYS AS (${columnExpressions.join(" || ")}) STORED`;
 
   return tsvectorColumn;
 }
