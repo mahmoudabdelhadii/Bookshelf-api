@@ -2,7 +2,6 @@
   "name": "kitab",
   "workspaces": [
     "eslint-plugin-kitab",
-    "kitab-client",
     "database",
     "server",
     "client"

@@ -7,7 +7,6 @@ default: build-database build-server && run
 
 dev:
     just docker-start
-    npm run -w kitab-client ios
 # Default command: Build and run the server
 # docker: docker-build-server && docker-start
 # # Run the servers.
@@ -189,30 +188,6 @@ clean-eslint-plugin-kitab:
     npx -w eslint-plugin-kitab tsc --build --clean
     rm -f eslint-plugin-kitab/.eslintcache
     rm -rf eslint-plugin-kitab/node_modules/.cache/prettier/
-
-[group('client')]
-lint-client:
-    npm -w kitab-client run lint
-
-[group('client')]
-test-client:
-    npm -w kitab-client run test
-[group('client')]
-run-client:
-    npm -w kitab-client start
-
-[group('client')]
-fmt-client:
-    npx -w kitab-client prettier . --write --cache
-
-[group('client')]
-clean-client:
-    npx -w kitab-client tsc --build --clean
-    rm -f kitab-client/.eslintcache
-    rm -rf kitab-client/node_modules/.cache/prettier/
-[group('client')]
-check-client:
-    npx -w kitab-client tsc --build
 
 # Docker commands
 docker-build-server:
