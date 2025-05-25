@@ -50,19 +50,17 @@ tsbuild: build-eslint-plugin-kitab build-database build-server
 
 # Lint all TypeScript projects
 [group('typescript')]
-tslint: lint-server lint-eslint-plugin-kitab lint-client lint-database
+tslint: lint-server lint-eslint-plugin-kitab  lint-database
 
 # Format all TypeScript projects
 [group('typescript')]
-tsfmt: fmt-database fmt-server fmt-eslint-plugin-kitab fmt-client
-
+tsfmt: fmt-database fmt-server fmt-eslint-plugin-kitab
 # Clean all TypeScript projects
 [group('typescript')]
-tsclean: clean-database clean-server clean-eslint-plugin-kitab clean-client
-
+tsclean: clean-database clean-server clean-eslint-plugin-kitab 
 # Typecheck all TypeScript projects
 [group('typescript')]
-tscheck: check-database check-server check-eslint-plugin-kitab check-client
+tscheck: check-database check-server check-eslint-plugin-kitab 
 
 # Test all TypeScript projects
 [group('typescript')]
