@@ -25,5 +25,4 @@
     "noImplicitOverride": true,
     "skipLibCheck": true
   },
-  "extends": "expo/tsconfig.base"
 }
