@@ -3,8 +3,9 @@ import { book } from "./book.js";
 import { author } from "./author.js";
 import { publisher } from "./publisher.js";
 import { subject } from "./subject.js";
+import { libraryBooks } from "./libraryBooks.js";
 
-export const bookRelations = relations(book, ({ one }) => ({
+export const bookRelations = relations(book, ({ one, many }) => ({
   author: one(author, {
     fields: [book.authorId],
     references: [author.id],
@@ -17,4 +18,5 @@ export const bookRelations = relations(book, ({ one }) => ({
     fields: [book.subjectId],
     references: [subject.id],
   }),
+  libraries: many(libraryBooks),
 }));

@@ -7,7 +7,6 @@ default: build-database build-server && run
 
 dev:
     just docker-start
-    npm run -w kitab-client ios
 # Default command: Build and run the server
 # docker: docker-build-server && docker-start
 # # Run the servers.
@@ -51,19 +50,17 @@ tsbuild: build-eslint-plugin-kitab build-database build-server
 
 # Lint all TypeScript projects
 [group('typescript')]
-tslint: lint-server lint-eslint-plugin-kitab lint-client lint-database
+tslint: lint-server lint-eslint-plugin-kitab  lint-database
 
 # Format all TypeScript projects
 [group('typescript')]
-tsfmt: fmt-database fmt-server fmt-eslint-plugin-kitab fmt-client
-
+tsfmt: fmt-database fmt-server fmt-eslint-plugin-kitab
 # Clean all TypeScript projects
 [group('typescript')]
-tsclean: clean-database clean-server clean-eslint-plugin-kitab clean-client
-
+tsclean: clean-database clean-server clean-eslint-plugin-kitab 
 # Typecheck all TypeScript projects
 [group('typescript')]
-tscheck: check-database check-server check-eslint-plugin-kitab check-client
+tscheck: check-database check-server check-eslint-plugin-kitab 
 
 # Test all TypeScript projects
 [group('typescript')]
@@ -189,30 +186,6 @@ clean-eslint-plugin-kitab:
     npx -w eslint-plugin-kitab tsc --build --clean
     rm -f eslint-plugin-kitab/.eslintcache
     rm -rf eslint-plugin-kitab/node_modules/.cache/prettier/
-
-[group('client')]
-lint-client:
-    npm -w kitab-client run lint
-
-[group('client')]
-test-client:
-    npm -w kitab-client run test
-[group('client')]
-run-client:
-    npm -w kitab-client start
-
-[group('client')]
-fmt-client:
-    npx -w kitab-client prettier . --write --cache
-
-[group('client')]
-clean-client:
-    npx -w kitab-client tsc --build --clean
-    rm -f kitab-client/.eslintcache
-    rm -rf kitab-client/node_modules/.cache/prettier/
-[group('client')]
-check-client:
-    npx -w kitab-client tsc --build
 
 # Docker commands
 docker-build-server:
