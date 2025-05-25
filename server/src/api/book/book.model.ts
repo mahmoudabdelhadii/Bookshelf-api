@@ -55,7 +55,7 @@ export const getBookSchema = z.object({
 export const createBookSchema = z.object({
   title: titleSchema,
   author: authorSchema,
-  publisher: authorSchema.describe('The publisher of the book.'),
+  publisher: authorSchema.describe("The publisher of the book."),
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
   publishedYear: publishedYearSchema.optional(),
@@ -65,7 +65,7 @@ export const createBookSchema = z.object({
 export const updateBookSchema = z.object({
   title: titleSchema.optional(),
   author: authorSchema.optional(),
-  publisher: authorSchema.describe('The publisher of the book.').optional(),
+  publisher: authorSchema.describe("The publisher of the book.").optional(),
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
   publishedYear: publishedYearSchema.optional(),
