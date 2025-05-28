@@ -1,8 +1,9 @@
 import { callISBNdb } from "./callISBNdb.js";
+import type { Publisher as ISBNdbPublisherResponse } from "../../types/shared/isbndbAPI.js";
 
 export interface PublisherSearchResponse {
   total: number;
-  publishers: string[];
+  publishers: ISBNdbPublisherResponse[];
 }
 
 export async function searchPublishers(
@@ -14,6 +15,8 @@ export async function searchPublishers(
     pageSize: options?.pageSize?.toString() ?? "20",
   });
 
-  const response = await callISBNdb(`/publishers/${query}?${params.toString()}`);
-  return response as PublisherSearchResponse;
+  const response = await callISBNdb<{ total: number; publishers: ISBNdbPublisherResponse[] }>(
+    `/publishers/${query}?${params.toString()}`,
+  );
+  return response;
 }

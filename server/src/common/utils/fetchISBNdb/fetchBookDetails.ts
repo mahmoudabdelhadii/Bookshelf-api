@@ -1,30 +1,11 @@
 import { NotFound } from "../../../errors.js";
 import { callISBNdb } from "./callISBNdb.js";
-import { schema } from "database";
-export interface BookDetails {
-  title: string;
-  titleLong?: string;
-  isbn: string;
-  isbn13?: string;
-  deweyDecimal?: string;
-  binding?: string;
-  publisher?: string;
-  language?: (typeof schema.book.language.enumValues)[number];
-  datePublished?: string;
-  edition?: string;
-  pages?: number;
-  overview?: string;
-  image?: string;
-  excerpt?: string;
-  synopsis?: string;
-  authors?: string[];
-  subjects?: string[];
-}
+import type { Book as ISBNdbBookResponse } from "../../types/shared/isbndbAPI.js";
 
-export async function fetchBookDetails(isbn: string): Promise<BookDetails> {
+export async function fetchBookDetails(isbn: string): Promise<ISBNdbBookResponse> {
   try {
-    const response = await callISBNdb(`/book/${isbn}`);
-    return response as BookDetails;
+    const response = await callISBNdb<ISBNdbBookResponse>(`/book/${isbn}`);
+    return response;
   } catch (error: any) {
     if (error.message === "Not found") {
       throw new NotFound(`Book with ISBN ${isbn} not found.`);

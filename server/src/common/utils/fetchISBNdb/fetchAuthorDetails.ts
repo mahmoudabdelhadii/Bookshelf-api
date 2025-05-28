@@ -1,32 +1,16 @@
 import { callISBNdb } from "./callISBNdb.js";
-import { schema } from "database";
-interface AuthorBook {
-  title: string;
-  titleLong?: string;
-  isbn: string;
-  isbn13?: string;
-  language?: (typeof schema.book.language.enumValues)[number];
-  datePublished?: string;
-  overview?: string;
-  authors?: string[];
-  subjects?: string[];
-}
-
-export interface AuthorResponse {
-  author: string;
-  books: AuthorBook[];
-}
+import type { Author as ISBNdbAuthorResponse } from "../../types/shared/isbndbAPI.js";
 
 export async function fetchAuthorDetails(
   name: string,
   options?: { page?: number; pageSize?: number; language?: string },
-): Promise<AuthorResponse> {
+): Promise<ISBNdbAuthorResponse> {
   const params = new URLSearchParams({
     page: options?.page?.toString() ?? "1",
     pageSize: options?.pageSize?.toString() ?? "20",
     language: options?.language ?? "",
   });
 
-  const response = await callISBNdb(`/author/${name}?${params.toString()}`);
-  return response as AuthorResponse;
+  const response = await callISBNdb<ISBNdbAuthorResponse>(`/author/${name}?${params.toString()}`);
+  return response;
 }
