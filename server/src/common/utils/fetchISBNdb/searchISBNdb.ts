@@ -1,7 +1,7 @@
 import { callISBNdb } from "./callISBNdb.js";
-import { type AuthorSearchResponse } from "./searchAuthors.js";
-import { type BookSearchResponse } from "./searchBooks.js";
-import { type PublisherSearchResponse } from "./searchPublishers.js";
+import type { AuthorQueryResults as AuthorSearchResponse } from "../../types/shared/isbndbAPI.js";
+import type { BookSearchResponse } from "./searchBooks.js";
+import type { PublisherSearchResponse } from "./searchPublishers.js";
 
 interface SearchParams {
   page?: number;

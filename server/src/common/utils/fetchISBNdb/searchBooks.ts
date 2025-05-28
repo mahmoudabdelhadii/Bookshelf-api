@@ -1,8 +1,9 @@
 import { callISBNdb } from "./callISBNdb.js";
-import { BookDetails } from "./fetchBookDetails.js";
+import type { Book as ISBNdbBookResponse } from "../../types/shared/isbndbAPI.js";
+
 export interface BookSearchResponse {
   total: number;
-  books: BookDetails[];
+  books: ISBNdbBookResponse[];
 }
 
 export async function searchBooks(
@@ -27,6 +28,8 @@ export async function searchBooks(
     shouldMatchAll: options?.shouldMatchAll ? "1" : "0",
   });
 
-  const response = await callISBNdb(`/books/${query}?${params.toString()}`);
-  return response as BookSearchResponse;
+  const response = await callISBNdb<{ total: number; books: ISBNdbBookResponse[] }>(
+    `/books/${query}?${params.toString()}`,
+  );
+  return response;
 }

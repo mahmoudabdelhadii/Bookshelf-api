@@ -28,7 +28,6 @@ export class BookService {
       throw new ValidationError("Title, author, and publisher are required fields.", { bookData });
     }
     const { isbn, title, author, publisher, genre, publishedYear, language } = bookData;
-    // Check for existing ISBN
     if (isbn) {
       const existing = await drizzle.query.book.findFirst({
         where: (b, { eq }) => eq(b.isbn, isbn),
@@ -79,9 +78,10 @@ export class BookService {
     drizzle: DrizzleClient,
     bookList: {
       title: string;
-      author: string;
+      authorId: string;
       isbn: string;
       genre: string;
+      publisherId: string;
       publishedYear?: number;
     }[],
   ) {
@@ -208,14 +208,26 @@ export class BookService {
       where: (b, { eq }) => eq(b.isbn, isbn),
     });
 
-    if (localBook) return { book: localBook };
+    if (localBook) {
+      return localBook;
+    }
 
-    const newBook = await isbndb.fetchBookDetails(isbn);
-    if (!newBook) throw new NotFound("Book not found");
-
-    await drizzle.insert(schema.book).values(newBook).onConflictDoNothing();
-
-    return { book: newBook };
+    const apiResponse = await isbndb.fetchBookDetails(isbn);
+    const bookInfo = apiResponse.book;
+    if (!bookInfo) {
+      throw new NotFound("Book not found");
+    }
+    // Map API response to local book schema and save
+    const createdBook = await this.createBook(drizzle, {
+      title: bookInfo.title ?? "",
+      author: bookInfo.authors?.[0] ?? "",
+      publisher: bookInfo.publisher ?? "",
+      isbn: bookInfo.isbn,
+      genre: undefined,
+      publishedYear: undefined,
+      language: "other" as Language,
+    });
+    return createdBook;
   }
 
   static async getBooks(
@@ -282,14 +294,11 @@ export class BookService {
     }
 
     const authorDetails = await isbndb.fetchAuthorDetails(name, { page, pageSize, language });
-    if (!authorDetails.author) throw new NotFound("Author not found");
-
-    await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
-
-    if (authorDetails.books.length) {
-      await drizzle.insert(schema.book).values(authorDetails.books).onConflictDoNothing();
+    if (!authorDetails.author) {
+      throw new NotFound("Author not found");
     }
-
+    // Ensure author exists locally
+    await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
     return authorDetails;
   }
 
@@ -322,26 +331,24 @@ export class BookService {
     }
 
     const publisherDetails = await isbndb.fetchPublisherDetails(name, { page, pageSize, language });
-    if (!publisherDetails.name) throw new NotFound("Publisher not found");
-
-    await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
-
-    if (publisherDetails.books.length) {
-      await drizzle.insert(schema.book).values(publisherDetails.books).onConflictDoNothing();
+    if (!publisherDetails.name) {
+      throw new NotFound("Publisher not found");
     }
-
+    // Ensure publisher exists locally
+    await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
     return publisherDetails;
   }
 
   static async searchAuthors(drizzle: DrizzleClient, query: string, page: number = 1, pageSize: number = 20) {
     const authorsData = await isbndb.searchAuthors(query, { page, pageSize });
-    if (authorsData.authors.length === 0) throw new NotFound("No authors found");
-
+    const authors = authorsData.authors ?? [];
+    if (authors.length === 0) {
+      throw new NotFound("No authors found");
+    }
     await drizzle
       .insert(schema.author)
-      .values(authorsData.authors.map((name) => ({ name })))
+      .values(authors.map((name) => ({ name })))
       .onConflictDoNothing();
-
     return authorsData;
   }
 
@@ -352,13 +359,19 @@ export class BookService {
     pageSize: number = 20,
   ) {
     const publishersData = await isbndb.searchPublishers(query, { page, pageSize });
-    if (publishersData.publishers.length === 0) throw new NotFound("No publishers found");
-
+    const publishers = publishersData.publishers ?? [];
+    if (publishers.length === 0) {
+      throw new NotFound("No publishers found");
+    }
     await drizzle
       .insert(schema.publisher)
-      .values(publishersData.publishers.map((name) => ({ name })))
+      .values(
+        publishers
+          .map((p) => p.name)
+          .filter((n): n is string => Boolean(n))
+          .map((name) => ({ name })),
+      )
       .onConflictDoNothing();
-
     return publishersData;
   }
 
