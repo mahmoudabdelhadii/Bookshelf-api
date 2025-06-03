@@ -1,0 +1,1562 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Swagger API"
+  },
+  "externalDocs": {
+    "description": "View the raw OpenAPI Specification in JSON format",
+    "url": "/swagger.json"
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "firstName",
+          "lastName",
+          "email",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Book": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200,
+            "description": "The title of the book."
+          },
+          "author": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "description": "The author of the book."
+          },
+          "publishedYear": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2025,
+            "description": "The year the book was published."
+          },
+          "isbn": {
+            "type": "string",
+            "maxLength": 20,
+            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+            "description": "The ISBN of the book."
+          },
+          "genre": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "The genre of the book."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Timestamp when the book was created."
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "ar",
+              "other"
+            ],
+            "description": "The language of the book."
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "author",
+          "createdAt",
+          "language"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/health-check": {
+      "get": {
+        "tags": [
+          "Health Check"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "nullable": true
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "username": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 50
+                          },
+                          "firstName": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 50
+                          },
+                          "lastName": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 50
+                          },
+                          "email": {
+                            "type": "string",
+                            "format": "email"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "username",
+                          "firstName",
+                          "lastName",
+                          "email",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "username": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "username",
+                        "firstName",
+                        "lastName",
+                        "email",
+                        "createdAt",
+                        "updatedAt"
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books": {
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "requestBody": {
+          "description": "Create a new book",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 200,
+                    "description": "The title of the book."
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100,
+                    "description": "The author of the book."
+                  },
+                  "publisher": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100,
+                    "description": "The publisher of the book."
+                  },
+                  "isbn": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                    "description": "The ISBN of the book."
+                  },
+                  "genre": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50,
+                    "description": "The genre of the book."
+                  },
+                  "publishedYear": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2025,
+                    "description": "The year the book was published."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "ar",
+                      "other"
+                    ],
+                    "description": "The language of the book."
+                  }
+                },
+                "required": [
+                  "title",
+                  "author",
+                  "publisher",
+                  "language"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Book created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 200,
+                          "description": "The title of the book."
+                        },
+                        "author": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 100,
+                          "description": "The author of the book."
+                        },
+                        "publishedYear": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2025,
+                          "description": "The year the book was published."
+                        },
+                        "isbn": {
+                          "type": "string",
+                          "maxLength": 20,
+                          "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                          "description": "The ISBN of the book."
+                        },
+                        "genre": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50,
+                          "description": "The genre of the book."
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was created."
+                        },
+                        "language": {
+                          "type": "string",
+                          "enum": [
+                            "en",
+                            "ar",
+                            "other"
+                          ],
+                          "description": "The language of the book."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "author",
+                        "createdAt",
+                        "language"
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "title",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "isbn",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "author",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "genre",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
+            "required": false,
+            "name": "publishedYear",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Books fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 200,
+                            "description": "The title of the book."
+                          },
+                          "author": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 100,
+                            "description": "The author of the book."
+                          },
+                          "publishedYear": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2025,
+                            "description": "The year the book was published."
+                          },
+                          "isbn": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                            "description": "The ISBN of the book."
+                          },
+                          "genre": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 50,
+                            "description": "The genre of the book."
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was created."
+                          },
+                          "language": {
+                            "type": "string",
+                            "enum": [
+                              "en",
+                              "ar",
+                              "other"
+                            ],
+                            "description": "The language of the book."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "author",
+                          "createdAt",
+                          "language"
+                        ]
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/bulk": {
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "requestBody": {
+          "description": "Bulk create multiple books",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "books": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 200,
+                          "description": "The title of the book."
+                        },
+                        "author": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 100,
+                          "description": "The author of the book."
+                        },
+                        "publisher": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 100,
+                          "description": "The publisher of the book."
+                        },
+                        "isbn": {
+                          "type": "string",
+                          "maxLength": 20,
+                          "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                          "description": "The ISBN of the book."
+                        },
+                        "genre": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50,
+                          "description": "The genre of the book."
+                        },
+                        "publishedYear": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2025,
+                          "description": "The year the book was published."
+                        },
+                        "language": {
+                          "type": "string",
+                          "enum": [
+                            "en",
+                            "ar",
+                            "other"
+                          ],
+                          "description": "The language of the book."
+                        }
+                      },
+                      "required": [
+                        "title",
+                        "author",
+                        "publisher",
+                        "language"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "books"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Books created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 200,
+                            "description": "The title of the book."
+                          },
+                          "author": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 100,
+                            "description": "The author of the book."
+                          },
+                          "publishedYear": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2025,
+                            "description": "The year the book was published."
+                          },
+                          "isbn": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                            "description": "The ISBN of the book."
+                          },
+                          "genre": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 50,
+                            "description": "The genre of the book."
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was created."
+                          },
+                          "language": {
+                            "type": "string",
+                            "enum": [
+                              "en",
+                              "ar",
+                              "other"
+                            ],
+                            "description": "The language of the book."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "author",
+                          "createdAt",
+                          "language"
+                        ]
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Book fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 200,
+                          "description": "The title of the book."
+                        },
+                        "author": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 100,
+                          "description": "The author of the book."
+                        },
+                        "publishedYear": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2025,
+                          "description": "The year the book was published."
+                        },
+                        "isbn": {
+                          "type": "string",
+                          "maxLength": 20,
+                          "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                          "description": "The ISBN of the book."
+                        },
+                        "genre": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50,
+                          "description": "The genre of the book."
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was created."
+                        },
+                        "language": {
+                          "type": "string",
+                          "enum": [
+                            "en",
+                            "ar",
+                            "other"
+                          ],
+                          "description": "The language of the book."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "author",
+                        "createdAt",
+                        "language"
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "description": "Partial update of a book",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 200,
+                    "description": "The title of the book."
+                  },
+                  "author": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100,
+                    "description": "The author of the book."
+                  },
+                  "publisher": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100,
+                    "description": "The publisher of the book."
+                  },
+                  "isbn": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                    "description": "The ISBN of the book."
+                  },
+                  "genre": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50,
+                    "description": "The genre of the book."
+                  },
+                  "publishedYear": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2025,
+                    "description": "The year the book was published."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "ar",
+                      "other"
+                    ],
+                    "description": "The language of the book."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Book updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 200,
+                          "description": "The title of the book."
+                        },
+                        "author": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 100,
+                          "description": "The author of the book."
+                        },
+                        "publishedYear": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2025,
+                          "description": "The year the book was published."
+                        },
+                        "isbn": {
+                          "type": "string",
+                          "maxLength": 20,
+                          "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                          "description": "The ISBN of the book."
+                        },
+                        "genre": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50,
+                          "description": "The genre of the book."
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was created."
+                        },
+                        "language": {
+                          "type": "string",
+                          "enum": [
+                            "en",
+                            "ar",
+                            "other"
+                          ],
+                          "description": "The language of the book."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "author",
+                        "createdAt",
+                        "language"
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Book deleted successfully"
+          },
+          "404": {
+            "description": "Book not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/search": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Books searched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 200,
+                            "description": "The title of the book."
+                          },
+                          "author": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 100,
+                            "description": "The author of the book."
+                          },
+                          "publishedYear": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2025,
+                            "description": "The year the book was published."
+                          },
+                          "isbn": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                            "description": "The ISBN of the book."
+                          },
+                          "genre": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 50,
+                            "description": "The genre of the book."
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was created."
+                          },
+                          "language": {
+                            "type": "string",
+                            "enum": [
+                              "en",
+                              "ar",
+                              "other"
+                            ],
+                            "description": "The language of the book."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "author",
+                          "createdAt",
+                          "language"
+                        ]
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/books/weighted-search": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "search",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Books fetched successfully using weighted search",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 200,
+                            "description": "The title of the book."
+                          },
+                          "author": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 100,
+                            "description": "The author of the book."
+                          },
+                          "publishedYear": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 2025,
+                            "description": "The year the book was published."
+                          },
+                          "isbn": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
+                            "description": "The ISBN of the book."
+                          },
+                          "genre": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 50,
+                            "description": "The genre of the book."
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was created."
+                          },
+                          "language": {
+                            "type": "string",
+                            "enum": [
+                              "en",
+                              "ar",
+                              "other"
+                            ],
+                            "description": "The language of the book."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "author",
+                          "createdAt",
+                          "language"
+                        ]
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/author/{name}": {
+      "get": {
+        "tags": [
+          "Author"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "name",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Author details fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "nullable": true
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authors/{query}": {
+      "get": {
+        "tags": [
+          "Author"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "query",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authors found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "nullable": true
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/publisher/{name}": {
+      "get": {
+        "tags": [
+          "Publisher"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "name",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Publisher details fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "nullable": true
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/publishers/{query}": {
+      "get": {
+        "tags": [
+          "Publisher"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "query",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Publishers found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "nullable": true
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/{index}": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "books",
+                "authors",
+                "publishers"
+              ]
+            },
+            "required": true,
+            "name": "index",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "nullable": true
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

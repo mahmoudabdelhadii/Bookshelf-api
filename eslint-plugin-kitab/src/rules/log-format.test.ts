@@ -8,9 +8,7 @@ RuleTester.describe = describe;
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 RuleTester.it = it;
 
-const ruleTester = new RuleTester({
-  parser: "@typescript-eslint/parser",
-});
+const ruleTester = new RuleTester();
 
 ruleTester.run("log-format", rule, {
   invalid: [

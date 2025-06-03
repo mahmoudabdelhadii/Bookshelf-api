@@ -60,7 +60,6 @@ export const rule = ESLintUtils.RuleCreator.withoutDocs<[Options], "drizzle-clie
   meta: {
     docs: {
       description: "Enforces safe usage of the Drizzle client",
-      recommended: "recommended",
     },
     messages: {
       "drizzle-client-in-transaction": "Bare Drizzle client should not be used inside of a `transaction`",

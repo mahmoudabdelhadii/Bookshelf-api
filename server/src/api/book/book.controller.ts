@@ -1,10 +1,9 @@
-import type { Request, RequestHandler, Response } from "express";
+import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import { BookService } from "./book.service.js";
-import { createBookSchema, updateBookSchema } from "./book.model.js";
+import { createBookSchema, updateBookSchema, createBooksBulkSchema } from "./book.model.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import { handleServiceResponse } from "../../common/utils/httpHandlers.js";
-import { z } from "zod";
 
 class BooksController {
   public createBook: RequestHandler = async (req, res) => {
@@ -24,7 +23,7 @@ class BooksController {
   public createBooksBulk: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
 
-    const books = z.array(createBookSchema).parse(req.body);
+    const books = createBooksBulkSchema.parse(req.body);
     try {
       const insertedBooks = await BookService.createBooksBulk(drizzle, books);
       return handleServiceResponse(

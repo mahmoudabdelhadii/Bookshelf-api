@@ -24,27 +24,20 @@ init: tsinit
       fi
     done
 
-# Build all components of the project
 build: tsbuild
 
-# Lint all components
 lint: tslint
 
-# Format all code
 fmt: tsfmt
 
-# Typecheck all components
 check: tscheck
 
-# Clean all
 clean: tsclean
 
-# Install TypeScript dependencies
 [group('typescript')]
 tsinit:
     npm install
 
-# Build all TypeScript projects
 [group('typescript')]
 tsbuild: build-eslint-plugin-kitab build-database build-server
 

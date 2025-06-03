@@ -64,7 +64,6 @@ export const rule = ESLintUtils.RuleCreator.withoutDocs<
   meta: {
     docs: {
       description: "Logs through Pino should be formatted using the appropriate arguments",
-      recommended: "recommended",
     },
     messages: {
       "logger-no-message": "Logging calls must have a message",
