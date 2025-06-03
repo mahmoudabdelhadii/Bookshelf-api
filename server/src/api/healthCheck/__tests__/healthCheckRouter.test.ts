@@ -14,7 +14,7 @@ describe("Health Check API endpoints", () => {
 
   it("GET /health-check - success", async () => {
     const response = await request(app).get("/health-check");
-    const result: ServiceResponse = response.body;
+    const result = response.body as ServiceResponse;
 
     expect(response.statusCode).toEqual(StatusCodes.OK);
     expect(result.success).toBe(true);

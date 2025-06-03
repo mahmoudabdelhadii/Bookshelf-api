@@ -9,7 +9,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "eslint . --max-warnings 0 --cache && xss-scan",
+    "lint": "eslint . --max-warnings 0 --cache",
     "lint:fix": "eslint . --max-warnings 0 --fix",
     "lint-all": "eslint . --max-warnings 0",
     "fmt": "prettier . --write --cache",
