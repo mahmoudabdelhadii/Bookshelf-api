@@ -8,6 +8,28 @@ import eslintPluginKitab from "eslint-plugin-kitab";
 
 function config(...configs) {
   return tsEslint.config(
+    {
+      ignores: [
+        "**/.DS_Store",
+        "**/node_modules",
+        "**/build",
+        "**/dist",
+        "**/public",
+        "**/out",
+        "**/.svelte-kit",
+        "**/.env",
+        "**/.env.*",
+        "!**/.env.example",
+        "**/package-lock.json",
+        "**/src/server/routes.ts",
+        "**/src/server/swagger.json",
+        "*.js",
+        "*.cjs",
+        "*.mjs",
+        ".venv",
+      ],
+    },
+
     eslint.configs.recommended,
     eslintPluginImport.flatConfigs.recommended,
     eslintPluginImport.flatConfigs.typescript,
@@ -84,26 +106,6 @@ function config(...configs) {
         sourceType: "module",
         globals: { ...globals.node },
       },
-    },
-    {
-      ignores: [
-        "**/.DS_Store",
-        "**/node_modules",
-        "**/build",
-        "**/public",
-        "**/out",
-        "**/.svelte-kit",
-        "**/.env",
-        "**/.env.*",
-        "!**/.env.example",
-        "**/package-lock.json",
-        "**/src/server/routes.ts",
-        "**/src/server/swagger.json",
-        "*.js",
-        "*.cjs",
-        "*.mjs",
-        ".venv",
-      ],
     },
     ...configs,
   );

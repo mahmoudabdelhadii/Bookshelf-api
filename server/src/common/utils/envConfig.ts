@@ -1,7 +1,7 @@
-import dotenv from "dotenv";
+import { config } from "dotenv";
 import { z } from "zod";
 
-dotenv.config();
+config();
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("test"),
