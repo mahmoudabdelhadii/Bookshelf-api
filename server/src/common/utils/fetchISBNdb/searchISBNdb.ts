@@ -64,7 +64,10 @@ export async function searchISBNdb(
       default:
         throw new Error("Unexpected index type");
     }
-  } catch (error: any) {
-    throw new Error(`Failed to fetch search results: ${error.message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch search results: ${error.message}`);
+    }
+    throw error;
   }
 }

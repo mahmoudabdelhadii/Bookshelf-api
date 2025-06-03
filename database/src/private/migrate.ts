@@ -11,7 +11,7 @@ function fmt(migration: Postgrator.Migration) {
 }
 
 async function main() {
-  // eslint-disable-next-line import/no-named-as-default-member
+   
   const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 
   try {

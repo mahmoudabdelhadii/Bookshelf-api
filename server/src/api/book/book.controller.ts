@@ -1,10 +1,9 @@
-import type { Request, RequestHandler, Response } from "express";
+import type { RequestHandler } from "express";
 import { StatusCodes } from "http-status-codes";
 import { BookService } from "./book.service.js";
 import { createBookSchema, updateBookSchema, createBooksBulkSchema } from "./book.model.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import { handleServiceResponse } from "../../common/utils/httpHandlers.js";
-import { z } from "zod";
 
 class BooksController {
   public createBook: RequestHandler = async (req, res) => {

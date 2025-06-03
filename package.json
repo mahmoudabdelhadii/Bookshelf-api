@@ -12,13 +12,21 @@
     "gcp-build": "npm run -ws build --if-present"
   },
   "devDependencies": {
+        "@eslint/js": "^9.12.0",
+    "@types/cookie-signature": "^1.1.2",
     "concurrently": "^8.2.2",
     "defrag": "^1.1.0",
     "dotenv": "^16.4.5",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.3",
+    "eslint-plugin-import-x": "^4.3.1",
+    "eslint-plugin-unicorn": "^56.0.1",
+    "globals": "^15.11.0",
     "ignore": "^5.3.1",
     "pino": "^9.3.2",
     "pino-pretty": "^11.2.1",
     "tsx": "^4.19.0",
-    "watcher": "^2.3.1"
-  }
+    "typescript-eslint": "8.29.1",
+    "watcher": "^2.3.1"  }
 }
