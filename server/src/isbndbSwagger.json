@@ -6,23 +6,15 @@
     "title": "ISBNdb API v2"
   },
   "host": "api2.isbndb.com",
-  "schemes": [
-    "https"
-  ],
+  "schemes": ["https"],
   "paths": {
     "/author/{name}": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "summary": "Gets author details",
         "description": "Returns the name and a list of books by the author.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "name",
@@ -81,17 +73,11 @@
     },
     "/authors/{query}": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "summary": "Search authors",
         "description": "This returns a list of authors whos name matches the given query",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "pageSize",
@@ -141,17 +127,11 @@
     },
     "/book/{isbn}": {
       "get": {
-        "tags": [
-          "Book"
-        ],
+        "tags": ["Book"],
         "summary": "Gets book details",
         "description": "Returns the book details\n\n__A 404 Not Found response for an ISBN lookup typically indicates that the book information is not yet available in our database. However, due to frequent updates, there is a high probability that the data will be added shortly, often within a minute or up to 24 hours. We recommend trying your request again after a while, as the information may soon become accessible__.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "isbn",
@@ -195,15 +175,10 @@
     },
     "/books": {
       "post": {
-        "tags": [
-          "Book"
-        ],
+        "tags": ["Book"],
         "summary": "Search books",
         "description": "This method returns a list of books that match the query and is available on all plans. The endpoint has no pagination but comes with the following limits based on your plan:<ul><li>Academic: Up to 10 ISBN numbers per request.</li><li>Basic: Up to 100 ISBN numbers per request.</li><li>Pro and Premium: Up to 1,000 ISBN numbers per request.</li></ul> If you send 100 ISBN numbers you will get information back for all 100 books in the response provided the ISBNs do exist in the ISBNdb Database. ISBN Numbers not found in the ISBNdb database will not be part of the response. There is a limit of up to 6MB response size, if the limit is exceeded you will get a 500 error reply. \n\n__This endpoint does not return pricing information.__",
-        "consumes": [
-          "application/json",
-          "multipart/form-data"
-        ],
+        "consumes": ["application/json", "multipart/form-data"],
         "parameters": [
           {
             "name": "isbns",
@@ -211,7 +186,7 @@
             "description": "a list of ISBN 10 or ISBN 13 in the Books database",
             "required": true,
             "type": "array",
-            "items" : {
+            "items": {
               "type": "string"
             }
           }
@@ -236,17 +211,11 @@
     },
     "/books/{query}": {
       "get": {
-        "tags": [
-          "Book"
-        ],
+        "tags": ["Book"],
         "summary": "Search books",
         "description": "This returns a list of books that match the query. \n\n__This endpoint does not return pricing information.__",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "query",
@@ -333,17 +302,11 @@
     },
     "/publisher/{name}": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "summary": "Gets publisher details",
         "description": "Returns details and a list of books by the publisher.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "name",
@@ -402,17 +365,11 @@
     },
     "/publishers/{query}": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "summary": "Search publishers",
         "description": "This returns a list of publishers that match the given query",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "pageSize",
@@ -459,17 +416,11 @@
     },
     "/search/{index}": {
       "get": {
-        "tags": [
-          "Search"
-        ],
+        "tags": ["Search"],
         "summary": "Search all ISBNDB databases",
         "description": "Uses a determined index and query string to search in any of the ISBNDB's databases",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "index",
@@ -559,14 +510,10 @@
     },
     "/stats": {
       "get": {
-        "tags": [
-          "Stats"
-        ],
+        "tags": ["Stats"],
         "summary": "Gets status on the ISBNDB Database",
         "description": "Returns a status object about the ISBNDB database.",
-        "produces": [
-          "application/json"
-        ],
+        "produces": ["application/json"],
         "responses": {
           "200": {
             "description": "Stats on the ISBNDB sucessfully retrieved",
@@ -587,17 +534,11 @@
     },
     "/subject/{name}": {
       "get": {
-        "tags": [
-          "Subject"
-        ],
+        "tags": ["Subject"],
         "summary": "Gets subject details",
         "description": "Returns details and a list of books with subject.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "name",
@@ -633,17 +574,11 @@
     },
     "/subjects/{query}": {
       "get": {
-        "tags": [
-          "Subject"
-        ],
+        "tags": ["Subject"],
         "summary": "Search subjects",
         "description": "This returns a list of subjects that match the given query",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
         "parameters": [
           {
             "name": "pageSize",
@@ -760,55 +695,55 @@
               "type": "string"
             },
             "dimensions_structured": {
+              "type": "object",
+              "properties": {
+                "length": {
                   "type": "object",
                   "properties": {
-                      "length": {
-                          "type": "object",
-                          "properties": {
-                              "unit": {
-                                  "type": "string"
-                              },
-                              "value": {
-                                  "type": "number"
-                              }
-                          }
-                      },
-                      "width": {
-                          "type": "object",
-                          "properties": {
-                              "unit": {
-                                  "type": "string"
-                              },
-                              "value": {
-                                  "type": "number"
-                              }
-                          }
-                      },
-                      "height": {
-                          "type": "object",
-                          "properties": {
-                              "unit": {
-                                  "type": "string"
-                              },
-                              "value": {
-                                  "type": "number"
-                              }
-                          }
-                      },
-                      "weight": {
-                          "type": "object",
-                          "properties": {
-                              "unit": {
-                                  "type": "string"
-                              },
-                              "value": {
-                                  "type": "number"
-                              }
-                          }
-                      }
-                  },
-                  "description": "Structured information about the book's dimensions."
+                    "unit": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "width": {
+                  "type": "object",
+                  "properties": {
+                    "unit": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "height": {
+                  "type": "object",
+                  "properties": {
+                    "unit": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "weight": {
+                  "type": "object",
+                  "properties": {
+                    "unit": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                }
               },
+              "description": "Structured information about the book's dimensions."
+            },
             "overview": {
               "type": "string"
             },

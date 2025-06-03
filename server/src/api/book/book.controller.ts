@@ -12,9 +12,9 @@ class BooksController {
       const parsed = createBookSchema.parse(req.body);
       const book = await BookService.createBook(drizzle, parsed);
       return handleServiceResponse(ServiceResponse.success("Book created", book, StatusCodes.CREATED), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Failed to create book", error, StatusCodes.BAD_REQUEST),
+        ServiceResponse.failure("Failed to create book", err, StatusCodes.BAD_REQUEST),
         res,
       );
     }
@@ -30,7 +30,7 @@ class BooksController {
         ServiceResponse.success("Books created", insertedBooks, StatusCodes.CREATED),
         res,
       );
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(ServiceResponse.failure("Bulk creation failed", null), res);
     }
   };
@@ -41,11 +41,8 @@ class BooksController {
       const parsed = updateBookSchema.parse(req.body);
       const updated = await BookService.updateBook(drizzle, req.params.id, parsed);
       return handleServiceResponse(ServiceResponse.success("Book updated", updated), res);
-    } catch (error) {
-      return handleServiceResponse(
-        ServiceResponse.failure("Update failed", error, StatusCodes.NOT_FOUND),
-        res,
-      );
+    } catch (err) {
+      return handleServiceResponse(ServiceResponse.failure("Update failed", err, StatusCodes.NOT_FOUND), res);
     }
   };
 
@@ -54,9 +51,9 @@ class BooksController {
     try {
       const book = await BookService.getBookById(drizzle, req.params.id);
       return handleServiceResponse(ServiceResponse.success("Book retrieved", book), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Book not found", error, StatusCodes.NOT_FOUND),
+        ServiceResponse.failure("Book not found", err, StatusCodes.NOT_FOUND),
         res,
       );
     }
@@ -83,8 +80,8 @@ class BooksController {
     try {
       const books = await BookService.getBooks(drizzle, filters);
       return handleServiceResponse(ServiceResponse.success("Books fetched", books), res);
-    } catch (error) {
-      return handleServiceResponse(ServiceResponse.failure("Error fetching books", error), res);
+    } catch (err) {
+      return handleServiceResponse(ServiceResponse.failure("Error fetching books", err), res);
     }
   };
 
@@ -96,9 +93,9 @@ class BooksController {
         ServiceResponse.success("Book deleted", null, StatusCodes.NO_CONTENT),
         res,
       );
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Book not found", error, StatusCodes.NOT_FOUND),
+        ServiceResponse.failure("Book not found", err, StatusCodes.NOT_FOUND),
         res,
       );
     }
@@ -109,9 +106,9 @@ class BooksController {
     try {
       const book = await BookService.getBookByISBN(drizzle, req.params.isbn);
       return handleServiceResponse(ServiceResponse.success("Book found", book), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Book not found", error, StatusCodes.NOT_FOUND),
+        ServiceResponse.failure("Book not found", err, StatusCodes.NOT_FOUND),
         res,
       );
     }
@@ -130,9 +127,9 @@ class BooksController {
     try {
       const books = await BookService.searchBooksByTrigram(drizzle, search);
       return handleServiceResponse(ServiceResponse.success("Search results", books), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Search failed", error, StatusCodes.INTERNAL_SERVER_ERROR),
+        ServiceResponse.failure("Search failed", err, StatusCodes.INTERNAL_SERVER_ERROR),
         res,
       );
     }
@@ -151,7 +148,7 @@ class BooksController {
     try {
       const books = await BookService.searchBooksByWeighted(drizzle, search);
       return handleServiceResponse(ServiceResponse.success("Weighted search results", books), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(ServiceResponse.failure("Weighted search failed", null), res);
     }
   };
@@ -169,9 +166,9 @@ class BooksController {
         language as "en" | "ar" | "other",
       );
       return handleServiceResponse(ServiceResponse.success("Author details fetched", data), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Failed to fetch author details", error, StatusCodes.NOT_FOUND),
+        ServiceResponse.failure("Failed to fetch author details", err, StatusCodes.NOT_FOUND),
         res,
       );
     }
@@ -190,9 +187,9 @@ class BooksController {
         parseInt(pageSize as string, 10),
       );
       return handleServiceResponse(ServiceResponse.success("Authors found", data), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Failed to search authors", error, StatusCodes.NOT_FOUND),
+        ServiceResponse.failure("Failed to search authors", err, StatusCodes.NOT_FOUND),
         res,
       );
     }
@@ -212,9 +209,9 @@ class BooksController {
         language as "en" | "ar" | "other",
       );
       return handleServiceResponse(ServiceResponse.success("Publisher details fetched", data), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Failed to fetch publisher details", error, StatusCodes.NOT_FOUND),
+        ServiceResponse.failure("Failed to fetch publisher details", err, StatusCodes.NOT_FOUND),
         res,
       );
     }
@@ -233,9 +230,9 @@ class BooksController {
         parseInt(pageSize as string, 10),
       );
       return handleServiceResponse(ServiceResponse.success("Publishers found", data), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Failed to search publishers", error, StatusCodes.NOT_FOUND),
+        ServiceResponse.failure("Failed to search publishers", err, StatusCodes.NOT_FOUND),
         res,
       );
     }
@@ -274,9 +271,9 @@ class BooksController {
       );
 
       return handleServiceResponse(ServiceResponse.success("Search results", data), res);
-    } catch (error) {
+    } catch (err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Search failed", error, StatusCodes.INTERNAL_SERVER_ERROR),
+        ServiceResponse.failure("Search failed", err, StatusCodes.INTERNAL_SERVER_ERROR),
         res,
       );
     }

@@ -31,8 +31,7 @@ export const tsvector = customType<{
       return config.weighted
         ? genExpWithWeights(config.sources)
         : `tsvector generated always as (to_tsvector('english', ${sources})) stored`;
-    } else {
-      return `tsvector`;
     }
+    return "tsvector";
   },
 });

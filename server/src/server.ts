@@ -13,7 +13,7 @@ import requestLogger from "./common/middleware/requestLogger.js";
 import { env } from "./common/utils/envConfig.js";
 
 import { LOG_LEVEL } from "../env.js";
-import { connect, schema } from "database";
+import { connect } from "database";
 import type { DrizzleClient } from "database";
 import { pinoHttp } from "pino-http";
 

@@ -3,14 +3,10 @@ import { book } from "../drizzle/book.js";
 import { author } from "../drizzle/author.js";
 import { publisher } from "../drizzle/publisher.js";
 import { subject } from "../drizzle/subject.js";
-import { Column, DrizzleClient } from "../drizzle.js";
+import { DrizzleClient } from "../drizzle.js";
 import { library } from "../drizzle/library.js";
 import { libraryBooks } from "../drizzle/./libraryBooks.js";
 export async function runSeed(drizzle: DrizzleClient) {
-  console.log("🌱 Seeding authors and publishers...");
-
-  console.log("🌱 Seeding books...");
-
   await reset(drizzle, { book, author, publisher, subject, library, libraryBooks });
 
   await seed(drizzle, { book, author, publisher, subject, library, libraryBooks }).refine((funcs) => ({
@@ -79,6 +75,4 @@ export async function runSeed(drizzle: DrizzleClient) {
       },
     },
   }));
-
-  console.log("✅ Books seeded!");
 }

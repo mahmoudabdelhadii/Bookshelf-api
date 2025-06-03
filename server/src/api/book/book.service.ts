@@ -135,7 +135,6 @@ export class BookService {
   static async deleteBook(drizzle: DrizzleClient, bookId: string) {
     try {
       const [deletedBook] = await drizzle.delete(schema.book).where(eq(schema.book.id, bookId)).returning();
-       
 
       if (!deletedBook) {
         throw new NotFound("Book not found.", { bookId });
@@ -337,7 +336,7 @@ export class BookService {
     return publisherDetails;
   }
 
-  static async searchAuthors(drizzle: DrizzleClient, query: string, page: number = 1, pageSize: number = 20) {
+  static async searchAuthors(drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) {
     const authorsData = await isbndb.searchAuthors(query, { page, pageSize });
     const authors = authorsData.authors ?? [];
     if (authors.length === 0) {
@@ -350,12 +349,7 @@ export class BookService {
     return authorsData;
   }
 
-  static async searchPublishers(
-    drizzle: DrizzleClient,
-    query: string,
-    page: number = 1,
-    pageSize: number = 20,
-  ) {
+  static async searchPublishers(drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) {
     const publishersData = await isbndb.searchPublishers(query, { page, pageSize });
     const publishers = publishersData.publishers;
     if (publishers.length === 0) {
@@ -376,8 +370,8 @@ export class BookService {
   static async searchAll(
     drizzle: DrizzleClient,
     index: "books" | "authors" | "publishers",
-    page: number = 1,
-    pageSize: number = 20,
+    page = 1,
+    pageSize = 20,
     filters: {
       isbn?: string;
       isbn13?: string;
