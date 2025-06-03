@@ -19,7 +19,7 @@ async function main() {
     database: "kitab",
     schemaTable: "public.__postgrator_migrations",
   });
-   
+
   const last = (await postgrator.getMigrations()).at(-1)!;
   const source = last.getSql();
   const lines = source.split("\n");

@@ -1,7 +1,5 @@
 import { callISBNdb } from "./callISBNdb.js";
-import type {
-  Publisher as ISBNdbPublisherResponse,
-} from "../../types/shared/isbndbAPI.js";
+import type { Publisher as ISBNdbPublisherResponse } from "../../types/shared/isbndbAPI.js";
 
 export async function fetchPublisherDetails(
   name: string,
@@ -13,8 +11,6 @@ export async function fetchPublisherDetails(
     language: options?.language ?? "",
   });
 
-  const response = await callISBNdb<ISBNdbPublisherResponse>(
-    `/publisher/${name}?${params.toString()}`,
-  );
+  const response = await callISBNdb<ISBNdbPublisherResponse>(`/publisher/${name}?${params.toString()}`);
   return response;
 }

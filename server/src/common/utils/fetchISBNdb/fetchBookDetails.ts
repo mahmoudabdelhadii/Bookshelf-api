@@ -6,10 +6,10 @@ export async function fetchBookDetails(isbn: string): Promise<ISBNdbBookResponse
   try {
     const response = await callISBNdb<ISBNdbBookResponse>(`/book/${isbn}`);
     return response;
-  } catch (error: unknown) {
-    if (error instanceof Error && error.message === "Not found") {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === "Not found") {
       throw new NotFound(`Book with ISBN ${isbn} not found.`);
     }
-    throw error;
+    throw err;
   }
 }

@@ -24,8 +24,8 @@ export type ApiResponseConfig = {
   statusCode: StatusCodes;
 };
 export function createApiResponses(configs: ApiResponseConfig[]) {
-  const responses: { [key: string]: ResponseConfig } = {};
-  configs.forEach(({ schema, description, statusCode }) => {
+  const responses: Record<string, ResponseConfig> = {};
+  for (const { schema, description, statusCode } of configs) {
     responses[statusCode] = {
       description,
       content: {
@@ -34,6 +34,6 @@ export function createApiResponses(configs: ApiResponseConfig[]) {
         },
       },
     };
-  });
+  }
   return responses;
 }
