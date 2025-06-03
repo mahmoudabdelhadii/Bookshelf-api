@@ -43,15 +43,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "username",
-          "firstName",
-          "lastName",
-          "email",
-          "createdAt",
-          "updatedAt"
-        ]
+        "required": ["id", "username", "firstName", "lastName", "email", "createdAt", "updatedAt"]
       },
       "Book": {
         "type": "object",
@@ -96,21 +88,11 @@
           },
           "language": {
             "type": "string",
-            "enum": [
-              "en",
-              "ar",
-              "other"
-            ],
+            "enum": ["en", "ar", "other"],
             "description": "The language of the book."
           }
         },
-        "required": [
-          "id",
-          "title",
-          "author",
-          "createdAt",
-          "language"
-        ]
+        "required": ["id", "title", "author", "createdAt", "language"]
       }
     },
     "parameters": {}
@@ -118,9 +100,7 @@
   "paths": {
     "/health-check": {
       "get": {
-        "tags": [
-          "Health Check"
-        ],
+        "tags": ["Health Check"],
         "responses": {
           "200": {
             "description": "Success",
@@ -142,11 +122,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -156,9 +132,7 @@
     },
     "/users": {
       "get": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "responses": {
           "200": {
             "description": "Success",
@@ -223,11 +197,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -237,9 +207,7 @@
     },
     "/users/{id}": {
       "get": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "parameters": [
           {
             "schema": {
@@ -312,11 +280,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -326,9 +290,7 @@
     },
     "/books": {
       "post": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "requestBody": {
           "description": "Create a new book",
           "required": true,
@@ -375,20 +337,11 @@
                   },
                   "language": {
                     "type": "string",
-                    "enum": [
-                      "en",
-                      "ar",
-                      "other"
-                    ],
+                    "enum": ["en", "ar", "other"],
                     "description": "The language of the book."
                   }
                 },
-                "required": [
-                  "title",
-                  "author",
-                  "publisher",
-                  "language"
-                ]
+                "required": ["title", "author", "publisher", "language"]
               }
             }
           }
@@ -450,31 +403,17 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": [
-                            "en",
-                            "ar",
-                            "other"
-                          ],
+                          "enum": ["en", "ar", "other"],
                           "description": "The language of the book."
                         }
                       },
-                      "required": [
-                        "id",
-                        "title",
-                        "author",
-                        "createdAt",
-                        "language"
-                      ]
+                      "required": ["id", "title", "author", "createdAt", "language"]
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -482,9 +421,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -586,32 +523,18 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": [
-                              "en",
-                              "ar",
-                              "other"
-                            ],
+                            "enum": ["en", "ar", "other"],
                             "description": "The language of the book."
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "author",
-                          "createdAt",
-                          "language"
-                        ]
+                        "required": ["id", "title", "author", "createdAt", "language"]
                       }
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -621,9 +544,7 @@
     },
     "/books/bulk": {
       "post": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "requestBody": {
           "description": "Bulk create multiple books",
           "required": true,
@@ -675,26 +596,15 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": [
-                            "en",
-                            "ar",
-                            "other"
-                          ],
+                          "enum": ["en", "ar", "other"],
                           "description": "The language of the book."
                         }
                       },
-                      "required": [
-                        "title",
-                        "author",
-                        "publisher",
-                        "language"
-                      ]
+                      "required": ["title", "author", "publisher", "language"]
                     }
                   }
                 },
-                "required": [
-                  "books"
-                ]
+                "required": ["books"]
               }
             }
           }
@@ -758,32 +668,18 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": [
-                              "en",
-                              "ar",
-                              "other"
-                            ],
+                            "enum": ["en", "ar", "other"],
                             "description": "The language of the book."
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "author",
-                          "createdAt",
-                          "language"
-                        ]
+                        "required": ["id", "title", "author", "createdAt", "language"]
                       }
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -793,9 +689,7 @@
     },
     "/books/{id}": {
       "get": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -864,31 +758,17 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": [
-                            "en",
-                            "ar",
-                            "other"
-                          ],
+                          "enum": ["en", "ar", "other"],
                           "description": "The language of the book."
                         }
                       },
-                      "required": [
-                        "id",
-                        "title",
-                        "author",
-                        "createdAt",
-                        "language"
-                      ]
+                      "required": ["id", "title", "author", "createdAt", "language"]
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -896,9 +776,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -956,11 +834,7 @@
                   },
                   "language": {
                     "type": "string",
-                    "enum": [
-                      "en",
-                      "ar",
-                      "other"
-                    ],
+                    "enum": ["en", "ar", "other"],
                     "description": "The language of the book."
                   }
                 }
@@ -1025,31 +899,17 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": [
-                            "en",
-                            "ar",
-                            "other"
-                          ],
+                          "enum": ["en", "ar", "other"],
                           "description": "The language of the book."
                         }
                       },
-                      "required": [
-                        "id",
-                        "title",
-                        "author",
-                        "createdAt",
-                        "language"
-                      ]
+                      "required": ["id", "title", "author", "createdAt", "language"]
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -1057,9 +917,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -1086,9 +944,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "message"
-                  ]
+                  "required": ["message"]
                 }
               }
             }
@@ -1098,9 +954,7 @@
     },
     "/books/search": {
       "get": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -1170,32 +1024,18 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": [
-                              "en",
-                              "ar",
-                              "other"
-                            ],
+                            "enum": ["en", "ar", "other"],
                             "description": "The language of the book."
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "author",
-                          "createdAt",
-                          "language"
-                        ]
+                        "required": ["id", "title", "author", "createdAt", "language"]
                       }
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -1205,9 +1045,7 @@
     },
     "/books/weighted-search": {
       "get": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -1277,32 +1115,18 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": [
-                              "en",
-                              "ar",
-                              "other"
-                            ],
+                            "enum": ["en", "ar", "other"],
                             "description": "The language of the book."
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "author",
-                          "createdAt",
-                          "language"
-                        ]
+                        "required": ["id", "title", "author", "createdAt", "language"]
                       }
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -1312,9 +1136,7 @@
     },
     "/author/{name}": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "schema": {
@@ -1346,11 +1168,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -1360,9 +1178,7 @@
     },
     "/authors/{query}": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "schema": {
@@ -1394,11 +1210,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -1408,9 +1220,7 @@
     },
     "/publisher/{name}": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "parameters": [
           {
             "schema": {
@@ -1442,11 +1252,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -1456,9 +1262,7 @@
     },
     "/publishers/{query}": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "parameters": [
           {
             "schema": {
@@ -1493,11 +1297,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -1507,18 +1307,12 @@
     },
     "/search/{index}": {
       "get": {
-        "tags": [
-          "Search"
-        ],
+        "tags": ["Search"],
         "parameters": [
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "books",
-                "authors",
-                "publishers"
-              ]
+              "enum": ["books", "authors", "publishers"]
             },
             "required": true,
             "name": "index",
@@ -1546,11 +1340,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }

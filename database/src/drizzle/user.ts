@@ -1,4 +1,4 @@
-import { text, timestamp, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
+import { text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 
 const userRole = server.enum("role", ["user", "admin"]);
@@ -15,10 +15,5 @@ export const user = server.table(
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
-  (table) => {
-    return {
-      emailIndex: uniqueIndex("unique_email").on(table.email),
-      usernameIndex: uniqueIndex("unique_username").on(table.username),
-    };
-  },
+  (table) => [uniqueIndex("unique_email").on(table.email), uniqueIndex("unique_username").on(table.username)],
 );

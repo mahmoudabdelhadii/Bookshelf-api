@@ -1,4 +1,4 @@
-import { integer, text, uniqueIndex, timestamp, index, AnyPgColumn, uuid } from "drizzle-orm/pg-core";
+import { text, uniqueIndex, timestamp, AnyPgColumn, uuid } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 
 export const subject = server.table(
@@ -9,7 +9,5 @@ export const subject = server.table(
     parent: uuid("parent").references((): AnyPgColumn => subject.id),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
-  (table) => ({
-    subjectNameIndex: uniqueIndex("unique_subject_name").on(table.name),
-  }),
+  (table) => [uniqueIndex("unique_subject_name").on(table.name)],
 );

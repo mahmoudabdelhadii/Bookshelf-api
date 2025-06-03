@@ -11,7 +11,6 @@ function fmt(migration: Postgrator.Migration) {
 }
 
 async function main() {
-   
   const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 
   try {
@@ -34,8 +33,8 @@ async function main() {
         `Applied ${appliedMigrations.length} migrations:\n${appliedMigrations.map(fmt).join("\n")}`,
       );
     }
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     process.exit(1);
   }
 

@@ -19,7 +19,7 @@ async function main() {
     database: "kitab",
     schemaTable: "public.__postgrator_migrations",
   });
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
   const last = (await postgrator.getMigrations()).at(-1)!;
   const source = last.getSql();
   const lines = source.split("\n");

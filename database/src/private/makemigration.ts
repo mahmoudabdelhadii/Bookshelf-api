@@ -30,8 +30,8 @@ async function main() {
     const file = join(migrationDir, `${last + 1}.do.${name}.sql`);
     await writeFile(file, "-- Empty migration\n");
     console.log(file);
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     process.exit(1);
   }
 }
