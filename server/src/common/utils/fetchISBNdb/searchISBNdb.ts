@@ -43,22 +43,22 @@ export async function searchISBNdb(
       case "books":
         return {
           data: {
-            total: (response as BookSearchResponse).total ?? 0,
-            books: (response as BookSearchResponse).books ?? [],
+            total: (response as BookSearchResponse).total,
+            books: (response as BookSearchResponse).books
           },
         };
       case "authors":
         return {
           data: {
-            total: (response as AuthorSearchResponse).total ?? 0,
-            authors: (response as AuthorSearchResponse).authors ?? [],
+            total: (response as AuthorSearchResponse).total,
+            authors: (response as AuthorSearchResponse).authors
           },
         };
       case "publishers":
         return {
           data: {
-            total: (response as PublisherSearchResponse).total ?? 0,
-            publishers: (response as PublisherSearchResponse).publishers ?? [],
+            total: (response as PublisherSearchResponse).total,
+            publishers: (response as PublisherSearchResponse).publishers
           },
         };
       default:

@@ -9,6 +9,7 @@ export const handleServiceResponse = <T>(serviceResponse: ServiceResponse<T>, re
 export const validateRequest =
   (schema: ZodSchema) => async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // eslint-disable-next-line  @typescript-eslint/no-unsafe-assignment
       await schema.parseAsync({ body: req.body, query: req.query, params: req.params });
       next();
     } catch (err) {

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Request, RequestHandler, Response } from "express";
-import { StatusCodes, getReasonPhrase } from "http-status-codes";
+import { getReasonPhrase } from "http-status-codes";
 import type { LevelWithSilent } from "pino";
 import { type CustomAttributeKeys, type Options, pinoHttp } from "pino-http";
 
@@ -60,7 +60,7 @@ const responseBodyMiddleware: RequestHandler = (_req, res, next) => {
   if (isNotProduction) {
     const originalSend = res.send;
     res.send = (content) => {
-      res.locals.responseBody = content;
+      res.locals.responseBody = content as string | Buffer | object;
       res.send = originalSend;
       return originalSend.call(res, content);
     };
@@ -69,19 +69,19 @@ const responseBodyMiddleware: RequestHandler = (_req, res, next) => {
 };
 
 const customLogLevel = (_req: IncomingMessage, res: ServerResponse, err?: Error): LevelWithSilent => {
-  if (err || res.statusCode >= StatusCodes.INTERNAL_SERVER_ERROR) return LogLevel.Error;
-  if (res.statusCode >= StatusCodes.BAD_REQUEST) return LogLevel.Warn;
-  if (res.statusCode >= StatusCodes.MULTIPLE_CHOICES) return LogLevel.Silent;
+  if (err || res.statusCode >= 500) return LogLevel.Error;
+  if (res.statusCode >= 400) return LogLevel.Warn;
+  if (res.statusCode >= 300) return LogLevel.Silent;
   return LogLevel.Info;
 };
 
 const customSuccessMessage = (req: IncomingMessage, res: ServerResponse) => {
-  if (res.statusCode === StatusCodes.NOT_FOUND) return getReasonPhrase(StatusCodes.NOT_FOUND);
+  if (res.statusCode === 404) return getReasonPhrase(404);
   return `${req.method} completed`;
 };
 
 const genReqId = (req: IncomingMessage, res: ServerResponse) => {
-  const existingID = req.id ?? req.headers["x-request-id"];
+  const existingID = req.headers["x-request-id"];
   if (existingID) return existingID;
   const id = randomUUID();
   res.setHeader("X-Request-Id", id);
