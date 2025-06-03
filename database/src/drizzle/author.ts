@@ -8,7 +8,5 @@ export const author = server.table(
     name: text("name").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
-  (table) => ({
-    authorNameIndex: uniqueIndex("unique_author_name").on(table.name),
-  }),
+  (table) => [uniqueIndex("unique_author_name").on(table.name)],
 );

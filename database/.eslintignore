@@ -1,0 +1,6 @@
+/node_modules/
+/build/
+*.js
+src/seedtypes.ts
+src/schematypes.ts
+drizzle.config.ts

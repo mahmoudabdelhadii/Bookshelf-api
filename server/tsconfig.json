@@ -2,11 +2,17 @@
   "extends": "../tsconfig.json",
   "references": [{ "path": "../database" }],
   "include": ["src", "*.ts", "package.json"],
-  "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "build",
-    // Override root/noEmit setting to allow emit in this project
-    "noEmit": false,
-"types": ["vitest"]
-  }
+ "compilerOptions": {
+		"baseUrl": "./src",
+		"paths": {
+			"@/*": ["*"]
+		},
+		"outDir": "dist",
+		"importsNotUsedAsValues": "remove",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["vitest/globals"]
+	},
 }

@@ -49,12 +49,12 @@ export const book = server.table(
       .defaultNow()
       .notNull(),
   },
-  (table) => ({
-    isbnIndex: uniqueIndex("unique_isbn").on(table.isbn),
+  (table) => [
+    uniqueIndex("unique_isbn").on(table.isbn),
 
-    titleTrgmIndex: index("books_title_trgm_idx").using("gin", sql`${table.title} gin_trgm_ops`),
+    index("books_title_trgm_idx").using("gin", sql`${table.title} gin_trgm_ops`),
 
-    titleTsvIndex: index("books_title_tsv_idx").using(
+    index("books_title_tsv_idx").using(
       "gin",
       sql`(
         to_tsvector('english', coalesce(${table.title}, '')) ||
@@ -63,7 +63,7 @@ export const book = server.table(
       )`,
     ),
 
-    searchIndex: index("books_search_idx").using(
+    index("books_search_idx").using(
       "gin",
       sql`(
         setweight(to_tsvector('english', coalesce(${table.title}, '')), 'A') ||
@@ -83,5 +83,5 @@ export const book = server.table(
         setweight(to_tsvector('simple', coalesce(${table.synopsis}, '')), 'D')
       )`,
     ),
-  }),
+  ],
 );
