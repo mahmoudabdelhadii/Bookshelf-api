@@ -55,15 +55,22 @@
     "tsup": "^8.0.2",
     "tsx": "^4.19.0",
     "typescript": "5.8.3",
-    "vite-tsconfig-paths": "5.1.4",   "vitest": "3.2.0"  },
+    "vite-tsconfig-paths": "5.1.4",
+    "vitest": "3.2.0"
+  },
   "engines": {
     "node": "^v22.9.0",
     "npm": "^10.8.3"
   },
   "tsup": {
-    "entry": ["src/index.ts"],
+    "entry": [
+      "src/index.ts"
+    ],
     "outDir": "dist",
-    "format": ["esm", "cjs"],
+    "format": [
+      "esm",
+      "cjs"
+    ],
     "target": "es2020",
     "sourcemap": true,
     "clean": true,
@@ -72,4 +79,3 @@
     "skipNodeModulesBundle": true
   }
 }
-

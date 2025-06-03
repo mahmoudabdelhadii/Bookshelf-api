@@ -11,7 +11,6 @@ function fmt(migration: Postgrator.Migration) {
 }
 
 async function main() {
-   
   const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 
   try {
