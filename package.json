@@ -3,8 +3,7 @@
   "workspaces": [
     "eslint-plugin-kitab",
     "database",
-    "server",
-    "client"
+    "server"
   ],
   "type": "module",
   "license": "ISC",
