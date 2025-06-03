@@ -1,13 +1,11 @@
+
 {
   "extends": "../tsconfig.json",
   "ts-node": { "files": true },
   "include": ["src"],
   "compilerOptions": {
-    "module": "node16",
-    "moduleResolution": "node16",
-    "resolveJsonModule": false,
-    "esModuleInterop": false,
     "rootDir": ".",
     "outDir": "build"
   }
 }
+

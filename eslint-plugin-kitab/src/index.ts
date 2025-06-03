@@ -1,12 +1,15 @@
 import { rule as logFormat } from "./rules/log-format.js";
 import { rule as drizzle } from "./rules/drizzle.js";
-import recommended from "./configs/recommended.js";
+import { recommended } from "./configs/recommended.js";
 
-export const rules: Record<string, unknown> = {
-  "log-format": logFormat,
-  drizzle,
+const plugin = {
+  rules: {
+    "log-format": logFormat,
+    drizzle,
+  },
+  configs: {},
 };
 
-export const configs = {
-  recommended,
-};
+Object.assign(plugin.configs, { recommended: recommended(plugin) });
+
+export default plugin;
