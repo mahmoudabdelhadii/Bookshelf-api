@@ -1,6 +1,6 @@
 import express, { type Express } from "express";
 import { StatusCodes } from "http-status-codes";
-import request, { type Response } from "supertest";
+import request from "supertest";
 
 import errorHandler from "../middleware/errorHandler.js";
 

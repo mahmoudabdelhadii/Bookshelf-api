@@ -21,7 +21,12 @@ export const IS_DEV = ENV === "development";
 export const PORT = number("PORT", 4050);
 export const HOST = process.env.HOST ?? "0.0.0.0";
 // Set default logging levels based on environment if LOG_LEVEL not provided
-const defaultLogLevel = ENV === "development" ? "debug" : ENV === "test" ? "silent" : "info";
+let defaultLogLevel = "info";
+if (ENV === "development") {
+  defaultLogLevel = "debug";
+} else if (ENV === "test") {
+  defaultLogLevel = "silent";
+}
 export const LOG_LEVEL = process.env.LOG_LEVEL ?? defaultLogLevel;
 export const DATABASE_URL = ENV !== "test" ? required("DATABASE_URL") : null;
 export const ISBNDB_API_KEY = process.env.ISBNDB_API_KEY ?? "";

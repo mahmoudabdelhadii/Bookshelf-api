@@ -6,7 +6,6 @@ function main() {
   const openAPIDocument = generateOpenAPIDocument();
   const outputPath = path.resolve(process.cwd(), "swagger.json");
   fs.writeFileSync(outputPath, JSON.stringify(openAPIDocument, null, 2));
-  console.log(`Generated OpenAPI document at ${outputPath}`);
 }
 
 main();

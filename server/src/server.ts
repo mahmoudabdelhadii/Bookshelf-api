@@ -19,6 +19,7 @@ import { pinoHttp } from "pino-http";
 
 const { drizzle } = connect("server");
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       drizzle: DrizzleClient;
