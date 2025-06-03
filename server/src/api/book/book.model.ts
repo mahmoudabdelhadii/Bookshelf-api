@@ -38,7 +38,9 @@ const publishedYearSchema = z
 export const bookSchema = z.object({
   id: idSchema,
   title: titleSchema,
-  author: authorSchema,
+  authorId: authorSchema,
+  publisherId: authorSchema.describe("The publisher of the book."),
+
   publishedYear: publishedYearSchema,
   isbn: isbnSchema.optional(),
   genre: genreSchema.optional(),
@@ -52,16 +54,18 @@ export const getBookSchema = z.object({
   }),
 });
 
+// Schema for creating a single book: use author and publisher names
 export const createBookSchema = z.object({
   title: titleSchema,
   author: authorSchema,
   publisher: authorSchema.describe("The publisher of the book."),
-  isbn: isbnSchema.optional(),
-  genre: genreSchema.optional(),
+  isbn: isbnSchema,
+  genre: genreSchema,
   publishedYear: publishedYearSchema.optional(),
   language: languageSchema,
 });
 
+// Schema for updating a book: author and publisher as names
 export const updateBookSchema = z.object({
   title: titleSchema.optional(),
   author: authorSchema.optional(),
@@ -71,3 +75,15 @@ export const updateBookSchema = z.object({
   publishedYear: publishedYearSchema.optional(),
   language: languageSchema.optional(),
 });
+
+// Schema for bulk creating books: expects existing authorId and publisherId UUIDs
+export const createBooksBulkSchema = z.array(
+  z.object({
+    title: titleSchema,
+    authorId: idSchema.describe("The UUID of an existing author."),
+    publisherId: idSchema.describe("The UUID of an existing publisher."),
+    isbn: isbnSchema,
+    genre: genreSchema,
+    publishedYear: publishedYearSchema.optional(),
+  }),
+);

@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import { StatusCodes } from "http-status-codes";
-import request from "supertest";
+import request, { type Response } from "supertest";
+import { describe, it, expect, beforeAll } from "@jest/globals";
 
 import errorHandler from "../middleware/errorHandler.js";
 
@@ -14,12 +15,11 @@ describe("Error Handler Middleware", () => {
       throw new Error("Test error");
     });
     app.get("/next-error", (_req, _res, next) => {
-      const error = new Error("Error passed to next()");
-      next(error);
+      next(new Error("Error passed to next()"));
     });
 
     app.use(errorHandler());
-    app.use("*", (req, res) => res.status(StatusCodes.NOT_FOUND).send("Not Found"));
+    app.use("*", (_req, res) => res.status(StatusCodes.NOT_FOUND).send("Not Found"));
   });
 
   describe("Handling unknown routes", () => {

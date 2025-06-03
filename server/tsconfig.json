@@ -6,6 +6,7 @@
     "rootDir": ".",
     "outDir": "build",
     // Override root/noEmit setting to allow emit in this project
-    "noEmit": false
+    "noEmit": false,
+"types": ["vitest"]
   }
 }

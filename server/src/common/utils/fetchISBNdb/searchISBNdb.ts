@@ -1,7 +1,7 @@
 import { callISBNdb } from "./callISBNdb.js";
-import { type AuthorSearchResponse } from "./searchAuthors.js";
-import { type BookSearchResponse } from "./searchBooks.js";
-import { type PublisherSearchResponse } from "./searchPublishers.js";
+import type { AuthorQueryResults as AuthorSearchResponse } from "../../types/shared/isbndbAPI.js";
+import type { BookSearchResponse } from "./searchBooks.js";
+import type { PublisherSearchResponse } from "./searchPublishers.js";
 
 interface SearchParams {
   page?: number;
@@ -64,7 +64,10 @@ export async function searchISBNdb(
       default:
         throw new Error("Unexpected index type");
     }
-  } catch (error: any) {
-    throw new Error(`Failed to fetch search results: ${error.message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch search results: ${error.message}`);
+    }
+    throw error;
   }
 }

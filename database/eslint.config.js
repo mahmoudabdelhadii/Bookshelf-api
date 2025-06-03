@@ -1,6 +1,6 @@
-import colonyEslintConfig from "../eslint.config.js";
+import kitabEslintConfig from "../eslint.config.js";
 
-export default colonyEslintConfig.config(
+export default kitabEslintConfig.config(
   {
     languageOptions: {
       parserOptions: {
