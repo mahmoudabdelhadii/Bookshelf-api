@@ -1,7 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import request, { Response as SupertestResponse } from "supertest";
-import { describe, it, expect, beforeAll } from "@jest/globals";
 
 import errorHandler from "../middleware/errorHandler.js";
 import requestLogger from "../middleware/requestLogger.js";
@@ -31,9 +30,7 @@ describe("Request Logger Middleware", () => {
 
     it("checks existing request id", async () => {
       const requestId = "test-request-id";
-      const response: SupertestResponse = await request(app)
-        .get("/success")
-        .set("X-Request-Id", requestId);
+      const response: SupertestResponse = await request(app).get("/success").set("X-Request-Id", requestId);
       expect(response.status).toBe(StatusCodes.OK);
     });
   });
