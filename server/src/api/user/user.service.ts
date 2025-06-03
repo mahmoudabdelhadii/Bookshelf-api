@@ -111,15 +111,16 @@ export const UserService = {
     }
 
     try {
-      const [updatedUser] = await drizzle
+      const updatedUsers = await drizzle
         .update(schema.user)
         .set(updates)
         .where(eq(schema.user.id, id))
         .returning();
 
-      if (updatedUser === undefined) {
+      if (updatedUsers.length === 0) {
         throw new NotFound("User not found.", { userId: id });
       }
+      const [updatedUser] = updatedUsers;
 
       return updatedUser;
     } catch (err) {
@@ -133,10 +134,11 @@ export const UserService = {
     }
 
     try {
-      const [deletedUser] = await drizzle.delete(schema.user).where(eq(schema.user.id, id)).returning();
-      if (deletedUser === undefined) {
+      const deletedUsers = await drizzle.delete(schema.user).where(eq(schema.user.id, id)).returning();
+      if (deletedUsers.length === 0) {
         throw new NotFound("User not found.", { userId: id });
       }
+      const [deletedUser] = deletedUsers;
       return deletedUser;
     } catch (err) {
       throw new DatabaseError("Failed to delete user.", { userId: id, originalError: err });

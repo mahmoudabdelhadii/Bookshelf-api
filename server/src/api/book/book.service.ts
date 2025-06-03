@@ -11,8 +11,8 @@ import * as isbndb from "../../common/utils/fetchISBNdb/index.js";
 
 type Language = (typeof schema.book.language.enumValues)[number];
 
-export class BookService {
-  static async createBook(
+export const BookService = {
+  createBook: async (
     drizzle: DrizzleClient,
     bookData: {
       title: string;
@@ -23,7 +23,7 @@ export class BookService {
       publishedYear?: number;
       language: (typeof schema.book.language.enumValues)[number];
     },
-  ) {
+  ) => {
     if (!bookData.title || !bookData.author || !bookData.publisher) {
       throw new ValidationError("Title, author, and publisher are required fields.", { bookData });
     }
@@ -69,9 +69,9 @@ export class BookService {
     } catch (err) {
       throw new DatabaseError("Failed to create a new book.", { originalError: err });
     }
-  }
+  },
 
-  static async createBooksBulk(
+  createBooksBulk: async (
     drizzle: DrizzleClient,
     bookList: {
       title: string;
@@ -81,7 +81,7 @@ export class BookService {
       publisherId: string;
       publishedYear?: number;
     }[],
-  ) {
+  ) => {
     if (!Array.isArray(bookList) || bookList.length === 0) {
       throw new ValidationError("The 'books' array must contain at least one book.", { bookList });
     }
@@ -91,9 +91,9 @@ export class BookService {
     } catch (err) {
       throw new DatabaseError("Failed to create books in bulk.", { originalError: err });
     }
-  }
+  },
 
-  static async getBookById(drizzle: DrizzleClient, bookId: string) {
+  getBookById: async (drizzle: DrizzleClient, bookId: string) => {
     const book = await drizzle.query.book.findFirst({
       where: (b, { eq }) => eq(b.id, bookId),
     });
@@ -102,9 +102,9 @@ export class BookService {
       throw new NotFound("Book not found.", { bookId });
     }
     return book;
-  }
+  },
 
-  static async updateBook(
+  updateBook: async (
     drizzle: DrizzleClient,
     bookId: string,
     updateData: Partial<{
@@ -114,7 +114,7 @@ export class BookService {
       genre: string;
       publishedYear: number;
     }>,
-  ) {
+  ) => {
     try {
       const [updatedBook] = await drizzle
         .update(schema.book)
@@ -130,23 +130,24 @@ export class BookService {
     } catch (err) {
       throw new DatabaseError("Failed to update the book.", { bookId, originalError: err });
     }
-  }
+  },
 
-  static async deleteBook(drizzle: DrizzleClient, bookId: string) {
+  deleteBook: async (drizzle: DrizzleClient, bookId: string) => {
     try {
-      const [deletedBook] = await drizzle.delete(schema.book).where(eq(schema.book.id, bookId)).returning();
+      const deletedBooks = await drizzle.delete(schema.book).where(eq(schema.book.id, bookId)).returning();
 
-      if (!deletedBook) {
+      if (deletedBooks.length === 0) {
         throw new NotFound("Book not found.", { bookId });
       }
+      const [deletedBook] = deletedBooks;
 
       return deletedBook;
     } catch (err) {
       throw new DatabaseError("Failed to delete the book.", { bookId, originalError: err });
     }
-  }
+  },
 
-  static async searchBooksByTrigram(drizzle: DrizzleClient, searchTerm: string) {
+  searchBooksByTrigram: async (drizzle: DrizzleClient, searchTerm: string) => {
     if (!searchTerm) {
       throw new BadRequest("Search term is required.");
     }
@@ -164,9 +165,9 @@ export class BookService {
     } catch (err) {
       throw new DatabaseError("Error executing trigram search.", { searchTerm, originalError: err });
     }
-  }
+  },
 
-  static async searchBooksByWeighted(drizzle: DrizzleClient, searchTerm: string) {
+  searchBooksByWeighted: async (drizzle: DrizzleClient, searchTerm: string) => {
     if (!searchTerm) {
       throw new BadRequest("Search term is required.");
     }
@@ -198,9 +199,9 @@ export class BookService {
     } catch (err) {
       throw new DatabaseError("Error executing weighted search.", { searchTerm, originalError: err });
     }
-  }
+  },
 
-  static async getBookByISBN(drizzle: DrizzleClient, isbn: string) {
+  getBookByISBN: async (drizzle: DrizzleClient, isbn: string) => {
     const localBook = await drizzle.query.book.findFirst({
       where: (b, { eq }) => eq(b.isbn, isbn),
     });
@@ -215,7 +216,7 @@ export class BookService {
       throw new NotFound("Book not found");
     }
     // Map API response to local book schema and save
-    const createdBook = await this.createBook(drizzle, {
+    const createdBook = await BookService.createBook(drizzle, {
       title: bookInfo.title ?? "",
       author: bookInfo.authors?.[0] ?? "",
       publisher: bookInfo.publisher ?? "",
@@ -225,9 +226,9 @@ export class BookService {
       language: "other" as Language,
     });
     return createdBook;
-  }
+  },
 
-  static async getBooks(
+  getBooks: async (
     drizzle: DrizzleClient,
     {
       title,
@@ -240,7 +241,7 @@ export class BookService {
       author?: string;
       genre?: string;
     } = {},
-  ) {
+  ) => {
     try {
       const conditions = [sql`TRUE`];
       if (title) conditions.push(ilike(schema.book.title, `%${title}%`));
@@ -260,15 +261,15 @@ export class BookService {
     } catch (err) {
       throw new DatabaseError("Error fetching books.", { originalError: err });
     }
-  }
+  },
 
-  static async getAuthorDetails(
+  getAuthorDetails: async (
     drizzle: DrizzleClient,
     name: string,
     page = 1,
     pageSize = 20,
     language?: Language,
-  ) {
+  ) => {
     const offset = (page - 1) * pageSize;
     const localAuthor = await drizzle.query.author.findFirst({
       where: (a, { eq }) => eq(a.name, name),
@@ -297,15 +298,15 @@ export class BookService {
     // Ensure author exists locally
     await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
     return authorDetails;
-  }
+  },
 
-  static async getPublisherDetails(
+  getPublisherDetails: async (
     drizzle: DrizzleClient,
     name: string,
     page = 1,
     pageSize = 20,
     language?: Language,
-  ) {
+  ) => {
     const offset = (page - 1) * pageSize;
     const localPublisher = await drizzle.query.publisher.findFirst({
       where: (p, { eq }) => eq(p.name, name),
@@ -334,9 +335,9 @@ export class BookService {
     // Ensure publisher exists locally
     await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
     return publisherDetails;
-  }
+  },
 
-  static async searchAuthors(drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) {
+  searchAuthors: async (drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) => {
     const authorsData = await isbndb.searchAuthors(query, { page, pageSize });
     const authors = authorsData.authors ?? [];
     if (authors.length === 0) {
@@ -347,9 +348,9 @@ export class BookService {
       .values(authors.map((name) => ({ name })))
       .onConflictDoNothing();
     return authorsData;
-  }
+  },
 
-  static async searchPublishers(drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) {
+  searchPublishers: async (drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) => {
     const publishersData = await isbndb.searchPublishers(query, { page, pageSize });
     const publishers = publishersData.publishers;
     if (publishers.length === 0) {
@@ -365,9 +366,9 @@ export class BookService {
       )
       .onConflictDoNothing();
     return publishersData;
-  }
+  },
 
-  static async searchAll(
+  searchAll: async (
     drizzle: DrizzleClient,
     index: "books" | "authors" | "publishers",
     page = 1,
@@ -380,7 +381,7 @@ export class BookService {
       subject?: string;
       publisher?: string;
     } = {},
-  ) {
+  ) => {
     const offset = (page - 1) * pageSize;
     const conditions = [sql`TRUE`];
 
