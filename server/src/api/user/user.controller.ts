@@ -1,12 +1,12 @@
-import type { Request, RequestHandler, Response } from "express";
+import type { RequestHandler } from "express";
 import { UserService } from "./user.service.js";
 import { handleServiceResponse } from "../../common/utils/httpHandlers.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import { createUserSchema, updateUserSchema, userSchema } from "./user.model.js";
+import { createUserSchema, updateUserSchema } from "./user.model.js";
 import { StatusCodes } from "http-status-codes";
 
 class UserController {
-  public createUser: RequestHandler = async (req: Request, res: Response) => {
+public createUser: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { id, username, email, firstName, lastName } = createUserSchema.parse(req.body);
 
@@ -19,7 +19,7 @@ class UserController {
     }
   };
 
-  public getUsers: RequestHandler = async (req: Request, res: Response) => {
+public getUsers: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const limit = req.query.limit ? Number(req.query.limit) : 50;
 
@@ -35,7 +35,7 @@ class UserController {
     }
   };
 
-  public getUser: RequestHandler = async (req: Request, res: Response) => {
+public getUser: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { id } = req.params;
 
@@ -48,7 +48,7 @@ class UserController {
     }
   };
 
-  public updateUser: RequestHandler = async (req: Request, res: Response) => {
+public updateUser: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { id } = req.params;
     const updates = updateUserSchema.parse(req.body);
@@ -66,7 +66,7 @@ class UserController {
     }
   };
 
-  public deleteUser: RequestHandler = async (req: Request, res: Response) => {
+public deleteUser: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { id } = req.params;
 

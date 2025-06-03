@@ -30,7 +30,7 @@ const logger = pino({
 
 const logLevel = declareVar(process.env.LOG_LEVEL ?? "", "info");
 const watch = declareVar(process.env.WATCH ?? "", "false");
-const adaptLoguru = `npx pino-pretty -m text -k 'record.exception' --levelKey 'record.level.name' -i 'record.elapsed,record.file,record.exception,record.function,record.level,record.line,record.message,record.module,record.name,record.process,record.thread,record.time' -x 'TRACE:5,DEBUG:10,INFO:20,SUCCESS:25,WARNING:30,ERROR:40,CRITICAL:50' -a 'record.time.timestamp'`;
+const adaptLoguru = "npx pino-pretty -m text -k 'record.exception' --levelKey 'record.level.name' -i 'record.elapsed,record.file,record.exception,record.function,record.level,record.line,record.message,record.module,record.name,record.process,record.thread,record.time' -x 'TRACE:5,DEBUG:10,INFO:20,SUCCESS:25,WARNING:30,ERROR:40,CRITICAL:50' -a 'record.time.timestamp'";
 
 const apps = [
   {

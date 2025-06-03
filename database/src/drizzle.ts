@@ -11,7 +11,7 @@ export { schema };
 
 export function connect(appName: string) {
   console.log(DATABASE_URL);
-  // eslint-disable-next-line import/no-named-as-default-member -- it's wrong!
+   
   const client = new pg.Pool({
     connectionString: DATABASE_URL,
     max: DATABASE_CONNECTION_LIMIT ?? undefined,

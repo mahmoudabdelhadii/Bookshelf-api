@@ -42,30 +42,27 @@ export class BookService {
     try {
       // Ensure author exists
       let authorRec = await drizzle.query.author.findFirst({
-        where: (a, { eq }) => eq(a.name, bookData.author),
+        where: (a, { eq }) => eq(a.name, author),
       });
       if (!authorRec) {
-        [authorRec] = await drizzle.insert(schema.author).values({ name: bookData.author }).returning();
+        [authorRec] = await drizzle.insert(schema.author).values({ name: author }).returning();
       }
       // Ensure publisher exists
       let publisherRec = await drizzle.query.publisher.findFirst({
-        where: (p, { eq }) => eq(p.name, bookData.publisher),
+        where: (p, { eq }) => eq(p.name, publisher),
       });
       if (!publisherRec) {
-        [publisherRec] = await drizzle
-          .insert(schema.publisher)
-          .values({ name: bookData.publisher })
-          .returning();
+        [publisherRec] = await drizzle.insert(schema.publisher).values({ name: publisher }).returning();
       }
       // Insert book with correct foreign keys
       const insertData = {
-        title: bookData.title,
+        title,
         authorId: authorRec.id,
         publisherId: publisherRec.id,
-        isbn: bookData.isbn,
-        genre: bookData.genre,
-        publishedYear: bookData.publishedYear,
-        language: bookData.language,
+        isbn,
+        genre,
+        publishedYear,
+        language,
       };
       const [insertedBook] = await drizzle.insert(schema.book).values(insertData).returning();
       return insertedBook;
@@ -104,7 +101,6 @@ export class BookService {
     if (!book) {
       throw new NotFound("Book not found.", { bookId });
     }
-    console.log(book);
     return book;
   }
 
@@ -125,7 +121,7 @@ export class BookService {
         .set(updateData)
         .where(eq(schema.book.id, bookId))
         .returning();
-
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!updatedBook) {
         throw new NotFound("Book not found.", { bookId });
       }
@@ -139,6 +135,8 @@ export class BookService {
   static async deleteBook(drizzle: DrizzleClient, bookId: string) {
     try {
       const [deletedBook] = await drizzle.delete(schema.book).where(eq(schema.book.id, bookId)).returning();
+       
+
       if (!deletedBook) {
         throw new NotFound("Book not found.", { bookId });
       }
@@ -359,7 +357,7 @@ export class BookService {
     pageSize: number = 20,
   ) {
     const publishersData = await isbndb.searchPublishers(query, { page, pageSize });
-    const publishers = publishersData.publishers ?? [];
+    const publishers = publishersData.publishers;
     if (publishers.length === 0) {
       throw new NotFound("No publishers found");
     }

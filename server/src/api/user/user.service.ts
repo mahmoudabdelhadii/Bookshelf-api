@@ -8,8 +8,8 @@ import {
   BadRequest,
 } from "../../errors.js";
 
-export class UserService {
-  static async createUser(
+export const UserService = {
+  async createUser(
     drizzle: DrizzleClient,
     {
       id,
@@ -52,31 +52,31 @@ export class UserService {
     } catch (err) {
       throw new DatabaseError("Failed to create user.", { originalError: err });
     }
-  }
+  },
 
-  static async findAll(drizzle: DrizzleClient, limit = 50) {
+  async findAll(drizzle: DrizzleClient, limit = 50) {
     try {
       return await drizzle.query.user.findMany({ limit });
     } catch (err) {
       throw new DatabaseError("Failed to fetch users.", { originalError: err });
     }
-  }
+  },
 
-  static async findById(drizzle: DrizzleClient, id: string) {
+  async findById(drizzle: DrizzleClient, id: string) {
     try {
       const user = await drizzle.query.user.findFirst({
         where: (u, { eq }) => eq(u.id, id),
       });
-      if (!user) {
+      if (user === undefined) {
         throw new NotFound("User not found.", { userId: id });
       }
       return user;
     } catch (err) {
       throw new DatabaseError("Failed to fetch user by ID.", { userId: id, originalError: err });
     }
-  }
+  },
 
-  static async updateUser(
+  async updateUser(
     drizzle: DrizzleClient,
     id: string,
     updates: {
@@ -91,20 +91,22 @@ export class UserService {
     }
 
     if (updates.email) {
+      const email = updates.email;
       const existingByEmail = await drizzle.query.user.findFirst({
-        where: (u, { eq }) => eq(u.email, updates.email!),
+        where: (u, { eq }) => eq(u.email, email),
       });
-      if (existingByEmail && existingByEmail.id !== id) {
-        throw new ResourceAlreadyExistsError("Email already in use.", { email: updates.email });
+      if (existingByEmail?.id !== undefined && existingByEmail.id !== id) {
+        throw new ResourceAlreadyExistsError("Email already in use.", { email });
       }
     }
 
     if (updates.username) {
+      const username = updates.username;
       const existingByUsername = await drizzle.query.user.findFirst({
-        where: (u, { eq }) => eq(u.username, updates.username!),
+        where: (u, { eq }) => eq(u.username, username),
       });
-      if (existingByUsername && existingByUsername.id !== id) {
-        throw new ResourceAlreadyExistsError("Username already in use.", { username: updates.username });
+      if (existingByUsername?.id !== undefined && existingByUsername.id !== id) {
+        throw new ResourceAlreadyExistsError("Username already in use.", { username });
       }
     }
 
@@ -115,7 +117,7 @@ export class UserService {
         .where(eq(schema.user.id, id))
         .returning();
 
-      if (!updatedUser) {
+      if (updatedUser === undefined) {
         throw new NotFound("User not found.", { userId: id });
       }
 
@@ -123,21 +125,21 @@ export class UserService {
     } catch (err) {
       throw new DatabaseError("Failed to update user.", { userId: id, originalError: err });
     }
-  }
+  },
 
-  static async deleteUser(drizzle: DrizzleClient, id: string) {
+  async deleteUser(drizzle: DrizzleClient, id: string) {
     if (!id) {
       throw new BadRequest("User ID is required.");
     }
 
     try {
       const [deletedUser] = await drizzle.delete(schema.user).where(eq(schema.user.id, id)).returning();
-      if (!deletedUser) {
+      if (deletedUser === undefined) {
         throw new NotFound("User not found.", { userId: id });
       }
       return deletedUser;
     } catch (err) {
       throw new DatabaseError("Failed to delete user.", { userId: id, originalError: err });
     }
-  }
-}
+  },
+} as const;
