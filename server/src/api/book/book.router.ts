@@ -9,7 +9,7 @@ import { bookSchema, getBookSchema, createBookSchema, updateBookSchema } from ".
 export const booksRouter = Router();
 export const booksRegistry = new OpenAPIRegistry();
 
-booksRegistry.register("Book", bookSchema);
+booksRegistry.register("Book", bookSchema.openapi("Book"));
 
 booksRegistry.registerPath({
   method: "post",

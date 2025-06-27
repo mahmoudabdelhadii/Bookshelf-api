@@ -8,14 +8,14 @@ import { StatusCodes } from "http-status-codes";
 class UserController {
   public createUser: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
-    const { id, username, email, firstName, lastName } = createUserSchema.parse(req.body);
-
+    
     try {
-      const user = await UserService.createUser(drizzle, { id, username, email, firstName, lastName });
-      return handleServiceResponse(ServiceResponse.success("User created", user, StatusCodes.CREATED), res);
+      const { id, username, email, firstName, lastName } = createUserSchema.parse(req.body);
+      const serviceResponse = await UserService.createUser(drizzle, { id, username, email, firstName, lastName });
+      return handleServiceResponse(serviceResponse, res);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create user";
-      return handleServiceResponse(ServiceResponse.failure(message, null, StatusCodes.BAD_REQUEST), res);
+      return handleServiceResponse(ServiceResponse.failure(message, null, StatusCodes.UNPROCESSABLE_ENTITY), res);
     }
   };
 
@@ -24,8 +24,8 @@ class UserController {
     const limit = req.query.limit ? Number(req.query.limit) : 50;
 
     try {
-      const users = await UserService.findAll(drizzle, limit);
-      return handleServiceResponse(ServiceResponse.success("Users retrieved", users), res);
+      const serviceResponse = await UserService.findAll(drizzle, limit);
+      return handleServiceResponse(serviceResponse, res);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to retrieve users";
       return handleServiceResponse(
@@ -40,8 +40,8 @@ class UserController {
     const { id } = req.params;
 
     try {
-      const user = await UserService.findById(drizzle, id);
-      return handleServiceResponse(ServiceResponse.success("User retrieved", user), res);
+      const serviceResponse = await UserService.findById(drizzle, id);
+      return handleServiceResponse(serviceResponse, res);
     } catch (err) {
       const message = err instanceof Error ? err.message : "User not found";
       return handleServiceResponse(ServiceResponse.failure(message, null, StatusCodes.NOT_FOUND), res);
@@ -51,16 +51,16 @@ class UserController {
   public updateUser: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { id } = req.params;
-    const updates = updateUserSchema.parse(req.body);
-
+    
     try {
-      const user = await UserService.updateUser(drizzle, id, updates);
-      return handleServiceResponse(ServiceResponse.success("User updated", user), res);
+      const updates = updateUserSchema.parse(req.body);
+      const serviceResponse = await UserService.updateUser(drizzle, id, updates);
+      return handleServiceResponse(serviceResponse, res);
     } catch (err) {
       const status =
         typeof err === "object" && err !== null && "code" in err && err.code === "Not Found"
           ? StatusCodes.NOT_FOUND
-          : StatusCodes.BAD_REQUEST;
+          : StatusCodes.UNPROCESSABLE_ENTITY;
       const message = err instanceof Error ? err.message : "Update failed";
       return handleServiceResponse(ServiceResponse.failure(message, null, status), res);
     }
@@ -71,11 +71,8 @@ class UserController {
     const { id } = req.params;
 
     try {
-      await UserService.deleteUser(drizzle, id);
-      return handleServiceResponse(
-        ServiceResponse.success("User deleted", null, StatusCodes.NO_CONTENT),
-        res,
-      );
+      const serviceResponse = await UserService.deleteUser(drizzle, id);
+      return handleServiceResponse(serviceResponse, res);
     } catch (err) {
       const status =
         typeof err === "object" && err !== null && "code" in err && err.code === "Not Found"

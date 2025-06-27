@@ -34,7 +34,6 @@ export const book = server.table(
     genre: text("genre"),
     datePublished: timestamp("date_published", {
       withTimezone: true,
-      mode: "string",
     }),
     edition: text("edition"),
     pages: integer("pages"),

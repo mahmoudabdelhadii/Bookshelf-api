@@ -2,7 +2,8 @@
   "openapi": "3.0.0",
   "info": {
     "version": "1.0.0",
-    "title": "Swagger API"
+    "title": "Bookshelf API",
+    "description": "A comprehensive API for managing books, libraries, users, and library collections"
   },
   "externalDocs": {
     "description": "View the raw OpenAPI Specification in JSON format",
@@ -43,7 +44,15 @@
             "type": "string"
           }
         },
-        "required": ["id", "username", "firstName", "lastName", "email", "createdAt", "updatedAt"]
+        "required": [
+          "id",
+          "username",
+          "firstName",
+          "lastName",
+          "email",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "Book": {
         "type": "object",
@@ -58,11 +67,17 @@
             "maxLength": 200,
             "description": "The title of the book."
           },
-          "author": {
+          "authorId": {
             "type": "string",
             "minLength": 2,
             "maxLength": 100,
             "description": "The author of the book."
+          },
+          "publisherId": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "description": "The publisher of the book."
           },
           "publishedYear": {
             "type": "integer",
@@ -88,11 +103,22 @@
           },
           "language": {
             "type": "string",
-            "enum": ["en", "ar", "other"],
+            "enum": [
+              "en",
+              "ar",
+              "other"
+            ],
             "description": "The language of the book."
           }
         },
-        "required": ["id", "title", "author", "createdAt", "language"]
+        "required": [
+          "id",
+          "title",
+          "authorId",
+          "publisherId",
+          "createdAt",
+          "language"
+        ]
       }
     },
     "parameters": {}
@@ -100,7 +126,9 @@
   "paths": {
     "/health-check": {
       "get": {
-        "tags": ["Health Check"],
+        "tags": [
+          "Health Check"
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -122,7 +150,11 @@
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -132,10 +164,12 @@
     },
     "/users": {
       "get": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Users retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -197,31 +231,67 @@
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
           }
         }
-      }
-    },
-    "/users/{id}": {
-      "get": {
-        "tags": ["User"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
+      },
+      "post": {
+        "tags": [
+          "User"
         ],
+        "requestBody": {
+          "description": "Create a new user",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "username": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50
+                  }
+                },
+                "required": [
+                  "id",
+                  "username",
+                  "email",
+                  "firstName",
+                  "lastName"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
-            "description": "Success",
+          "201": {
+            "description": "User created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -280,7 +350,280 @@
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "username": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "username",
+                        "firstName",
+                        "lastName",
+                        "email",
+                        "createdAt",
+                        "updatedAt"
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "description": "Update user details",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50
+                  }
+                },
+                "required": [
+                  "firstName",
+                  "lastName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "username": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 50
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "username",
+                        "firstName",
+                        "lastName",
+                        "email",
+                        "createdAt",
+                        "updatedAt"
+                      ]
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deleted successfully"
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
                 }
               }
             }
@@ -290,7 +633,9 @@
     },
     "/books": {
       "post": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "requestBody": {
           "description": "Create a new book",
           "required": true,
@@ -337,11 +682,22 @@
                   },
                   "language": {
                     "type": "string",
-                    "enum": ["en", "ar", "other"],
+                    "enum": [
+                      "en",
+                      "ar",
+                      "other"
+                    ],
                     "description": "The language of the book."
                   }
                 },
-                "required": ["title", "author", "publisher", "language"]
+                "required": [
+                  "title",
+                  "author",
+                  "publisher",
+                  "isbn",
+                  "genre",
+                  "language"
+                ]
               }
             }
           }
@@ -373,11 +729,17 @@
                           "maxLength": 200,
                           "description": "The title of the book."
                         },
-                        "author": {
+                        "authorId": {
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 100,
                           "description": "The author of the book."
+                        },
+                        "publisherId": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 100,
+                          "description": "The publisher of the book."
                         },
                         "publishedYear": {
                           "type": "integer",
@@ -403,17 +765,32 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": ["en", "ar", "other"],
+                          "enum": [
+                            "en",
+                            "ar",
+                            "other"
+                          ],
                           "description": "The language of the book."
                         }
                       },
-                      "required": ["id", "title", "author", "createdAt", "language"]
+                      "required": [
+                        "id",
+                        "title",
+                        "authorId",
+                        "publisherId",
+                        "createdAt",
+                        "language"
+                      ]
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -421,7 +798,9 @@
         }
       },
       "get": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "parameters": [
           {
             "schema": {
@@ -493,11 +872,17 @@
                             "maxLength": 200,
                             "description": "The title of the book."
                           },
-                          "author": {
+                          "authorId": {
                             "type": "string",
                             "minLength": 2,
                             "maxLength": 100,
                             "description": "The author of the book."
+                          },
+                          "publisherId": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 100,
+                            "description": "The publisher of the book."
                           },
                           "publishedYear": {
                             "type": "integer",
@@ -523,18 +908,33 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": ["en", "ar", "other"],
+                            "enum": [
+                              "en",
+                              "ar",
+                              "other"
+                            ],
                             "description": "The language of the book."
                           }
                         },
-                        "required": ["id", "title", "author", "createdAt", "language"]
+                        "required": [
+                          "id",
+                          "title",
+                          "authorId",
+                          "publisherId",
+                          "createdAt",
+                          "language"
+                        ]
                       }
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -544,7 +944,9 @@
     },
     "/books/bulk": {
       "post": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "requestBody": {
           "description": "Bulk create multiple books",
           "required": true,
@@ -596,15 +998,28 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": ["en", "ar", "other"],
+                          "enum": [
+                            "en",
+                            "ar",
+                            "other"
+                          ],
                           "description": "The language of the book."
                         }
                       },
-                      "required": ["title", "author", "publisher", "language"]
+                      "required": [
+                        "title",
+                        "author",
+                        "publisher",
+                        "isbn",
+                        "genre",
+                        "language"
+                      ]
                     }
                   }
                 },
-                "required": ["books"]
+                "required": [
+                  "books"
+                ]
               }
             }
           }
@@ -638,11 +1053,17 @@
                             "maxLength": 200,
                             "description": "The title of the book."
                           },
-                          "author": {
+                          "authorId": {
                             "type": "string",
                             "minLength": 2,
                             "maxLength": 100,
                             "description": "The author of the book."
+                          },
+                          "publisherId": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 100,
+                            "description": "The publisher of the book."
                           },
                           "publishedYear": {
                             "type": "integer",
@@ -668,18 +1089,33 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": ["en", "ar", "other"],
+                            "enum": [
+                              "en",
+                              "ar",
+                              "other"
+                            ],
                             "description": "The language of the book."
                           }
                         },
-                        "required": ["id", "title", "author", "createdAt", "language"]
+                        "required": [
+                          "id",
+                          "title",
+                          "authorId",
+                          "publisherId",
+                          "createdAt",
+                          "language"
+                        ]
                       }
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -689,7 +1125,9 @@
     },
     "/books/{id}": {
       "get": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "parameters": [
           {
             "schema": {
@@ -728,11 +1166,17 @@
                           "maxLength": 200,
                           "description": "The title of the book."
                         },
-                        "author": {
+                        "authorId": {
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 100,
                           "description": "The author of the book."
+                        },
+                        "publisherId": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 100,
+                          "description": "The publisher of the book."
                         },
                         "publishedYear": {
                           "type": "integer",
@@ -758,17 +1202,32 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": ["en", "ar", "other"],
+                          "enum": [
+                            "en",
+                            "ar",
+                            "other"
+                          ],
                           "description": "The language of the book."
                         }
                       },
-                      "required": ["id", "title", "author", "createdAt", "language"]
+                      "required": [
+                        "id",
+                        "title",
+                        "authorId",
+                        "publisherId",
+                        "createdAt",
+                        "language"
+                      ]
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -776,7 +1235,9 @@
         }
       },
       "patch": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "parameters": [
           {
             "schema": {
@@ -834,7 +1295,11 @@
                   },
                   "language": {
                     "type": "string",
-                    "enum": ["en", "ar", "other"],
+                    "enum": [
+                      "en",
+                      "ar",
+                      "other"
+                    ],
                     "description": "The language of the book."
                   }
                 }
@@ -869,11 +1334,17 @@
                           "maxLength": 200,
                           "description": "The title of the book."
                         },
-                        "author": {
+                        "authorId": {
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 100,
                           "description": "The author of the book."
+                        },
+                        "publisherId": {
+                          "type": "string",
+                          "minLength": 2,
+                          "maxLength": 100,
+                          "description": "The publisher of the book."
                         },
                         "publishedYear": {
                           "type": "integer",
@@ -899,17 +1370,32 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": ["en", "ar", "other"],
+                          "enum": [
+                            "en",
+                            "ar",
+                            "other"
+                          ],
                           "description": "The language of the book."
                         }
                       },
-                      "required": ["id", "title", "author", "createdAt", "language"]
+                      "required": [
+                        "id",
+                        "title",
+                        "authorId",
+                        "publisherId",
+                        "createdAt",
+                        "language"
+                      ]
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -917,7 +1403,9 @@
         }
       },
       "delete": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "parameters": [
           {
             "schema": {
@@ -944,7 +1432,9 @@
                       "type": "string"
                     }
                   },
-                  "required": ["message"]
+                  "required": [
+                    "message"
+                  ]
                 }
               }
             }
@@ -954,7 +1444,9 @@
     },
     "/books/search": {
       "get": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "parameters": [
           {
             "schema": {
@@ -994,11 +1486,17 @@
                             "maxLength": 200,
                             "description": "The title of the book."
                           },
-                          "author": {
+                          "authorId": {
                             "type": "string",
                             "minLength": 2,
                             "maxLength": 100,
                             "description": "The author of the book."
+                          },
+                          "publisherId": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 100,
+                            "description": "The publisher of the book."
                           },
                           "publishedYear": {
                             "type": "integer",
@@ -1024,18 +1522,33 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": ["en", "ar", "other"],
+                            "enum": [
+                              "en",
+                              "ar",
+                              "other"
+                            ],
                             "description": "The language of the book."
                           }
                         },
-                        "required": ["id", "title", "author", "createdAt", "language"]
+                        "required": [
+                          "id",
+                          "title",
+                          "authorId",
+                          "publisherId",
+                          "createdAt",
+                          "language"
+                        ]
                       }
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -1045,7 +1558,9 @@
     },
     "/books/weighted-search": {
       "get": {
-        "tags": ["Books"],
+        "tags": [
+          "Books"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1085,11 +1600,17 @@
                             "maxLength": 200,
                             "description": "The title of the book."
                           },
-                          "author": {
+                          "authorId": {
                             "type": "string",
                             "minLength": 2,
                             "maxLength": 100,
                             "description": "The author of the book."
+                          },
+                          "publisherId": {
+                            "type": "string",
+                            "minLength": 2,
+                            "maxLength": 100,
+                            "description": "The publisher of the book."
                           },
                           "publishedYear": {
                             "type": "integer",
@@ -1115,18 +1636,33 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": ["en", "ar", "other"],
+                            "enum": [
+                              "en",
+                              "ar",
+                              "other"
+                            ],
                             "description": "The language of the book."
                           }
                         },
-                        "required": ["id", "title", "author", "createdAt", "language"]
+                        "required": [
+                          "id",
+                          "title",
+                          "authorId",
+                          "publisherId",
+                          "createdAt",
+                          "language"
+                        ]
                       }
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -1136,7 +1672,9 @@
     },
     "/author/{name}": {
       "get": {
-        "tags": ["Author"],
+        "tags": [
+          "Author"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1168,7 +1706,11 @@
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -1178,7 +1720,9 @@
     },
     "/authors/{query}": {
       "get": {
-        "tags": ["Author"],
+        "tags": [
+          "Author"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1210,7 +1754,11 @@
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -1220,7 +1768,9 @@
     },
     "/publisher/{name}": {
       "get": {
-        "tags": ["Publisher"],
+        "tags": [
+          "Publisher"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1252,7 +1802,11 @@
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -1262,7 +1816,9 @@
     },
     "/publishers/{query}": {
       "get": {
-        "tags": ["Publisher"],
+        "tags": [
+          "Publisher"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1297,7 +1853,11 @@
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }
@@ -1307,12 +1867,18 @@
     },
     "/search/{index}": {
       "get": {
-        "tags": ["Search"],
+        "tags": [
+          "Search"
+        ],
         "parameters": [
           {
             "schema": {
               "type": "string",
-              "enum": ["books", "authors", "publishers"]
+              "enum": [
+                "books",
+                "authors",
+                "publishers"
+              ]
             },
             "required": true,
             "name": "index",
@@ -1340,7 +1906,11 @@
                       "type": "number"
                     }
                   },
-                  "required": ["success", "message", "statusCode"]
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
                 }
               }
             }

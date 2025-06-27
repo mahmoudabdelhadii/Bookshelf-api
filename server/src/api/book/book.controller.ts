@@ -10,11 +10,11 @@ class BooksController {
     const drizzle = req.drizzle;
     try {
       const parsed = createBookSchema.parse(req.body);
-      const book = await BookService.createBook(drizzle, parsed);
-      return handleServiceResponse(ServiceResponse.success("Book created", book, StatusCodes.CREATED), res);
+      const serviceResponse = await BookService.createBook(drizzle, parsed);
+      return handleServiceResponse(serviceResponse, res);
     } catch (_err) {
       return handleServiceResponse(
-        ServiceResponse.failure("Failed to create book", _err, StatusCodes.BAD_REQUEST),
+        ServiceResponse.failure("Failed to create book", _err, StatusCodes.UNPROCESSABLE_ENTITY),
         res,
       );
     }
@@ -49,8 +49,8 @@ class BooksController {
   public getBook: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     try {
-      const book = await BookService.getBookById(drizzle, req.params.id);
-      return handleServiceResponse(ServiceResponse.success("Book retrieved", book), res);
+      const serviceResponse = await BookService.getBookById(drizzle, req.params.id);
+      return handleServiceResponse(serviceResponse, res);
     } catch (_err) {
       return handleServiceResponse(
         ServiceResponse.failure("Book not found", _err, StatusCodes.NOT_FOUND),

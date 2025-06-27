@@ -7,6 +7,8 @@ import { openAPIRouter } from "./api-docs/openAPIRouter.js";
 import { healthCheckRouter } from "./api/healthCheck/healthCheckRouter.js";
 import { userRouter } from "./api/user/user.router.js";
 import { booksRouter } from "./api/book/book.router.js";
+import { libraryRouter } from "./api/library/library.router.js";
+import { libraryBooksRouter } from "./api/libraryBooks/libraryBooks.router.js";
 import errorHandler from "./common/middleware/errorHandler.js";
 import rateLimiter from "./common/middleware/rateLimiter.js";
 import requestLogger from "./common/middleware/requestLogger.js";
@@ -62,6 +64,8 @@ app.use(
 app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);
 app.use("/books", booksRouter);
+app.use("/libraries", libraryRouter);
+app.use("/library-books", libraryBooksRouter);
 
 app.use("/docs", openAPIRouter);
 

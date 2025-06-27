@@ -1,13 +1,16 @@
 import type { DrizzleClient } from "database";
 import { eq, sql, schema, ilike, and, or } from "database";
 import {
-  BadRequest,
-  NotFound,
-  ResourceAlreadyExistsError,
+  NotFoundError,
+  ConflictError,
   DatabaseError,
   ValidationError,
+  NotFound,
+  BadRequest,
 } from "../../errors.js";
+import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import * as isbndb from "../../common/utils/fetchISBNdb/index.js";
+import type { Book } from "./book.model.js";
 
 type Language = (typeof schema.book.language.enumValues)[number];
 
@@ -24,36 +27,50 @@ export const BookService = {
       language: (typeof schema.book.language.enumValues)[number];
     },
   ) => {
-    if (!bookData.title || !bookData.author || !bookData.publisher) {
-      throw new ValidationError("Title, author, and publisher are required fields.", { bookData });
-    }
-    const { isbn, title, author, publisher, genre, publishedYear, language } = bookData;
-    if (isbn) {
-      const existing = await drizzle.query.book.findFirst({
-        where: (b, { eq }) => eq(b.isbn, isbn),
-      });
-      if (existing) {
-        throw new ResourceAlreadyExistsError("A book with the provided ISBN already exists.", {
-          isbn: bookData.isbn,
-        });
-      }
-    }
-
     try {
-      // Ensure author exists
+      // Validate required fields
+      if (!bookData.title.trim()) {
+        const validationError = new ValidationError("Book title is required");
+        return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
+      }
+      if (!bookData.author.trim()) {
+        const validationError = new ValidationError("Book author is required");
+        return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
+      }
+      if (!bookData.publisher.trim()) {
+        const validationError = new ValidationError("Book publisher is required");
+        return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
+      }
+
+      const { isbn, title, author, publisher, genre, publishedYear, language } = bookData;
+      
+      // Check for existing ISBN if provided
+      if (isbn?.trim()) {
+        const existing = await drizzle.query.book.findFirst({
+          where: (b, { eq }) => eq(b.isbn, isbn),
+        });
+        if (existing) {
+          const conflictError = new ConflictError("A book with this ISBN already exists");
+          return ServiceResponse.failure(conflictError.message, { isbn }, conflictError.statusCode);
+        }
+      }
+
+      // Ensure author exists or create new one
       let authorRec = await drizzle.query.author.findFirst({
         where: (a, { eq }) => eq(a.name, author),
       });
       if (!authorRec) {
         [authorRec] = await drizzle.insert(schema.author).values({ name: author }).returning();
       }
-      // Ensure publisher exists
+
+      // Ensure publisher exists or create new one
       let publisherRec = await drizzle.query.publisher.findFirst({
         where: (p, { eq }) => eq(p.name, publisher),
       });
       if (!publisherRec) {
         [publisherRec] = await drizzle.insert(schema.publisher).values({ name: publisher }).returning();
       }
+
       // Insert book with correct foreign keys
       const insertData = {
         title,
@@ -65,9 +82,12 @@ export const BookService = {
         language,
       };
       const [insertedBook] = await drizzle.insert(schema.book).values(insertData).returning();
-      return insertedBook;
+      
+      return ServiceResponse.success("Book created successfully", insertedBook, 201);
     } catch (err) {
-      throw new DatabaseError("Failed to create a new book.", { originalError: err });
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const dbError = new DatabaseError(`Failed to create book: ${errorMessage}`);
+      return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
     }
   },
 
@@ -94,14 +114,27 @@ export const BookService = {
   },
 
   getBookById: async (drizzle: DrizzleClient, bookId: string) => {
-    const book = await drizzle.query.book.findFirst({
-      where: (b, { eq }) => eq(b.id, bookId),
-    });
+    try {
+      if (!bookId.trim()) {
+        const validationError = new ValidationError("Book ID is required");
+        return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
+      }
 
-    if (!book) {
-      throw new NotFound("Book not found.", { bookId });
+      const book = await drizzle.query.book.findFirst({
+        where: (b, { eq }) => eq(b.id, bookId),
+      });
+
+      if (!book) {
+        const notFoundError = new NotFoundError("Book", bookId);
+        return ServiceResponse.failure(notFoundError.message, null, notFoundError.statusCode);
+      }
+
+      return ServiceResponse.success("Book found", book);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      const dbError = new DatabaseError(`Failed to fetch book: ${errorMessage}`);
+      return ServiceResponse.failure(dbError.message, { bookId, originalError: errorMessage }, dbError.statusCode);
     }
-    return book;
   },
 
   updateBook: async (

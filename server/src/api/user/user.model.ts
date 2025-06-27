@@ -14,6 +14,7 @@ export const userSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
   email: emailSchema,
+  role: z.enum(["user", "admin"]).default("user"),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -33,6 +34,6 @@ export const createUserSchema = z.object({
 export const updateUserSchema = z.object({
   username: usernameSchema.optional(),
   email: emailSchema.optional(),
-  firstName: nameSchema,
-  lastName: nameSchema,
+  firstName: nameSchema.optional(),
+  lastName: nameSchema.optional(),
 });

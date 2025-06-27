@@ -20,7 +20,7 @@
     "generate-types": "npx swagger-typescript-api generate --path ./swagger.json --output src/common/types/shared/ --name isbndbApi.ts",
     "build": "tsc --build .",
     "start": "node build/src/index.js",
-    "test": "ENV=test globstar -- tsx --test 'src/**/*.test.ts'",
+    "test": "vitest run",
     "dev": "nodemon",
     "export": "NODE_ENV=test tsx -r dotenv/config src/private/export.ts"
   },

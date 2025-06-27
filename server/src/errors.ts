@@ -6,7 +6,7 @@ export abstract class ApiError extends Error {
   constructor(
     message: string,
     context: Record<string, unknown> = {},
-    opts: ErrorOptions | undefined = undefined,
+    opts?: { cause?: unknown },
   ) {
     super(message, opts);
     this.context = context;
@@ -112,4 +112,41 @@ export class Conflict extends ApiError {
 export class BadGateway extends ApiError {
   override code = "Bad Gateway";
   override statusCode = 502;
+}
+
+export class NotFoundError extends ApiError {
+  override code = "Not Found";
+  override statusCode = 404;
+
+  constructor(resource = "Resource", id?: string, context: Record<string, unknown> = {}) {
+    const message = id ? `${resource} with ID ${id} not found` : `${resource} not found`;
+    super(message, context);
+  }
+}
+
+export class ConflictError extends ApiError {
+  override code = "Conflict";
+  override statusCode = 409;
+
+  constructor(message = "Resource conflict occurred", context: Record<string, unknown> = {}) {
+    super(message, context);
+  }
+}
+
+export class UnauthorizedError extends ApiError {
+  override code = "Unauthorized";
+  override statusCode = 401;
+
+  constructor(message = "Authentication required", context: Record<string, unknown> = {}) {
+    super(message, context);
+  }
+}
+
+export class ForbiddenError extends ApiError {
+  override code = "Forbidden";
+  override statusCode = 403;
+
+  constructor(message = "Access forbidden", context: Record<string, unknown> = {}) {
+    super(message, context);
+  }
 }

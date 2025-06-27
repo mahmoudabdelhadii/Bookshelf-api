@@ -3,7 +3,7 @@ import { OpenAPIRegistry, OpenApiGeneratorV3 } from "@asteasolutions/zod-to-open
 import { healthCheckRegistry } from "../api/healthCheck/healthCheckRouter.js";
 import { userRegistry } from "../api/user/user.router.js";
 import { booksRegistry } from "../api/book/book.router.js";
-// Removed unused generateApi import (no type declarations available)
+
 export function generateOpenAPIDocument() {
   const registry = new OpenAPIRegistry([healthCheckRegistry, userRegistry, booksRegistry]);
   const generator = new OpenApiGeneratorV3(registry.definitions);
@@ -12,7 +12,8 @@ export function generateOpenAPIDocument() {
     openapi: "3.0.0",
     info: {
       version: "1.0.0",
-      title: "Swagger API",
+      title: "Bookshelf API",
+      description: "A comprehensive API for managing books, libraries, users, and library collections",
     },
     externalDocs: {
       description: "View the raw OpenAPI Specification in JSON format",
