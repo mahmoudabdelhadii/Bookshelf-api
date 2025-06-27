@@ -1,0 +1,394 @@
+import rateLimit from "express-rate-limit";
+import RedisStore from "rate-limit-redis";
+import { StatusCodes } from "http-status-codes";
+import { env } from "../utils/envConfig.js";
+import { redisClient } from "./session.js";
+
+/**
+ * Enhanced rate limiting specifically for authentication endpoints
+ * with Redis backing for distributed rate limiting
+ */
+
+// Common rate limit response
+const rateLimitResponse = (limit: number, windowMs: number) => ({
+  success: false,
+  message: `Too many requests. You have exceeded the limit of ${limit} requests per ${Math.floor(windowMs / 60000)} minutes. Please try again later.`,
+  responseObject: {
+    limit,
+    windowMs,
+    retryAfter: Math.ceil(windowMs / 1000),
+  },
+  statusCode: StatusCodes.TOO_MANY_REQUESTS,
+});
+
+/**
+ * Create Redis store for rate limiting (if Redis is available)
+ */
+function createRedisStore() {
+  if (redisClient) {
+    return new RedisStore({
+      sendCommand: (...args: string[]) => redisClient!.sendCommand(args),
+      prefix: "rl:",
+    });
+  }
+  return undefined; // Fall back to memory store
+}
+
+/**
+ * General authentication rate limiting
+ * Applies to login, register, and password reset requests
+ */
+export const authRateLimit = rateLimit({
+  store: createRedisStore(),
+  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS, // 15 minutes
+  max: env.AUTH_RATE_LIMIT_MAX_REQUESTS, // 5 requests per window
+  message: rateLimitResponse(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting in test environment
+    return process.env.NODE_ENV === "test";
+  },
+  keyGenerator: (req) => {
+    // Use IP address as the primary key, with fallback to x-forwarded-for
+    return req.ip || req.socket.remoteAddress || "unknown";
+  },
+  handler: (req, res) => {
+    const response = rateLimitResponse(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS);
+    res.status(StatusCodes.TOO_MANY_REQUESTS).json(response);
+  },
+});
+
+/**
+ * Strict rate limiting for login attempts
+ * More restrictive than general auth rate limiting
+ */
+export const loginRateLimit = rateLimit({
+  store: createRedisStore(),
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 login attempts per 15 minutes per IP
+  message: rateLimitResponse(5, 15 * 60 * 1000),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === "test",
+  keyGenerator: (req) => {
+    // Combine IP and email for more granular control
+    const email = req.body?.email || "no-email";
+    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    return `login:${ip}:${email}`;
+  },
+  handler: (req, res) => {
+    res.status(StatusCodes.TOO_MANY_REQUESTS).json(
+      rateLimitResponse(5, 15 * 60 * 1000)
+    );
+  },
+});
+
+/**
+ * Rate limiting for password reset requests
+ * Prevents spam of password reset emails
+ */
+export const passwordResetRateLimit = rateLimit({
+  store: createRedisStore(),
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // 3 password reset requests per hour per email
+  message: rateLimitResponse(3, 60 * 60 * 1000),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === "test",
+  keyGenerator: (req) => {
+    const email = req.body?.email || "no-email";
+    return `password-reset:${email}`;
+  },
+  handler: (req, res) => {
+    res.status(StatusCodes.TOO_MANY_REQUESTS).json({
+      success: false,
+      message: "Too many password reset requests. Please wait before requesting another reset.",
+      responseObject: {
+        limit: 3,
+        windowMs: 60 * 60 * 1000,
+        retryAfter: 3600,
+      },
+      statusCode: StatusCodes.TOO_MANY_REQUESTS,
+    });
+  },
+});
+
+/**
+ * Rate limiting for email verification attempts
+ */
+export const emailVerificationRateLimit = rateLimit({
+  store: createRedisStore(),
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 5, // 5 verification attempts per 10 minutes per IP
+  message: rateLimitResponse(5, 10 * 60 * 1000),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === "test",
+  keyGenerator: (req) => {
+    const token = req.body?.token || "no-token";
+    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    return `email-verify:${ip}:${token.substring(0, 8)}`;
+  },
+  handler: (req, res) => {
+    res.status(StatusCodes.TOO_MANY_REQUESTS).json({
+      success: false,
+      message: "Too many email verification attempts. Please wait before trying again.",
+      responseObject: {
+        limit: 5,
+        windowMs: 10 * 60 * 1000,
+        retryAfter: 600,
+      },
+      statusCode: StatusCodes.TOO_MANY_REQUESTS,
+    });
+  },
+});
+
+/**
+ * Rate limiting for registration attempts
+ * Prevents automated account creation
+ */
+export const registrationRateLimit = rateLimit({
+  store: createRedisStore(),
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // 5 registration attempts per hour per IP
+  message: rateLimitResponse(5, 60 * 60 * 1000),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === "test",
+  keyGenerator: (req) => {
+    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    return `register:${ip}`;
+  },
+  handler: (req, res) => {
+    res.status(StatusCodes.TOO_MANY_REQUESTS).json({
+      success: false,
+      message: "Too many registration attempts. Please wait before creating another account.",
+      responseObject: {
+        limit: 5,
+        windowMs: 60 * 60 * 1000,
+        retryAfter: 3600,
+      },
+      statusCode: StatusCodes.TOO_MANY_REQUESTS,
+    });
+  },
+});
+
+/**
+ * Rate limiting for token refresh requests
+ * Prevents token refresh abuse
+ */
+export const refreshTokenRateLimit = rateLimit({
+  store: createRedisStore(),
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 refresh attempts per 15 minutes per IP
+  message: rateLimitResponse(10, 15 * 60 * 1000),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === "test",
+  keyGenerator: (req) => {
+    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    return `refresh:${ip}`;
+  },
+  handler: (req, res) => {
+    res.status(StatusCodes.TOO_MANY_REQUESTS).json({
+      success: false,
+      message: "Too many token refresh attempts. Please wait before trying again.",
+      responseObject: {
+        limit: 10,
+        windowMs: 15 * 60 * 1000,
+        retryAfter: 900,
+      },
+      statusCode: StatusCodes.TOO_MANY_REQUESTS,
+    });
+  },
+});
+
+/**
+ * Adaptive rate limiting based on user behavior
+ * Increases restrictions for suspicious patterns
+ */
+export const createAdaptiveRateLimit = (baseMax: number, baseWindowMs: number) => {
+  return rateLimit({
+    store: createRedisStore(),
+    windowMs: baseWindowMs,
+    max: (req) => {
+      // Reduce limit for requests with suspicious patterns
+      const userAgent = req.get("user-agent") || "";
+      const hasValidUserAgent = userAgent.length > 10 && !userAgent.includes("bot");
+      
+      // Check for common automation indicators
+      const suspiciousHeaders = [
+        "automation",
+        "selenium",
+        "crawler",
+        "spider",
+        "scraper",
+      ].some(keyword => userAgent.toLowerCase().includes(keyword));
+
+      if (!hasValidUserAgent || suspiciousHeaders) {
+        return Math.max(1, Math.floor(baseMax / 2)); // Reduce by half
+      }
+
+      return baseMax;
+    },
+    message: (req) => {
+      const max = typeof req.rateLimit?.limit === "number" ? req.rateLimit.limit : baseMax;
+      return rateLimitResponse(max, baseWindowMs);
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV === "test",
+  });
+};
+
+/**
+ * Progressive rate limiting
+ * Increases restrictions with each violation
+ */
+export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number) => {
+  const violationStore = new Map<string, { count: number; firstViolation: number }>();
+
+  return rateLimit({
+    store: createRedisStore(),
+    windowMs: baseWindowMs,
+    max: (req) => {
+      const key = req.ip || "unknown";
+      const violation = violationStore.get(key);
+      
+      if (!violation) {
+        return baseMax;
+      }
+
+      // Increase restriction progressively
+      const multiplier = Math.min(violation.count, 5); // Cap at 5x restriction
+      return Math.max(1, Math.floor(baseMax / multiplier));
+    },
+    onLimitReached: (req) => {
+      const key = req.ip || "unknown";
+      const existing = violationStore.get(key);
+      
+      if (existing) {
+        existing.count += 1;
+      } else {
+        violationStore.set(key, { count: 1, firstViolation: Date.now() });
+      }
+
+      // Clean up old violations (after 24 hours)
+      const now = Date.now();
+      for (const [k, v] of violationStore.entries()) {
+        if (now - v.firstViolation > 24 * 60 * 60 * 1000) {
+          violationStore.delete(k);
+        }
+      }
+    },
+    message: (req) => {
+      const key = req.ip || "unknown";
+      const violation = violationStore.get(key);
+      const multiplier = violation ? Math.min(violation.count, 5) : 1;
+      const max = Math.max(1, Math.floor(baseMax / multiplier));
+      
+      return {
+        success: false,
+        message: `Rate limit exceeded. Due to repeated violations, your limit has been reduced to ${max} requests per window.`,
+        responseObject: {
+          limit: max,
+          windowMs: baseWindowMs,
+          violationCount: violation?.count || 0,
+        },
+        statusCode: StatusCodes.TOO_MANY_REQUESTS,
+      };
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV === "test",
+  });
+};
+
+/**
+ * Rate limiting middleware that combines multiple strategies
+ */
+export const authSecurityRateLimit = [
+  // Basic IP-based rate limiting
+  authRateLimit,
+  
+  // Adaptive rate limiting based on patterns
+  createAdaptiveRateLimit(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
+];
+
+/**
+ * Utility functions for rate limit management
+ */
+export class RateLimitUtils {
+  /**
+   * Reset rate limit for a specific key (admin function)
+   */
+  static async resetRateLimit(key: string): Promise<void> {
+    if (redisClient) {
+      try {
+        const pattern = `rl:*${key}*`;
+        const keys = await redisClient.keys(pattern);
+        if (keys.length > 0) {
+          await redisClient.del(keys);
+        }
+      } catch (error) {
+        console.error("Error resetting rate limit:", error);
+      }
+    }
+  }
+
+  /**
+   * Get current rate limit status for a key
+   */
+  static async getRateLimitStatus(key: string): Promise<{
+    remaining: number;
+    resetTime: Date | null;
+    total: number;
+  }> {
+    if (redisClient) {
+      try {
+        const redisKey = `rl:${key}`;
+        const [current, ttl] = await Promise.all([
+          redisClient.get(redisKey),
+          redisClient.ttl(redisKey),
+        ]);
+
+        const currentCount = current ? parseInt(current, 10) : 0;
+        const resetTime = ttl > 0 ? new Date(Date.now() + ttl * 1000) : null;
+
+        return {
+          remaining: Math.max(0, env.AUTH_RATE_LIMIT_MAX_REQUESTS - currentCount),
+          resetTime,
+          total: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+        };
+      } catch (error) {
+        console.error("Error getting rate limit status:", error);
+      }
+    }
+
+    return {
+      remaining: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+      resetTime: null,
+      total: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+    };
+  }
+
+  /**
+   * Check if IP is currently rate limited
+   */
+  static async isRateLimited(ip: string, limitType: string = "auth"): Promise<boolean> {
+    if (redisClient) {
+      try {
+        const key = `rl:${limitType}:${ip}`;
+        const current = await redisClient.get(key);
+        const currentCount = current ? parseInt(current, 10) : 0;
+        
+        return currentCount >= env.AUTH_RATE_LIMIT_MAX_REQUESTS;
+      } catch (error) {
+        console.error("Error checking rate limit status:", error);
+      }
+    }
+    
+    return false;
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run migrate:*)",
+      "Bash(npm run check:*)"
+    ],
+    "deny": []
+  }
+}
