@@ -14,10 +14,10 @@ async function main() {
   const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 
   try {
-    // Establish a database connection
+    
     await client.connect();
 
-    // Create postgrator instance
+    
     const postgrator = new Postgrator({
       migrationPattern: join(__dirname, "../../migrations/*"),
       driver: "pg",

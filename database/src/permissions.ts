@@ -1,8 +1,8 @@
-// Comprehensive Permission System for Role-Based Access Control (RBAC)
+
 
 export enum ResourceType {
   USER = "user",
-  BOOK = "book", 
+  BOOK = "book",
   LIBRARY = "library",
   LIBRARY_BOOK = "library_book",
   AUTHOR = "author",
@@ -15,10 +15,10 @@ export enum ResourceType {
 
 export enum ActionType {
   CREATE = "create",
-  READ = "read", 
+  READ = "read",
   UPDATE = "update",
   DELETE = "delete",
-  MANAGE = "manage", // Full access to resource
+  MANAGE = "manage",
   LIST = "list",
   SEARCH = "search",
   EXPORT = "export",
@@ -29,25 +29,24 @@ export enum ActionType {
   REVOKE = "revoke",
 }
 
-// Permission string format: "resource:action" or "resource:action:scope"
 export const PERMISSIONS = {
-  // User Management Permissions
+  
   USER_CREATE: "user:create",
-  USER_READ: "user:read", 
+  USER_READ: "user:read",
   USER_READ_OWN: "user:read:own",
   USER_UPDATE: "user:update",
-  USER_UPDATE_OWN: "user:update:own", 
+  USER_UPDATE_OWN: "user:update:own",
   USER_DELETE: "user:delete",
   USER_DELETE_OWN: "user:delete:own",
   USER_LIST: "user:list",
-  USER_MANAGE: "user:manage", // Full user management
+  USER_MANAGE: "user:manage",
   USER_SUSPEND: "user:suspend",
   USER_ACTIVATE: "user:activate",
 
-  // Book Management Permissions
+  
   BOOK_CREATE: "book:create",
   BOOK_READ: "book:read",
-  BOOK_UPDATE: "book:update", 
+  BOOK_UPDATE: "book:update",
   BOOK_DELETE: "book:delete",
   BOOK_LIST: "book:list",
   BOOK_SEARCH: "book:search",
@@ -58,15 +57,15 @@ export const PERMISSIONS = {
   BOOK_BULK_UPDATE: "book:update:bulk",
   BOOK_BULK_DELETE: "book:delete:bulk",
 
-  // Library Management Permissions
+  
   LIBRARY_CREATE: "library:create",
   LIBRARY_READ: "library:read",
   LIBRARY_UPDATE: "library:update",
-  LIBRARY_DELETE: "library:delete", 
+  LIBRARY_DELETE: "library:delete",
   LIBRARY_LIST: "library:list",
   LIBRARY_MANAGE: "library:manage",
 
-  // Library Books Management Permissions
+  
   LIBRARY_BOOK_ADD: "library_book:create",
   LIBRARY_BOOK_READ: "library_book:read",
   LIBRARY_BOOK_UPDATE: "library_book:update",
@@ -75,17 +74,17 @@ export const PERMISSIONS = {
   LIBRARY_BOOK_MANAGE: "library_book:manage",
   LIBRARY_BOOK_TRANSFER: "library_book:transfer",
 
-  // Author Management Permissions  
+  
   AUTHOR_CREATE: "author:create",
   AUTHOR_READ: "author:read",
   AUTHOR_UPDATE: "author:update",
   AUTHOR_DELETE: "author:delete",
   AUTHOR_LIST: "author:list",
-  AUTHOR_SEARCH: "author:search", 
+  AUTHOR_SEARCH: "author:search",
   AUTHOR_MANAGE: "author:manage",
 
-  // Publisher Management Permissions
-  PUBLISHER_CREATE: "publisher:create", 
+  
+  PUBLISHER_CREATE: "publisher:create",
   PUBLISHER_READ: "publisher:read",
   PUBLISHER_UPDATE: "publisher:update",
   PUBLISHER_DELETE: "publisher:delete",
@@ -93,38 +92,38 @@ export const PERMISSIONS = {
   PUBLISHER_SEARCH: "publisher:search",
   PUBLISHER_MANAGE: "publisher:manage",
 
-  // Role Management Permissions
+  
   ROLE_CREATE: "role:create",
   ROLE_READ: "role:read",
-  ROLE_UPDATE: "role:update", 
+  ROLE_UPDATE: "role:update",
   ROLE_DELETE: "role:delete",
   ROLE_LIST: "role:list",
   ROLE_MANAGE: "role:manage",
   ROLE_ASSIGN: "role:assign",
   ROLE_REVOKE: "role:revoke",
 
-  // System Administration Permissions
+  
   SYSTEM_CONFIG: "system:config",
-  SYSTEM_MONITOR: "system:monitor", 
+  SYSTEM_MONITOR: "system:monitor",
   SYSTEM_BACKUP: "system:backup",
   SYSTEM_RESTORE: "system:restore",
   SYSTEM_MAINTAIN: "system:maintain",
   SYSTEM_MANAGE: "system:manage",
 
-  // Audit and Security Permissions
+  
   AUDIT_LOG_READ: "audit_log:read",
   AUDIT_LOG_EXPORT: "audit_log:export",
   AUDIT_LOG_MANAGE: "audit_log:manage",
   SECURITY_MANAGE: "security:manage",
   SECURITY_MONITOR: "security:monitor",
 
-  // API and Integration Permissions
+  
   API_ACCESS: "api:access",
   API_ADMIN: "api:admin",
   INTEGRATION_MANAGE: "integration:manage",
 } as const;
 
-// Predefined Role Templates
+
 export const ROLE_TEMPLATES = {
   SUPER_ADMIN: {
     name: "Super Administrator",
@@ -133,7 +132,7 @@ export const ROLE_TEMPLATES = {
   },
 
   ADMIN: {
-    name: "Administrator", 
+    name: "Administrator",
     description: "Administrative access to most system functions",
     permissions: [
       PERMISSIONS.USER_CREATE,
@@ -186,7 +185,7 @@ export const ROLE_TEMPLATES = {
 
   LIBRARIAN: {
     name: "Librarian",
-    description: "Manages library operations and book catalog", 
+    description: "Manages library operations and book catalog",
     permissions: [
       PERMISSIONS.USER_READ,
       PERMISSIONS.USER_LIST,
@@ -288,7 +287,7 @@ export const ROLE_TEMPLATES = {
     description: "Limited read-only access",
     permissions: [
       PERMISSIONS.BOOK_READ,
-      PERMISSIONS.BOOK_LIST, 
+      PERMISSIONS.BOOK_LIST,
       PERMISSIONS.BOOK_SEARCH,
       PERMISSIONS.AUTHOR_READ,
       PERMISSIONS.AUTHOR_SEARCH,
@@ -300,7 +299,7 @@ export const ROLE_TEMPLATES = {
   },
 } as const;
 
-// Permission validation utilities
+
 export class PermissionValidator {
   static isValidPermission(permission: string): boolean {
     return Object.values(PERMISSIONS).includes(permission as any);
@@ -311,7 +310,7 @@ export class PermissionValidator {
     action: string;
     scope?: string;
   } | null {
-    const parts = permission.split(':');
+    const parts = permission.split(":");
     if (parts.length < 2 || parts.length > 3) {
       return null;
     }
@@ -324,12 +323,12 @@ export class PermissionValidator {
   }
 
   static hasPermission(userPermissions: string[], requiredPermission: string): boolean {
-    // Check for exact permission match
+    
     if (userPermissions.includes(requiredPermission)) {
       return true;
     }
 
-    // Check for wildcard permissions (e.g., "user:manage" includes "user:create")
+    
     const parsed = this.parsePermission(requiredPermission);
     if (!parsed) return false;
 
@@ -338,7 +337,7 @@ export class PermissionValidator {
       return true;
     }
 
-    // Check for system-wide admin permissions
+    
     if (userPermissions.includes(PERMISSIONS.SYSTEM_MANAGE)) {
       return true;
     }
@@ -347,19 +346,15 @@ export class PermissionValidator {
   }
 
   static hasAnyPermission(userPermissions: string[], requiredPermissions: string[]): boolean {
-    return requiredPermissions.some(permission => 
-      this.hasPermission(userPermissions, permission)
-    );
+    return requiredPermissions.some((permission) => this.hasPermission(userPermissions, permission));
   }
 
   static hasAllPermissions(userPermissions: string[], requiredPermissions: string[]): boolean {
-    return requiredPermissions.every(permission => 
-      this.hasPermission(userPermissions, permission)
-    );
+    return requiredPermissions.every((permission) => this.hasPermission(userPermissions, permission));
   }
 }
 
-// Type definitions
+
 export type Permission = keyof typeof PERMISSIONS;
-export type PermissionString = typeof PERMISSIONS[Permission];
+export type PermissionString = (typeof PERMISSIONS)[Permission];
 export type RoleTemplate = keyof typeof ROLE_TEMPLATES;

@@ -14,7 +14,7 @@ import {
   type LogoutRequest,
 } from "./auth.model.js";
 
-// Extend Request interface to include drizzle
+
 interface AuthRequest extends Request {
   drizzle: DrizzleClient;
   user?: {
@@ -48,8 +48,8 @@ export class AuthController {
       });
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Registration error:", error);
+    } catch (err) {
+      console.error("Registration error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during registration",
@@ -73,22 +73,22 @@ export class AuthController {
         userAgent: req.get("user-agent"),
       });
 
-      // Set httpOnly cookie for refresh token if login successful
-      if (serviceResponse.success && serviceResponse.responseObject) {
+      
+      if (serviceResponse.success && serviceResponse.responseObject && "tokens" in serviceResponse.responseObject) {
         const { tokens } = serviceResponse.responseObject;
         
         res.cookie("refreshToken", tokens.refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
-          maxAge: tokens.refreshExpiresIn * 1000, // Convert to milliseconds
+          maxAge: tokens.refreshExpiresIn * 1000, 
           path: "/auth/refresh",
         });
       }
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error("Login error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during login",
@@ -103,8 +103,8 @@ export class AuthController {
    */
   public static async refreshToken(req: AuthRequest, res: Response) {
     try {
-      // Try to get refresh token from cookie first, then from body
-      const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+      
+      const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
       
       if (!refreshToken) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -121,8 +121,8 @@ export class AuthController {
         userAgent: req.get("user-agent"),
       });
 
-      // Update refresh token cookie if successful
-      if (serviceResponse.success && serviceResponse.responseObject) {
+      
+      if (serviceResponse.success && serviceResponse.responseObject && "refreshToken" in serviceResponse.responseObject) {
         const tokens = serviceResponse.responseObject;
         
         res.cookie("refreshToken", tokens.refreshToken, {
@@ -135,8 +135,8 @@ export class AuthController {
       }
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Token refresh error:", error);
+    } catch (err) {
+      console.error("Token refresh error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during token refresh",
@@ -160,8 +160,8 @@ export class AuthController {
         });
       }
 
-      // Extract session ID from JWT payload (would be available in a real implementation)
-      const sessionId = req.body.sessionId || "current-session"; // Placeholder
+      
+      const sessionId = req.body.sessionId || "current-session"; 
 
       const serviceResponse = await AuthService.logout(
         req.drizzle, 
@@ -169,14 +169,14 @@ export class AuthController {
         req.user.id
       );
 
-      // Clear refresh token cookie
+      
       res.clearCookie("refreshToken", {
         path: "/auth/refresh",
       });
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch (err) {
+      console.error("Logout error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during logout",
@@ -200,8 +200,8 @@ export class AuthController {
       });
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Password reset request error:", error);
+    } catch (err) {
+      console.error("Password reset request error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password reset request",
@@ -226,8 +226,8 @@ export class AuthController {
       });
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Password reset error:", error);
+    } catch (err) {
+      console.error("Password reset error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password reset",
@@ -251,8 +251,8 @@ export class AuthController {
       });
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Email verification error:", error);
+    } catch (err) {
+      console.error("Email verification error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during email verification",
@@ -287,8 +287,8 @@ export class AuthController {
       });
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Change password error:", error);
+    } catch (err) {
+      console.error("Change password error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password change",
@@ -318,8 +318,8 @@ export class AuthController {
         responseObject: req.user,
         statusCode: StatusCodes.OK,
       });
-    } catch (error) {
-      console.error("Get profile error:", error);
+    } catch (err) {
+      console.error("Get profile error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error retrieving profile",
@@ -352,16 +352,16 @@ export class AuthController {
         });
       }
 
-      // This would generate a new verification token and send email
-      // For now, return a success message
+      
+      
       return res.status(StatusCodes.OK).json({
         success: true,
         message: "Verification email sent successfully",
         responseObject: null,
         statusCode: StatusCodes.OK,
       });
-    } catch (error) {
-      console.error("Resend verification error:", error);
+    } catch (err) {
+      console.error("Resend verification error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error sending verification email",
@@ -385,8 +385,8 @@ export class AuthController {
         });
       }
 
-      // This would query user sessions from database
-      // For now, return placeholder data
+      
+      
       const sessions = [
         {
           id: "session-1",
@@ -405,8 +405,8 @@ export class AuthController {
         responseObject: sessions,
         statusCode: StatusCodes.OK,
       });
-    } catch (error) {
-      console.error("Get sessions error:", error);
+    } catch (err) {
+      console.error("Get sessions error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error retrieving sessions",
@@ -441,12 +441,12 @@ export class AuthController {
         });
       }
 
-      // This would revoke the specific session
+      
       const serviceResponse = await AuthService.logout(req.drizzle, sessionId, req.user.id);
 
       return handleServiceResponse(serviceResponse, res);
-    } catch (error) {
-      console.error("Revoke session error:", error);
+    } catch (err) {
+      console.error("Revoke session error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error revoking session",
@@ -470,16 +470,16 @@ export class AuthController {
         });
       }
 
-      // This would revoke all sessions except current
-      // For now, return success message
+      
+      
       return res.status(StatusCodes.OK).json({
         success: true,
         message: "All other sessions revoked successfully",
         responseObject: null,
         statusCode: StatusCodes.OK,
       });
-    } catch (error) {
-      console.error("Revoke all sessions error:", error);
+    } catch (err) {
+      console.error("Revoke all sessions error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error revoking sessions",

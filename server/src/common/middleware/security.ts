@@ -1,7 +1,7 @@
 import helmet from "helmet";
 import type { Application, Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { env } from "../utils/envConfig.js";
 
 /**
@@ -14,12 +14,12 @@ import { env } from "../utils/envConfig.js";
 export function configureSecurityHeaders(app: Application): void {
   app.use(
     helmet({
-      // Content Security Policy
+      
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-          fontSrc: ["'self'", "https://fonts.gstatic.com"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https:
+          fontSrc: ["'self'", "https:
           imgSrc: ["'self'", "data:", "https:"],
           scriptSrc: ["'self'"],
           connectSrc: ["'self'"],
@@ -27,64 +27,50 @@ export function configureSecurityHeaders(app: Application): void {
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
           formAction: ["'self'"],
-          upgradeInsecureRequests: env.isProduction ? [] : false,
+          upgradeInsecureRequests: env.isProduction ? [] : null,
         },
-        reportOnly: !env.isProduction, // Report only in development
+        reportOnly: !env.isProduction, 
       },
 
-      // HTTP Strict Transport Security
+      
       hsts: {
-        maxAge: 31536000, // 1 year
+        maxAge: 31536000, 
         includeSubDomains: true,
         preload: true,
       },
 
-      // X-Frame-Options
+      
       frameguard: {
         action: "deny",
       },
 
-      // X-Content-Type-Options
+      
       noSniff: true,
 
-      // X-XSS-Protection
+      
       xssFilter: true,
 
-      // Referrer Policy
+      
       referrerPolicy: {
         policy: ["no-referrer", "strict-origin-when-cross-origin"],
       },
 
-      // Cross-Origin Embedder Policy
-      crossOriginEmbedderPolicy: false, // May interfere with APIs
+      
+      crossOriginEmbedderPolicy: false, 
 
-      // Cross-Origin Opener Policy
+      
       crossOriginOpenerPolicy: {
         policy: "same-origin",
       },
 
-      // Cross-Origin Resource Policy
+      
       crossOriginResourcePolicy: {
         policy: "cross-origin",
       },
 
-      // Permissions Policy (Feature Policy)
-      permissionsPolicy: {
-        features: {
-          camera: ["'none'"],
-          microphone: ["'none'"],
-          geolocation: ["'none'"],
-          payment: ["'none'"],
-          usb: ["'none'"],
-          magnetometer: ["'none'"],
-          gyroscope: ["'none'"],
-          accelerometer: ["'none'"],
-        },
-      },
-
-      // Hide X-Powered-By header
+      
       hidePoweredBy: true,
-    })
+    }),
   );
 }
 
@@ -124,23 +110,23 @@ class CSRFProtection {
   /**
    * Set CSRF token in cookie and make it available to client
    */
-  setToken(req: Request, res: Response): string {
+  setToken(_req: Request, res: Response): string {
     const token = this.generateToken();
+
     
-    // Set secure httpOnly cookie for server verification
     res.cookie(`${this.cookieName}-secret`, token, {
       httpOnly: true,
       secure: env.isProduction,
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000, 
     });
 
-    // Set readable cookie for client to include in headers
+    
     res.cookie(this.cookieName, token, {
       httpOnly: false,
       secure: env.isProduction,
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000, 
     });
 
     return token;
@@ -150,42 +136,40 @@ class CSRFProtection {
    * Verify CSRF token
    */
   verifyToken(req: Request): boolean {
-    const cookieToken = req.cookies?.[`${this.cookieName}-secret`];
+    const cookieToken = req.cookies[`${this.cookieName}-secret`];
     const headerToken = req.get(this.headerName) || req.body?._csrf;
 
     if (!cookieToken || !headerToken) {
       return false;
     }
 
-    // Use timing-safe comparison
-    return crypto.timingSafeEqual(
-      Buffer.from(cookieToken),
-      Buffer.from(headerToken)
-    );
+    
+    return crypto.timingSafeEqual(Buffer.from(cookieToken), Buffer.from(headerToken));
   }
 
   /**
    * CSRF middleware
    */
   middleware() {
-    return (req: Request, res: Response, next: NextFunction) => {
-      // Skip CSRF protection for whitelisted paths
+    return (req: Request, res: Response, next: NextFunction): void => {
       if (this.whitelist.has(req.path)) {
-        return next();
+        next();
+        return;
       }
 
-      // Skip for ignored methods (GET, HEAD, OPTIONS)
+      
       if (this.ignoredMethods.has(req.method)) {
-        // Ensure token is set for non-modifying requests
-        if (!req.cookies?.[this.cookieName]) {
+        
+        if (!req.cookies[this.cookieName]) {
           this.setToken(req, res);
         }
-        return next();
+        next();
+        return;
       }
 
-      // Verify CSRF token for state-changing requests
+      
       if (!this.verifyToken(req)) {
-        return res.status(StatusCodes.FORBIDDEN).json({
+        res.status(StatusCodes.FORBIDDEN).json({
           success: false,
           message: "Invalid CSRF token. Please refresh the page and try again.",
           responseObject: null,
@@ -194,6 +178,7 @@ class CSRFProtection {
       }
 
       next();
+      
     };
   }
 
@@ -203,7 +188,7 @@ class CSRFProtection {
   getTokenEndpoint() {
     return (req: Request, res: Response) => {
       const token = this.setToken(req, res);
-      
+
       res.json({
         success: true,
         message: "CSRF token generated",
@@ -214,7 +199,7 @@ class CSRFProtection {
   }
 }
 
-// Create CSRF protection instance
+
 export const csrfProtection = new CSRFProtection({
   whitelist: [
     "/health",
@@ -231,8 +216,8 @@ export const csrfProtection = new CSRFProtection({
 /**
  * API Security Headers Middleware
  */
-export function apiSecurityHeaders(req: Request, res: Response, next: NextFunction): void {
-  // Security headers specific to API responses
+export function apiSecurityHeaders(_req: Request, res: Response, next: NextFunction) {
+  
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-XSS-Protection", "1; mode=block");
@@ -241,7 +226,7 @@ export function apiSecurityHeaders(req: Request, res: Response, next: NextFuncti
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
 
-  // API-specific headers
+  
   res.setHeader("X-API-Version", "1.0.0");
   res.setHeader("X-Response-Time", Date.now().toString());
 
@@ -251,12 +236,12 @@ export function apiSecurityHeaders(req: Request, res: Response, next: NextFuncti
 /**
  * Request sanitization middleware
  */
-export function sanitizeRequest(req: Request, res: Response, next: NextFunction): void {
-  // Remove potentially dangerous characters from query parameters
+export function sanitizeRequest(req: Request, _res: Response, next: NextFunction) {
+  
   if (req.query) {
     for (const [key, value] of Object.entries(req.query)) {
       if (typeof value === "string") {
-        // Remove HTML tags and potentially dangerous characters
+        
         req.query[key] = value
           .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
           .replace(/<[^>]+>/g, "")
@@ -265,7 +250,7 @@ export function sanitizeRequest(req: Request, res: Response, next: NextFunction)
     }
   }
 
-  // Sanitize request body (basic XSS prevention)
+  
   if (req.body && typeof req.body === "object") {
     sanitizeObject(req.body);
   }
@@ -305,7 +290,7 @@ export class IPAccessControl {
     return (req: Request, res: Response, next: NextFunction) => {
       const clientIP = this.getClientIP(req);
 
-      // Check blacklist first
+      
       if (this.blacklist.has(clientIP)) {
         return res.status(StatusCodes.FORBIDDEN).json({
           success: false,
@@ -315,7 +300,7 @@ export class IPAccessControl {
         });
       }
 
-      // If whitelist is configured, check it
+      
       if (this.whitelist.size > 0 && !this.whitelist.has(clientIP)) {
         return res.status(StatusCodes.FORBIDDEN).json({
           success: false,
@@ -326,6 +311,7 @@ export class IPAccessControl {
       }
 
       next();
+      
     };
   }
 
@@ -333,7 +319,7 @@ export class IPAccessControl {
     return (
       req.ip ||
       req.socket.remoteAddress ||
-      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      (req.headers["x-forwarded-for"] as string).split(",")[0]?.trim() ||
       "unknown"
     );
   }
@@ -358,7 +344,7 @@ export class IPAccessControl {
 /**
  * Request ID middleware for tracking
  */
-export function requestId(req: Request, res: Response, next: NextFunction): void {
+export function requestId(req: Request, res: Response, next: NextFunction) {
   const id = crypto.randomUUID();
   req.headers["x-request-id"] = id;
   res.setHeader("X-Request-ID", id);
@@ -368,29 +354,29 @@ export function requestId(req: Request, res: Response, next: NextFunction): void
 /**
  * Security monitoring middleware
  */
-export function securityMonitoring(req: Request, res: Response, next: NextFunction): void {
+export function securityMonitoring(req: Request, res: Response, next: NextFunction) {
   const startTime = Date.now();
+
   
-  // Log suspicious patterns
   const suspiciousPatterns = [
-    /\.\./,                    // Path traversal
-    /<script/i,               // XSS attempts
-    /union.*select/i,         // SQL injection
-    /exec\(/i,                // Code injection
-    /eval\(/i,                // Code injection
+    /\.\./, 
+    /<script/i, 
+    /union.*select/i, 
+    /exec\(/i, 
+    /eval\(/i, 
   ];
 
   const userAgent = req.get("user-agent") || "";
   const url = req.url;
   const body = JSON.stringify(req.body);
 
-  // Check for suspicious patterns
-  const isSuspicious = suspiciousPatterns.some(pattern => 
-    pattern.test(url) || pattern.test(body) || pattern.test(userAgent)
+  
+  const isSuspicious = suspiciousPatterns.some(
+    (pattern) => pattern.test(url) || pattern.test(body) || pattern.test(userAgent),
   );
 
   if (isSuspicious) {
-    console.warn(`Suspicious request detected:`, {
+    console.warn("Suspicious request detected:", {
       ip: req.ip,
       userAgent,
       url,
@@ -400,11 +386,12 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
     });
   }
 
-  // Monitor response time
+  
   res.on("finish", () => {
     const duration = Date.now() - startTime;
-    if (duration > 5000) { // Log slow requests
-      console.warn(`Slow request detected:`, {
+    if (duration > 5000) {
+      
+      console.warn("Slow request detected:", {
         ip: req.ip,
         url,
         method: req.method,
@@ -421,26 +408,26 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
 /**
  * Complete security middleware setup
  */
-export function setupSecurity(app: Application): void {
-  // Configure security headers
+export function setupSecurity(app: Application) {
+  
   configureSecurityHeaders(app);
 
-  // Add request ID for tracking
+  
   app.use(requestId);
 
-  // Add security monitoring
+  
   app.use(securityMonitoring);
 
-  // API-specific security headers
+  
   app.use("/api", apiSecurityHeaders);
 
-  // Request sanitization
+  
   app.use(sanitizeRequest);
 
-  // CSRF protection (exclude auth endpoints that need to work without existing session)
+  
   app.use(csrfProtection.middleware());
 
-  // Add CSRF token endpoint
+  
   app.get("/api/csrf-token", csrfProtection.getTokenEndpoint());
 }
 
@@ -454,8 +441,8 @@ export const SecurityUtils = {
   validateOrigin(req: Request, allowedOrigins: string[]): boolean {
     const origin = req.get("origin");
     if (!origin) return false;
-    
-    return allowedOrigins.some(allowed => {
+
+    return allowedOrigins.some((allowed) => {
       if (allowed === "*") return true;
       if (allowed.includes("*")) {
         const pattern = new RegExp(allowed.replace(/\*/g, ".*"));
@@ -469,18 +456,9 @@ export const SecurityUtils = {
    * Check for bot/crawler user agents
    */
   isBot(userAgent: string): boolean {
-    const botPatterns = [
-      /bot/i,
-      /crawler/i,
-      /spider/i,
-      /scraper/i,
-      /curl/i,
-      /wget/i,
-      /python/i,
-      /java/i,
-    ];
-    
-    return botPatterns.some(pattern => pattern.test(userAgent));
+    const botPatterns = [/bot/i, /crawler/i, /spider/i, /scraper/i, /curl/i, /wget/i, /python/i, /java/i];
+
+    return botPatterns.some((pattern) => pattern.test(userAgent));
   },
 
   /**
@@ -497,3 +475,4 @@ export const SecurityUtils = {
     return crypto.createHash("sha256").update(data).digest("hex").substring(0, 8);
   },
 };
+

@@ -3,13 +3,28 @@ import RedisStore from "rate-limit-redis";
 import { StatusCodes } from "http-status-codes";
 import { env } from "../utils/envConfig.js";
 import { redisClient } from "./session.js";
+import { Request, Response } from "express";
+
+
+declare global {
+  namespace Express {
+    interface Request {
+      rateLimit?: {
+        limit: number;
+        current: number;
+        remaining: number;
+        resetTime?: Date;
+      };
+    }
+  }
+}
 
 /**
  * Enhanced rate limiting specifically for authentication endpoints
  * with Redis backing for distributed rate limiting
  */
 
-// Common rate limit response
+
 const rateLimitResponse = (limit: number, windowMs: number) => ({
   success: false,
   message: `Too many requests. You have exceeded the limit of ${limit} requests per ${Math.floor(windowMs / 60000)} minutes. Please try again later.`,
@@ -31,7 +46,7 @@ function createRedisStore() {
       prefix: "rl:",
     });
   }
-  return undefined; // Fall back to memory store
+  return undefined; 
 }
 
 /**
@@ -40,18 +55,16 @@ function createRedisStore() {
  */
 export const authRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS, // 15 minutes
-  max: env.AUTH_RATE_LIMIT_MAX_REQUESTS, // 5 requests per window
+  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS, 
+  max: env.AUTH_RATE_LIMIT_MAX_REQUESTS, 
   message: rateLimitResponse(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => {
-    // Skip rate limiting in test environment
+  skip: (_req: Request) => {
     return process.env.NODE_ENV === "test";
   },
-  keyGenerator: (req) => {
-    // Use IP address as the primary key, with fallback to x-forwarded-for
-    return req.ip || req.socket.remoteAddress || "unknown";
+  keyGenerator: (req: Request) => {
+    return req.ip ?? req.socket.remoteAddress ?? "unknown";
   },
   handler: (req, res) => {
     const response = rateLimitResponse(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS);
@@ -59,28 +72,21 @@ export const authRateLimit = rateLimit({
   },
 });
 
-/**
- * Strict rate limiting for login attempts
- * More restrictive than general auth rate limiting
- */
 export const loginRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 login attempts per 15 minutes per IP
+  windowMs: 15 * 60 * 1000, 
+  max: 5, 
   message: rateLimitResponse(5, 15 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => process.env.NODE_ENV === "test",
+  skip: (_req: Request) => process.env.NODE_ENV === "test",
   keyGenerator: (req) => {
-    // Combine IP and email for more granular control
     const email = req.body?.email || "no-email";
     const ip = req.ip || req.socket.remoteAddress || "unknown";
     return `login:${ip}:${email}`;
   },
-  handler: (req, res) => {
-    res.status(StatusCodes.TOO_MANY_REQUESTS).json(
-      rateLimitResponse(5, 15 * 60 * 1000)
-    );
+  handler: (_req, res) => {
+    res.status(StatusCodes.TOO_MANY_REQUESTS).json(rateLimitResponse(5, 15 * 60 * 1000));
   },
 });
 
@@ -90,17 +96,17 @@ export const loginRateLimit = rateLimit({
  */
 export const passwordResetRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 3, // 3 password reset requests per hour per email
+  windowMs: 60 * 60 * 1000, 
+  max: 3, 
   message: rateLimitResponse(3, 60 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => process.env.NODE_ENV === "test",
-  keyGenerator: (req) => {
+  skip: (_req: Request) => process.env.NODE_ENV === "test",
+  keyGenerator: (req: Request) => {
     const email = req.body?.email || "no-email";
     return `password-reset:${email}`;
   },
-  handler: (req, res) => {
+  handler: (_req: Request, res: Response) => {
     res.status(StatusCodes.TOO_MANY_REQUESTS).json({
       success: false,
       message: "Too many password reset requests. Please wait before requesting another reset.",
@@ -119,18 +125,18 @@ export const passwordResetRateLimit = rateLimit({
  */
 export const emailVerificationRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // 5 verification attempts per 10 minutes per IP
+  windowMs: 10 * 60 * 1000, 
+  max: 5, 
   message: rateLimitResponse(5, 10 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => process.env.NODE_ENV === "test",
-  keyGenerator: (req) => {
+  skip: (_req: Request) => process.env.NODE_ENV === "test",
+  keyGenerator: (req: Request) => {
     const token = req.body?.token || "no-token";
     const ip = req.ip || req.socket.remoteAddress || "unknown";
     return `email-verify:${ip}:${token.substring(0, 8)}`;
   },
-  handler: (req, res) => {
+  handler: (_req: Request, res: Response) => {
     res.status(StatusCodes.TOO_MANY_REQUESTS).json({
       success: false,
       message: "Too many email verification attempts. Please wait before trying again.",
@@ -150,17 +156,17 @@ export const emailVerificationRateLimit = rateLimit({
  */
 export const registrationRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // 5 registration attempts per hour per IP
+  windowMs: 60 * 60 * 1000, 
+  max: 5, 
   message: rateLimitResponse(5, 60 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => process.env.NODE_ENV === "test",
-  keyGenerator: (req) => {
+  skip: (_req: Request) => process.env.NODE_ENV === "test",
+  keyGenerator: (req: Request) => {
     const ip = req.ip || req.socket.remoteAddress || "unknown";
     return `register:${ip}`;
   },
-  handler: (req, res) => {
+  handler: (_req: Request, res: Response) => {
     res.status(StatusCodes.TOO_MANY_REQUESTS).json({
       success: false,
       message: "Too many registration attempts. Please wait before creating another account.",
@@ -180,17 +186,17 @@ export const registrationRateLimit = rateLimit({
  */
 export const refreshTokenRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // 10 refresh attempts per 15 minutes per IP
+  windowMs: 15 * 60 * 1000, 
+  max: 10, 
   message: rateLimitResponse(10, 15 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => process.env.NODE_ENV === "test",
-  keyGenerator: (req) => {
+  skip: (_req: Request) => process.env.NODE_ENV === "test",
+  keyGenerator: (req: Request) => {
     const ip = req.ip || req.socket.remoteAddress || "unknown";
     return `refresh:${ip}`;
   },
-  handler: (req, res) => {
+  handler: (_req: Request, res: Response) => {
     res.status(StatusCodes.TOO_MANY_REQUESTS).json({
       success: false,
       message: "Too many token refresh attempts. Please wait before trying again.",
@@ -212,33 +218,29 @@ export const createAdaptiveRateLimit = (baseMax: number, baseWindowMs: number) =
   return rateLimit({
     store: createRedisStore(),
     windowMs: baseWindowMs,
-    max: (req) => {
-      // Reduce limit for requests with suspicious patterns
+    max: (req: Request) => {
+      
       const userAgent = req.get("user-agent") || "";
       const hasValidUserAgent = userAgent.length > 10 && !userAgent.includes("bot");
+
       
-      // Check for common automation indicators
-      const suspiciousHeaders = [
-        "automation",
-        "selenium",
-        "crawler",
-        "spider",
-        "scraper",
-      ].some(keyword => userAgent.toLowerCase().includes(keyword));
+      const suspiciousHeaders = ["automation", "selenium", "crawler", "spider", "scraper"].some((keyword) =>
+        userAgent.toLowerCase().includes(keyword),
+      );
 
       if (!hasValidUserAgent || suspiciousHeaders) {
-        return Math.max(1, Math.floor(baseMax / 2)); // Reduce by half
+        return Math.max(1, Math.floor(baseMax / 2)); 
       }
 
       return baseMax;
     },
-    message: (req) => {
+    message: (req: Request) => {
       const max = typeof req.rateLimit?.limit === "number" ? req.rateLimit.limit : baseMax;
       return rateLimitResponse(max, baseWindowMs);
     },
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => process.env.NODE_ENV === "test",
+    skip: (_req: Request) => process.env.NODE_ENV === "test",
   });
 };
 
@@ -252,42 +254,24 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
   return rateLimit({
     store: createRedisStore(),
     windowMs: baseWindowMs,
-    max: (req) => {
+    max: (req: Request) => {
       const key = req.ip || "unknown";
       const violation = violationStore.get(key);
-      
+
       if (!violation) {
         return baseMax;
       }
 
-      // Increase restriction progressively
-      const multiplier = Math.min(violation.count, 5); // Cap at 5x restriction
+      
+      const multiplier = Math.min(violation.count, 5); 
       return Math.max(1, Math.floor(baseMax / multiplier));
     },
-    onLimitReached: (req) => {
-      const key = req.ip || "unknown";
-      const existing = violationStore.get(key);
-      
-      if (existing) {
-        existing.count += 1;
-      } else {
-        violationStore.set(key, { count: 1, firstViolation: Date.now() });
-      }
-
-      // Clean up old violations (after 24 hours)
-      const now = Date.now();
-      for (const [k, v] of violationStore.entries()) {
-        if (now - v.firstViolation > 24 * 60 * 60 * 1000) {
-          violationStore.delete(k);
-        }
-      }
-    },
-    message: (req) => {
+    message: (req: Request) => {
       const key = req.ip || "unknown";
       const violation = violationStore.get(key);
       const multiplier = violation ? Math.min(violation.count, 5) : 1;
       const max = Math.max(1, Math.floor(baseMax / multiplier));
-      
+
       return {
         success: false,
         message: `Rate limit exceeded. Due to repeated violations, your limit has been reduced to ${max} requests per window.`,
@@ -301,7 +285,7 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
     },
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => process.env.NODE_ENV === "test",
+    skip: (_req: Request) => process.env.NODE_ENV === "test",
   });
 };
 
@@ -309,10 +293,10 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
  * Rate limiting middleware that combines multiple strategies
  */
 export const authSecurityRateLimit = [
-  // Basic IP-based rate limiting
-  authRateLimit,
   
-  // Adaptive rate limiting based on patterns
+  authRateLimit,
+
+  
   createAdaptiveRateLimit(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
 ];
 
@@ -331,8 +315,8 @@ export class RateLimitUtils {
         if (keys.length > 0) {
           await redisClient.del(keys);
         }
-      } catch (error) {
-        console.error("Error resetting rate limit:", error);
+      } catch (err) {
+        console.error("Error resetting rate limit:", err);
       }
     }
   }
@@ -348,10 +332,7 @@ export class RateLimitUtils {
     if (redisClient) {
       try {
         const redisKey = `rl:${key}`;
-        const [current, ttl] = await Promise.all([
-          redisClient.get(redisKey),
-          redisClient.ttl(redisKey),
-        ]);
+        const [current, ttl] = await Promise.all([redisClient.get(redisKey), redisClient.ttl(redisKey)]);
 
         const currentCount = current ? parseInt(current, 10) : 0;
         const resetTime = ttl > 0 ? new Date(Date.now() + ttl * 1000) : null;
@@ -361,8 +342,8 @@ export class RateLimitUtils {
           resetTime,
           total: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
         };
-      } catch (error) {
-        console.error("Error getting rate limit status:", error);
+      } catch (err) {
+        console.error("Error getting rate limit status:", err);
       }
     }
 
@@ -376,19 +357,20 @@ export class RateLimitUtils {
   /**
    * Check if IP is currently rate limited
    */
-  static async isRateLimited(ip: string, limitType: string = "auth"): Promise<boolean> {
+  static async isRateLimited(ip: string, limitType = "auth"): Promise<boolean> {
     if (redisClient) {
       try {
         const key = `rl:${limitType}:${ip}`;
         const current = await redisClient.get(key);
         const currentCount = current ? parseInt(current, 10) : 0;
-        
+
         return currentCount >= env.AUTH_RATE_LIMIT_MAX_REQUESTS;
-      } catch (error) {
-        console.error("Error checking rate limit status:", error);
+      } catch (err) {
+        console.error("Error checking rate limit status:", err);
       }
     }
-    
+
     return false;
   }
 }
+

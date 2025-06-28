@@ -69,7 +69,7 @@ export const getBookSchema = z.object({
   }),
 });
 
-// Schema for creating a single book: use author and publisher names
+
 export const createBookSchema = z.object({
   title: titleSchema,
   author: authorSchema,
@@ -80,7 +80,7 @@ export const createBookSchema = z.object({
   language: languageSchema,
 });
 
-// Schema for updating a book: author and publisher as names
+
 export const updateBookSchema = z.object({
   title: titleSchema.optional(),
   author: authorSchema.optional(),
@@ -91,7 +91,7 @@ export const updateBookSchema = z.object({
   language: languageSchema.optional(),
 });
 
-// Schema for bulk creating books: expects existing authorId and publisherId UUIDs
+
 export const createBooksBulkSchema = z.array(
   z.object({
     title: titleSchema,

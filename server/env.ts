@@ -20,7 +20,7 @@ export const IS_DEV = ENV === "development";
 
 export const PORT = number("PORT", 4050);
 export const HOST = process.env.HOST ?? "0.0.0.0";
-// Set default logging levels based on environment if LOG_LEVEL not provided
+
 let defaultLogLevel = "info";
 if (ENV === "development") {
   defaultLogLevel = "debug";

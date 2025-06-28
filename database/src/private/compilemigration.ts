@@ -32,11 +32,11 @@ async function main() {
 
     const includeContent = await readFile(join(dirname(last.filename), match[1]), "utf-8");
 
-    // An include directive will DELETE EVERYTHING between the start and the next `--!endinclude` line.
-    // If there is no end include line before the next include or the end of the file`, then nothing is deleted.
-    //
-    // This makes it reasonable for includes to replace their own content if you change the content, but it will
-    // lead to lost code if you are not careful when editing the migration manually.
+    
+    
+    
+    
+    
     let j = i + 1;
     for (; j < lines.length; ++j) {
       if (INCLUDE_START.test(lines[j])) {

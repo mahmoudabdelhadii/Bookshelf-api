@@ -56,7 +56,7 @@ describe("Library Validation Schemas", () => {
     it("should reject library with name exceeding max length", () => {
       const invalidLibrary = {
         id: "123e4567-e89b-12d3-a456-426614174000",
-        name: "a".repeat(101), // Exceeds 100 character limit
+        name: "a".repeat(101), 
         createdAt: new Date(),
       };
 
@@ -67,7 +67,7 @@ describe("Library Validation Schemas", () => {
       const invalidLibrary = {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "Central Library",
-        location: "a".repeat(201), // Exceeds 200 character limit
+        location: "a".repeat(201), 
         createdAt: new Date(),
       };
 
@@ -110,7 +110,7 @@ describe("Library Validation Schemas", () => {
         location: "Uptown",
       };
 
-      // This passes because the schema doesn't trim whitespace - that would be handled in service layer
+      
       const result = createLibrarySchema.parse(dataWithWhitespace);
       expect(result).toEqual(dataWithWhitespace);
     });
@@ -201,14 +201,14 @@ describe("Library Validation Schemas", () => {
         location: "Downtown",
       };
 
-      // Note: Zod doesn't automatically trim, this would need to be handled in the service layer
+      
       const result = createLibrarySchema.parse(createDataWithWhitespace);
       assert.deepStrictEqual(result, createDataWithWhitespace);
     });
 
     it("should handle boundary values for name length", () => {
       const validCreateData = {
-        name: "a".repeat(100), // Exactly 100 characters
+        name: "a".repeat(100), 
       };
 
       const result = createLibrarySchema.parse(validCreateData);
@@ -218,7 +218,7 @@ describe("Library Validation Schemas", () => {
     it("should handle boundary values for location length", () => {
       const validCreateData = {
         name: "Central Library",
-        location: "a".repeat(200), // Exactly 200 characters
+        location: "a".repeat(200), 
       };
 
       const result = createLibrarySchema.parse(validCreateData);

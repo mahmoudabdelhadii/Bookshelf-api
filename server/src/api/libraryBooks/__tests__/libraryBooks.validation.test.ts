@@ -68,7 +68,7 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
-        shelfLocation: "a".repeat(101), // Exceeds 100 character limit
+        shelfLocation: "a".repeat(101), 
         addedAt: new Date(),
       };
 
@@ -80,7 +80,7 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
-        condition: "a".repeat(51), // Exceeds 50 character limit
+        condition: "a".repeat(51), 
         addedAt: new Date(),
       };
 
@@ -175,7 +175,7 @@ describe("LibraryBooks Validation Schemas", () => {
     it("should reject create data with missing required fields", () => {
       const invalidCreateData = {
         libraryId: "lib-123e4567-e89b-12d3-a456-426614174000",
-        // Missing bookId
+        
       };
 
       expect(() => createLibraryBookSchema.parse(invalidCreateData)).toThrow(ZodError);
@@ -278,7 +278,7 @@ describe("LibraryBooks Validation Schemas", () => {
       const validCreateData = {
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
-        shelfLocation: "a".repeat(100), // Exactly 100 characters
+        shelfLocation: "a".repeat(100), 
       };
 
       const result = createLibraryBookSchema.parse(validCreateData);
@@ -289,7 +289,7 @@ describe("LibraryBooks Validation Schemas", () => {
       const validCreateData = {
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
-        condition: "a".repeat(50), // Exactly 50 characters
+        condition: "a".repeat(50), 
       };
 
       const result = createLibraryBookSchema.parse(validCreateData);

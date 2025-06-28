@@ -16,7 +16,7 @@ export function createApiResponse(schema: z.ZodTypeAny, description: string, sta
   };
 }
 
-// Use if you want multiple responses for a single endpoint
+
 
 export type ApiResponseConfig = {
   schema: z.ZodTypeAny;

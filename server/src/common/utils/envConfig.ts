@@ -10,15 +10,15 @@ const envSchema = z.object({
 
   PORT: z.coerce.number().int().positive().default(3000),
 
-  ISBNDB_API_KEY: z.string().default(""), // allow empty string by default
+  ISBNDB_API_KEY: z.string().default(""), 
 
-  CORS_ORIGIN: z.string().url().default("http://localhost:3000"),
+  CORS_ORIGIN: z.string().url().default("http:
 
   COMMON_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(1000),
 
   COMMON_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(1000),
 
-  // JWT Configuration
+  
   JWT_SECRET: z.string().min(32).default("your-super-secret-jwt-key-change-in-production-minimum-32-chars"),
   JWT_REFRESH_SECRET: z.string().min(32).default("your-super-secret-refresh-key-change-in-production-different-from-jwt"),
   JWT_EXPIRES_IN: z.string().default("15m"),
@@ -26,29 +26,54 @@ const envSchema = z.object({
   JWT_ISSUER: z.string().default("bookshelf-api"),
   JWT_AUDIENCE: z.string().default("bookshelf-users"),
 
-  // Session Configuration
+  
   SESSION_SECRET: z.string().min(32).default("your-super-secret-session-key-change-in-production-minimum-32-chars"),
   SESSION_NAME: z.string().default("bookshelf-session"),
-  SESSION_MAX_AGE: z.coerce.number().int().positive().default(86400000), // 24 hours in ms
+  SESSION_MAX_AGE: z.coerce.number().int().positive().default(86400000), 
 
-  // Redis Configuration (for session storage)
-  REDIS_URL: z.string().default("redis://localhost:6379"),
+  
+  REDIS_URL: z.string().default("redis:
   REDIS_SESSION_PREFIX: z.string().default("sess:"),
 
-  // Security Configuration
+  
   BCRYPT_ROUNDS: z.coerce.number().int().min(10).max(15).default(12),
-  PASSWORD_RESET_EXPIRES: z.coerce.number().int().positive().default(3600000), // 1 hour in ms
-  EMAIL_VERIFICATION_EXPIRES: z.coerce.number().int().positive().default(86400000), // 24 hours in ms
+  PASSWORD_RESET_EXPIRES: z.coerce.number().int().positive().default(3600000), 
+  EMAIL_VERIFICATION_EXPIRES: z.coerce.number().int().positive().default(86400000), 
   MAX_LOGIN_ATTEMPTS: z.coerce.number().int().positive().default(5),
-  LOCKOUT_TIME: z.coerce.number().int().positive().default(900000), // 15 minutes in ms
+  LOCKOUT_TIME: z.coerce.number().int().positive().default(900000), 
 
-  // Rate Limiting for Auth
+  
   AUTH_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(5),
-  AUTH_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000), // 15 minutes
+  AUTH_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000), 
 
-  // 2FA Configuration
+  
   TWO_FA_ISSUER: z.string().default("Bookshelf API"),
-  TWO_FA_WINDOW: z.coerce.number().int().positive().default(2), // Time step tolerance
+  TWO_FA_WINDOW: z.coerce.number().int().positive().default(2), 
+
+  
+  EMAIL_SERVICE: z.string().default("gmail"), 
+  EMAIL_HOST: z.string().default("smtp.gmail.com"),
+  EMAIL_PORT: z.coerce.number().int().positive().default(587),
+  EMAIL_SECURE: z.coerce.boolean().default(false), 
+  EMAIL_USER: z.string().default(""), 
+  EMAIL_PASS: z.string().default(""), 
+  EMAIL_FROM: z.string().default("noreply@bookshelf-api.com"),
+  EMAIL_FROM_NAME: z.string().default("Bookshelf API"),
+
+  
+  GOOGLE_CLIENT_ID: z.string().default(""),
+  GOOGLE_CLIENT_SECRET: z.string().default(""),
+  GOOGLE_CALLBACK_URL: z.string().default("/auth/google/callback"),
+
+  
+  APPLE_CLIENT_ID: z.string().default(""), 
+  APPLE_TEAM_ID: z.string().default(""), 
+  APPLE_KEY_ID: z.string().default(""), 
+  APPLE_PRIVATE_KEY: z.string().default(""), 
+  APPLE_CALLBACK_URL: z.string().default("/auth/apple/callback"),
+
+  
+  FRONTEND_URL: z.string().default("http:
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

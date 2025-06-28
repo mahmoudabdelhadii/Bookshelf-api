@@ -5,7 +5,8 @@
       "Bash(rmdir:*)",
       "Bash(npm install:*)",
       "Bash(npm run migrate:*)",
-      "Bash(npm run check:*)"
+      "Bash(npm run check:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

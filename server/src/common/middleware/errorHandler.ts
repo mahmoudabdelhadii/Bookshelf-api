@@ -13,7 +13,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
   };
 
   const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
-    // Log error with context
+    
     const errorContext = {
       url: req.url,
       method: req.method,
@@ -24,13 +24,13 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
     
     logger?.error({ err, ...errorContext }, "Error occurred in request");
 
-    // Handle custom API errors
+    
     if (err instanceof ApiError) {
       const response = ServiceResponse.failure(err.message, err.context, err.statusCode);
       return res.status(err.statusCode).send(response);
     }
 
-    // Handle Zod validation errors
+    
     if (err instanceof ZodError) {
       const formattedErrors = err.errors.map(error => ({
         field: error.path.join("."),
@@ -47,7 +47,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       return res.status(StatusCodes.BAD_REQUEST).send(response);
     }
 
-    // Handle specific known error types
+    
     if (err.name === "CastError") {
       const response = ServiceResponse.failure(
         "Invalid ID format provided",
@@ -66,7 +66,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       return res.status(StatusCodes.SERVICE_UNAVAILABLE).send(response);
     }
 
-    // Handle payload too large
+    
     if (err.type === "entity.too.large") {
       const response = ServiceResponse.failure(
         "Request payload too large",
@@ -76,7 +76,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       return res.status(StatusCodes.REQUEST_TOO_LONG).send(response);
     }
 
-    // Handle syntax errors (malformed JSON)
+    
     if (err instanceof SyntaxError && err.message.includes("JSON")) {
       const response = ServiceResponse.failure(
         "Invalid JSON format in request body",
@@ -86,7 +86,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       return res.status(StatusCodes.BAD_REQUEST).send(response);
     }
 
-    // Handle timeout errors
+    
     if (err.code === "ETIMEDOUT" || err.message.includes("timeout")) {
       const response = ServiceResponse.failure(
         "Request timeout",
@@ -96,7 +96,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       return res.status(StatusCodes.REQUEST_TIMEOUT).send(response);
     }
 
-    // Default error response
+    
     const isDevelopment = process.env.NODE_ENV === "development";
     const response = ServiceResponse.failure(
       "An unexpected error occurred",

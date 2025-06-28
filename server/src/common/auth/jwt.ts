@@ -1,16 +1,16 @@
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
+import jwt, { sign, SignOptions } from "jsonwebtoken";
+import crypto from "node:crypto";
 import { env } from "../utils/envConfig.js";
 
-// JWT Configuration
+
 const JWT_SECRET = env.JWT_SECRET || crypto.randomBytes(64).toString("hex");
 const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET || crypto.randomBytes(64).toString("hex");
-const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN || "15m"; // Short-lived access tokens
-const JWT_REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN || "7d"; // Longer-lived refresh tokens
+const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN || "15m";
+const JWT_REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN || "7d"; 
 const JWT_ISSUER = env.JWT_ISSUER || "bookshelf-api";
 const JWT_AUDIENCE = env.JWT_AUDIENCE || "bookshelf-users";
 
-// Interfaces
+
 export interface JwtPayload {
   userId: string;
   username: string;
@@ -42,7 +42,9 @@ export interface VerificationResult {
 /**
  * Generate JWT access token
  */
-export function generateAccessToken(payload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">): string {
+export function generateAccessToken(
+  payload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">,
+): string {
   const tokenPayload: Omit<JwtPayload, "iat" | "exp"> = {
     ...payload,
     type: "access",
@@ -50,18 +52,17 @@ export function generateAccessToken(payload: Omit<JwtPayload, "type" | "iat" | "
     aud: JWT_AUDIENCE,
   };
 
-  return jwt.sign(tokenPayload, JWT_SECRET, {
+  const options: SignOptions = {
     expiresIn: JWT_EXPIRES_IN,
-    issuer: JWT_ISSUER,
-    audience: JWT_AUDIENCE,
     algorithm: "HS256",
-  });
+  };
+
+  return sign(tokenPayload, JWT_SECRET, options);
 }
 
-/**
- * Generate JWT refresh token
- */
-export function generateRefreshToken(payload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">): string {
+export function generateRefreshToken(
+  payload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">,
+): string {
   const tokenPayload: Omit<JwtPayload, "iat" | "exp"> = {
     ...payload,
     type: "refresh",
@@ -69,22 +70,22 @@ export function generateRefreshToken(payload: Omit<JwtPayload, "type" | "iat" | 
     aud: JWT_AUDIENCE,
   };
 
-  return jwt.sign(tokenPayload, JWT_REFRESH_SECRET, {
+  const options: SignOptions = {
     expiresIn: JWT_REFRESH_EXPIRES_IN,
-    issuer: JWT_ISSUER,
-    audience: JWT_AUDIENCE,
     algorithm: "HS256",
-  });
-}
+  };
 
-/**
+  return sign(tokenPayload, JWT_REFRESH_SECRET, options);
+} /**
  * Generate both access and refresh tokens
  */
-export function generateTokenPair(userPayload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">): TokenPair {
+export function generateTokenPair(
+  userPayload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">,
+): TokenPair {
   const accessToken = generateAccessToken(userPayload);
   const refreshToken = generateRefreshToken(userPayload);
 
-  // Calculate expiration times in seconds
+  
   const accessExpiresIn = parseExpiration(JWT_EXPIRES_IN);
   const refreshExpiresIn = parseExpiration(JWT_REFRESH_EXPIRES_IN);
 
@@ -92,7 +93,7 @@ export function generateTokenPair(userPayload: Omit<JwtPayload, "type" | "iat" |
     accessToken,
     refreshToken,
     expiresIn: accessExpiresIn,
-    refreshExpiresIn: refreshExpiresIn,
+    refreshExpiresIn,
   };
 }
 
@@ -112,11 +113,11 @@ export function verifyAccessToken(token: string): VerificationResult {
     }
 
     return { isValid: true, payload };
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) {
       return { isValid: false, error: "Token expired", expired: true };
     }
-    if (error instanceof jwt.JsonWebTokenError) {
+    if (err instanceof jwt.JsonWebTokenError) {
       return { isValid: false, error: "Invalid token" };
     }
     return { isValid: false, error: "Token verification failed" };
@@ -139,11 +140,11 @@ export function verifyRefreshToken(token: string): VerificationResult {
     }
 
     return { isValid: true, payload };
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) {
       return { isValid: false, error: "Refresh token expired", expired: true };
     }
-    if (error instanceof jwt.JsonWebTokenError) {
+    if (err instanceof jwt.JsonWebTokenError) {
       return { isValid: false, error: "Invalid refresh token" };
     }
     return { isValid: false, error: "Refresh token verification failed" };
@@ -166,7 +167,7 @@ export function decodeToken(token: string): JwtPayload | null {
  */
 export function getTokenExpiration(token: string): Date | null {
   const decoded = decodeToken(token);
-  if (!decoded || !decoded.exp) {
+  if (!decoded?.exp) {
     return null;
   }
   return new Date(decoded.exp * 1000);
@@ -254,7 +255,7 @@ function parseExpiration(expiration: string): number {
     w: 604800,
   };
 
-  const match = expiration.match(/^(\d+)([smhdw])$/);
+  const match = /^(\d+)([smhdw])$/.exec(expiration);
   if (!match) {
     throw new Error(`Invalid expiration format: ${expiration}`);
   }
@@ -291,9 +292,7 @@ export const TokenUtils = {
 
     const fullPayload = { ...defaultPayload, ...payload };
 
-    return type === "access" 
-      ? generateAccessToken(fullPayload)
-      : generateRefreshToken(fullPayload);
+    return type === "access" ? generateAccessToken(fullPayload) : generateRefreshToken(fullPayload);
   },
 
   /**
@@ -314,7 +313,7 @@ export const TokenUtils = {
     };
 
     return jwt.sign(tokenPayload, JWT_SECRET, {
-      expiresIn: "-1s", // Already expired
+      expiresIn: "-1s", 
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
       algorithm: "HS256",
@@ -322,7 +321,7 @@ export const TokenUtils = {
   },
 };
 
-// Export configuration for testing
+
 export const JwtConfig = {
   JWT_SECRET,
   JWT_REFRESH_SECRET,
@@ -331,3 +330,4 @@ export const JwtConfig = {
   JWT_ISSUER,
   JWT_AUDIENCE,
 } as const;
+

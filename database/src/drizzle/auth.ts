@@ -2,7 +2,7 @@ import { text, timestamp, boolean, integer, uniqueIndex, index } from "drizzle-o
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 
-// User Sessions table for session management
+
 export const userSession = server.table(
   "user_session",
   {
@@ -25,7 +25,7 @@ export const userSession = server.table(
   ]
 );
 
-// Password Reset Tokens table
+
 export const passwordResetToken = server.table(
   "password_reset_token",
   {
@@ -43,7 +43,7 @@ export const passwordResetToken = server.table(
   ]
 );
 
-// Email Verification Tokens table
+
 export const emailVerificationToken = server.table(
   "email_verification_token",
   {
@@ -61,7 +61,7 @@ export const emailVerificationToken = server.table(
   ]
 );
 
-// Login Attempts table for rate limiting and security monitoring
+
 export const loginAttempt = server.table(
   "login_attempt",
   {
@@ -71,7 +71,7 @@ export const loginAttempt = server.table(
     isSuccessful: boolean("is_successful").notNull(),
     attemptedAt: timestamp("attempted_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     userAgent: text("user_agent"),
-    failureReason: text("failure_reason"), // e.g., "invalid_password", "account_locked", "invalid_email"
+    failureReason: text("failure_reason"), 
   },
   (table) => [
     index("idx_login_attempts_email").on(table.email),
@@ -80,14 +80,14 @@ export const loginAttempt = server.table(
   ]
 );
 
-// User Roles table for Role-Based Access Control (RBAC)
+
 export const role = server.table(
   "role",
   {
     id: idpk("id"),
     name: text("name").notNull(),
     description: text("description"),
-    permissions: text("permissions").array(), // JSON array of permissions
+    permissions: text("permissions").array(), 
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
@@ -96,7 +96,7 @@ export const role = server.table(
   ]
 );
 
-// User-Role Assignment table (many-to-many relationship)
+
 export const userRole = server.table(
   "user_role",
   {
@@ -113,18 +113,18 @@ export const userRole = server.table(
   ]
 );
 
-// Security Audit Log table
+
 export const securityAuditLog = server.table(
   "security_audit_log",
   {
     id: idpk("id"),
     userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
-    action: text("action").notNull(), // e.g., "login", "logout", "password_change", "role_change"
-    details: text("details"), // JSON string with additional details
+    action: text("action").notNull(), 
+    details: text("details"), 
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
     timestamp: timestamp("timestamp", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    severity: text("severity").notNull().default("info"), // "info", "warning", "critical"
+    severity: text("severity").notNull().default("info"), 
   },
   (table) => [
     index("idx_audit_log_user_id").on(table.userId),
@@ -134,7 +134,7 @@ export const securityAuditLog = server.table(
   ]
 );
 
-// Account Lockout table for security
+
 export const accountLockout = server.table(
   "account_lockout",
   {
@@ -142,12 +142,37 @@ export const accountLockout = server.table(
     userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
     lockedAt: timestamp("locked_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     lockedUntil: timestamp("locked_until", { withTimezone: true, mode: "date" }).notNull(),
-    reason: text("reason").notNull(), // e.g., "too_many_failed_attempts", "security_violation"
+    reason: text("reason").notNull(), 
     failedAttempts: integer("failed_attempts").default(0).notNull(),
     isActive: boolean("is_active").default(true).notNull(),
   },
   (table) => [
     index("idx_account_lockout_user_id").on(table.userId),
     index("idx_account_lockout_locked_until").on(table.lockedUntil),
+  ]
+);
+
+
+export const oauthProfile = server.table(
+  "oauth_profile",
+  {
+    id: idpk("id"),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    provider: text("provider").notNull(), 
+    providerId: text("provider_id").notNull(), 
+    email: text("email").notNull(),
+    profileData: text("profile_data"), 
+    accessToken: text("access_token"), 
+    refreshToken: text("refresh_token"), 
+    tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("unique_oauth_provider_user").on(table.provider, table.providerId),
+    uniqueIndex("unique_oauth_user_provider").on(table.userId, table.provider),
+    index("idx_oauth_profile_user_id").on(table.userId),
+    index("idx_oauth_profile_provider").on(table.provider),
+    index("idx_oauth_profile_email").on(table.email),
   ]
 );

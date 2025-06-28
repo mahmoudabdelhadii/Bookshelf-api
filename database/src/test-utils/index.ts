@@ -1,8 +1,9 @@
 import { connect, type DrizzleClient } from "database";
 
-export async function setupTestDb(testName: string): Promise<{ drizzle: DrizzleClient, close: () => Promise<void> }> {
-  // Connect to test database with specific name for easier debugging
-  const { drizzle, close } = await connect(testName);
+export async function setupTestDb(
+  testName: string,
+): Promise<{ drizzle: DrizzleClient; close: () => Promise<void> }> {
+  const { drizzle, close } = connect(testName);
   return { drizzle, close };
 }
 
@@ -37,6 +38,6 @@ export function createMockResponse() {
     statusCode: 200,
     body: null,
   } as any;
-  
+
   return res;
 }

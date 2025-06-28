@@ -31,7 +31,7 @@ describe("JWT utilities", () => {
 
       expect(token).toBeDefined();
       expect(typeof token).toBe("string");
-      expect(token.split(".")).toHaveLength(3); // JWT has 3 parts
+      expect(token.split(".")).toHaveLength(3); 
     });
 
     it("should include correct payload in token", () => {
@@ -49,10 +49,10 @@ describe("JWT utilities", () => {
       const token = generateAccessToken(mockPayload);
       const decoded = decodeToken(token);
 
-      expect(decoded!.iat).toBeDefined(); // Issued at
-      expect(decoded!.exp).toBeDefined(); // Expires at
-      expect(decoded!.iss).toBeDefined(); // Issuer
-      expect(decoded!.aud).toBeDefined(); // Audience
+      expect(decoded!.iat).toBeDefined(); 
+      expect(decoded!.exp).toBeDefined(); 
+      expect(decoded!.iss).toBeDefined(); 
+      expect(decoded!.aud).toBeDefined(); 
     });
   });
 
@@ -244,7 +244,7 @@ describe("JWT utilities", () => {
       expect(id1).toBeDefined();
       expect(id2).toBeDefined();
       expect(id1).not.toBe(id2);
-      expect(id1).toHaveLength(64); // 32 bytes in hex
+      expect(id1).toHaveLength(64); 
     });
   });
 
@@ -252,7 +252,7 @@ describe("JWT utilities", () => {
     it("should validate correct configuration", () => {
       const result = validateJwtConfig();
 
-      // This depends on the actual environment configuration
+      
       expect(result.isValid).toBeDefined();
       expect(Array.isArray(result.errors)).toBe(true);
     });
@@ -265,7 +265,7 @@ describe("JWT utilities", () => {
       const hash2 = createTokenHash(token);
 
       expect(hash1).toBe(hash2);
-      expect(hash1).toHaveLength(64); // SHA-256 hex hash
+      expect(hash1).toHaveLength(64); 
     });
 
     it("should create different hashes for different tokens", () => {
@@ -281,7 +281,7 @@ describe("JWT utilities", () => {
   describe("TokenUtils", () => {
     describe("createTestToken", () => {
       it("should create test access token with default payload", () => {
-        const token = TokenUtils.createTestToken();
+        const token = TokenUtils.createTestToken({});
         const decoded = decodeToken(token);
 
         expect(decoded).toBeDefined();
@@ -304,7 +304,7 @@ describe("JWT utilities", () => {
 
         expect(decoded!.userId).toBe("custom-user");
         expect(decoded!.role).toBe("admin");
-        expect(decoded!.username).toBe("testuser"); // Default value
+        expect(decoded!.username).toBe("testuser"); 
       });
     });
 
@@ -337,8 +337,8 @@ describe("JWT utilities", () => {
     });
 
     it("should reject tokens with wrong issuer", () => {
-      // This would require mocking the JWT verification to test different issuers
-      // For now, we test that our tokens have the correct issuer
+      
+      
       const token = generateAccessToken(mockPayload);
       const decoded = decodeToken(token);
 
@@ -346,7 +346,7 @@ describe("JWT utilities", () => {
     });
 
     it("should reject tokens with wrong audience", () => {
-      // Similar to issuer test
+      
       const token = generateAccessToken(mockPayload);
       const decoded = decodeToken(token);
 
@@ -357,13 +357,13 @@ describe("JWT utilities", () => {
       const sessionIds = Array.from({ length: 100 }, () => generateSessionId());
       const uniqueIds = new Set(sessionIds);
 
-      // All session IDs should be unique
+      
       expect(uniqueIds.size).toBe(sessionIds.length);
 
-      // Should be hex strings
-      sessionIds.forEach(id => {
+      
+      for (const id of sessionIds) {
         expect(id).toMatch(/^[a-f0-9]+$/);
-      });
+      }
     });
 
     it("should handle malformed JWT structures", () => {
@@ -372,15 +372,15 @@ describe("JWT utilities", () => {
         "only.two.parts",
         "",
         "too.many.parts.here.extra",
-        "header.payload.", // Missing signature
-        ".payload.signature", // Missing header
-        "header..signature", // Missing payload
+        "header.payload.", 
+        ".payload.signature", 
+        "header..signature", 
       ];
 
-      malformedTokens.forEach(token => {
+      for (const token of malformedTokens) {
         const result = verifyAccessToken(token);
         expect(result.isValid).toBe(false);
-      });
+      }
     });
   });
 });

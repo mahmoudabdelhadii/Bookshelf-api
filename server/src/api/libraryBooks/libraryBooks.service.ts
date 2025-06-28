@@ -18,7 +18,7 @@ export const LibraryBooksService = {
     }
 
     try {
-      // First check if library exists
+      
       const library = await drizzle.query.library.findFirst({
         where: (libraries, { eq }) => eq(libraries.id, libraryId),
       });
@@ -76,7 +76,7 @@ export const LibraryBooksService = {
     }
 
     try {
-      // Check if library exists
+      
       const library = await drizzle.query.library.findFirst({
         where: (libraries, { eq }) => eq(libraries.id, libraryBookData.libraryId),
       });
@@ -85,7 +85,7 @@ export const LibraryBooksService = {
         return ServiceResponse.failure(notFoundError.message, null, notFoundError.statusCode);
       }
 
-      // Check if book exists
+      
       const book = await drizzle.query.book.findFirst({
         where: (books, { eq }) => eq(books.id, libraryBookData.bookId),
       });
@@ -94,7 +94,7 @@ export const LibraryBooksService = {
         return ServiceResponse.failure(notFoundError.message, null, notFoundError.statusCode);
       }
 
-      // Check if book is already in the library
+      
       const existingEntry = await drizzle.query.libraryBooks.findFirst({
         where: (libraryBooks, { and, eq }) => 
           and(

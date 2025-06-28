@@ -8,9 +8,9 @@ import { libraryRouter } from "../library.router.js";
 import { LibraryService } from "../library.service.js";
 import type { ServiceResponse } from "../../../common/models/serviceResponse.js";
 import type { Library, CreateLibrary, UpdateLibrary } from "../library.model.js";
-import { setupTestDb } from "../../../common/utils/testUtils.js";
+import { setupTestDb } from "database/test-utils";
 
-// Mock the LibraryService
+
 const mockLibraryService = {
   findAll: vi.fn(),
   findById: vi.fn(),
@@ -19,7 +19,7 @@ const mockLibraryService = {
   delete: vi.fn(),
 };
 
-// Replace the actual service with our mock
+
 Object.assign(LibraryService, mockLibraryService);
 
 const mockLibrary: Library = {
@@ -38,16 +38,16 @@ describe("Library API endpoints", () => {
     const dbSetup = await setupTestDb("library-test");
     testDb = dbSetup.drizzle;
     close = dbSetup.close;
-    
+
     app = express();
     app.use(express.json());
+
     
-    // Add drizzle instance to request
     app.use((req: any, res, next) => {
       req.drizzle = testDb;
       next();
     });
-    
+
     app.use("/libraries", libraryRouter);
   });
 
@@ -63,7 +63,12 @@ describe("Library API endpoints", () => {
     it("should return all libraries successfully", async () => {
       const libraries = [mockLibrary];
       mockLibraryService.findAll.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "Libraries found", responseObject: libraries, statusCode: 200 })
+        Promise.resolve({
+          success: true,
+          message: "Libraries found",
+          responseObject: libraries,
+          statusCode: 200,
+        }),
       );
 
       const response = await request(app).get("/libraries");
@@ -79,7 +84,12 @@ describe("Library API endpoints", () => {
 
     it("should handle database errors gracefully", async () => {
       mockLibraryService.findAll.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Failed to retrieve libraries", responseObject: null, statusCode: 500 })
+        Promise.resolve({
+          success: false,
+          message: "Failed to retrieve libraries",
+          responseObject: null,
+          statusCode: 500,
+        }),
       );
 
       const response = await request(app).get("/libraries");
@@ -94,7 +104,12 @@ describe("Library API endpoints", () => {
   describe("GET /libraries/:id", () => {
     it("should return a library by ID successfully", async () => {
       mockLibraryService.findById.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "Library found", responseObject: mockLibrary, statusCode: 200 })
+        Promise.resolve({
+          success: true,
+          message: "Library found",
+          responseObject: mockLibrary,
+          statusCode: 200,
+        }),
       );
 
       const response = await request(app).get(`/libraries/${mockLibrary.id}`);
@@ -108,7 +123,12 @@ describe("Library API endpoints", () => {
 
     it("should return 404 for non-existent library", async () => {
       mockLibraryService.findById.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Library not found", responseObject: null, statusCode: 404 })
+        Promise.resolve({
+          success: false,
+          message: "Library not found",
+          responseObject: null,
+          statusCode: 404,
+        }),
       );
 
       const response = await request(app).get("/libraries/non-existent-id");
@@ -121,7 +141,12 @@ describe("Library API endpoints", () => {
 
     it("should return 422 for invalid UUID format", async () => {
       mockLibraryService.findById.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Library ID is required", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "Library ID is required",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
       const response = await request(app).get("/libraries/invalid-uuid");
@@ -141,12 +166,15 @@ describe("Library API endpoints", () => {
     it("should create a new library successfully", async () => {
       const createdLibrary = { ...mockLibrary, ...newLibraryData };
       mockLibraryService.create.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "Library created successfully", responseObject: createdLibrary, statusCode: 201 })
+        Promise.resolve({
+          success: true,
+          message: "Library created successfully",
+          responseObject: createdLibrary,
+          statusCode: 201,
+        }),
       );
 
-      const response = await request(app)
-        .post("/libraries")
-        .send(newLibraryData);
+      const response = await request(app).post("/libraries").send(newLibraryData);
       const result = response.body as ServiceResponse<Library>;
 
       expect(response.statusCode).toBe(StatusCodes.CREATED);
@@ -158,12 +186,15 @@ describe("Library API endpoints", () => {
 
     it("should return 422 for missing required fields", async () => {
       mockLibraryService.create.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Library name is required", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "Library name is required",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
-      const response = await request(app)
-        .post("/libraries")
-        .send({});
+      const response = await request(app).post("/libraries").send({});
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.UNPROCESSABLE_ENTITY);
@@ -172,12 +203,15 @@ describe("Library API endpoints", () => {
 
     it("should return 409 for duplicate library name", async () => {
       mockLibraryService.create.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Library with this name already exists", responseObject: null, statusCode: 409 })
+        Promise.resolve({
+          success: false,
+          message: "Library with this name already exists",
+          responseObject: null,
+          statusCode: 409,
+        }),
       );
 
-      const response = await request(app)
-        .post("/libraries")
-        .send(newLibraryData);
+      const response = await request(app).post("/libraries").send(newLibraryData);
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.CONFLICT);
@@ -195,12 +229,15 @@ describe("Library API endpoints", () => {
     it("should update a library successfully", async () => {
       const updatedLibrary = { ...mockLibrary, ...updateData };
       mockLibraryService.update.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "Library updated successfully", responseObject: updatedLibrary, statusCode: 200 })
+        Promise.resolve({
+          success: true,
+          message: "Library updated successfully",
+          responseObject: updatedLibrary,
+          statusCode: 200,
+        }),
       );
 
-      const response = await request(app)
-        .patch(`/libraries/${mockLibrary.id}`)
-        .send(updateData);
+      const response = await request(app).patch(`/libraries/${mockLibrary.id}`).send(updateData);
       const result = response.body as ServiceResponse<Library>;
 
       expect(response.statusCode).toBe(StatusCodes.OK);
@@ -211,12 +248,15 @@ describe("Library API endpoints", () => {
 
     it("should return 404 for non-existent library", async () => {
       mockLibraryService.update.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Library not found", responseObject: null, statusCode: 404 })
+        Promise.resolve({
+          success: false,
+          message: "Library not found",
+          responseObject: null,
+          statusCode: 404,
+        }),
       );
 
-      const response = await request(app)
-        .patch("/libraries/non-existent-id")
-        .send(updateData);
+      const response = await request(app).patch("/libraries/non-existent-id").send(updateData);
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
@@ -225,12 +265,15 @@ describe("Library API endpoints", () => {
 
     it("should return 422 for empty update data", async () => {
       mockLibraryService.update.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "At least one field must be provided for update", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "At least one field must be provided for update",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
-      const response = await request(app)
-        .patch(`/libraries/${mockLibrary.id}`)
-        .send({});
+      const response = await request(app).patch(`/libraries/${mockLibrary.id}`).send({});
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.UNPROCESSABLE_ENTITY);
@@ -241,7 +284,12 @@ describe("Library API endpoints", () => {
   describe("DELETE /libraries/:id", () => {
     it("should delete a library successfully", async () => {
       mockLibraryService.delete.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "Library deleted successfully", responseObject: null, statusCode: 204 })
+        Promise.resolve({
+          success: true,
+          message: "Library deleted successfully",
+          responseObject: null,
+          statusCode: 204,
+        }),
       );
 
       const response = await request(app).delete(`/libraries/${mockLibrary.id}`);
@@ -252,7 +300,12 @@ describe("Library API endpoints", () => {
 
     it("should return 404 for non-existent library", async () => {
       mockLibraryService.delete.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Library not found", responseObject: null, statusCode: 404 })
+        Promise.resolve({
+          success: false,
+          message: "Library not found",
+          responseObject: null,
+          statusCode: 404,
+        }),
       );
 
       const response = await request(app).delete("/libraries/non-existent-id");
@@ -264,7 +317,12 @@ describe("Library API endpoints", () => {
 
     it("should return 409 when library contains books", async () => {
       mockLibraryService.delete.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Cannot delete library that contains books. Please remove all books first.", responseObject: null, statusCode: 409 })
+        Promise.resolve({
+          success: false,
+          message: "Cannot delete library that contains books. Please remove all books first.",
+          responseObject: null,
+          statusCode: 409,
+        }),
       );
 
       const response = await request(app).delete(`/libraries/${mockLibrary.id}`);
@@ -276,3 +334,4 @@ describe("Library API endpoints", () => {
     });
   });
 });
+

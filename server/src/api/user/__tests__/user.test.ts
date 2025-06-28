@@ -8,9 +8,9 @@ import { userRouter } from "../user.router.js";
 import { UserService } from "../user.service.js";
 import type { ServiceResponse } from "../../../common/models/serviceResponse.js";
 import type { User } from "../user.model.js";
-import { setupTestDb } from "../../../common/utils/testUtils.js";
+import { setupTestDb } from "database/test-utils";
 
-// Mock the UserService
+
 const mockUserService = {
   findAll: vi.fn(),
   findById: vi.fn(),
@@ -19,7 +19,7 @@ const mockUserService = {
   deleteUser: vi.fn(),
 };
 
-// Replace the actual service with our mock
+
 Object.assign(UserService, mockUserService);
 
 const mockUser: User = {
@@ -42,16 +42,16 @@ describe("User API endpoints", () => {
     const dbSetup = await setupTestDb("user-test");
     testDb = dbSetup.drizzle;
     close = dbSetup.close;
-    
+
     app = express();
     app.use(express.json());
+
     
-    // Add drizzle instance to request
     app.use((req: any, res, next) => {
       req.drizzle = testDb;
       next();
     });
-    
+
     app.use("/users", userRouter);
   });
 
@@ -67,7 +67,12 @@ describe("User API endpoints", () => {
     it("should return all users successfully", async () => {
       const users = [mockUser];
       mockUserService.findAll.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "Users retrieved successfully", responseObject: users, statusCode: 200 })
+        Promise.resolve({
+          success: true,
+          message: "Users retrieved successfully",
+          responseObject: users,
+          statusCode: 200,
+        }),
       );
 
       const response = await request(app).get("/users");
@@ -83,7 +88,12 @@ describe("User API endpoints", () => {
 
     it("should handle database errors gracefully", async () => {
       mockUserService.findAll.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Failed to fetch users: Database error", responseObject: null, statusCode: 500 })
+        Promise.resolve({
+          success: false,
+          message: "Failed to fetch users: Database error",
+          responseObject: null,
+          statusCode: 500,
+        }),
       );
 
       const response = await request(app).get("/users");
@@ -98,7 +108,7 @@ describe("User API endpoints", () => {
   describe("GET /users/:id", () => {
     it("should return a user by ID successfully", async () => {
       mockUserService.findById.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "User found", responseObject: mockUser, statusCode: 200 })
+        Promise.resolve({ success: true, message: "User found", responseObject: mockUser, statusCode: 200 }),
       );
 
       const response = await request(app).get(`/users/${mockUser.id}`);
@@ -112,7 +122,12 @@ describe("User API endpoints", () => {
 
     it("should return 404 for non-existent user", async () => {
       mockUserService.findById.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User with ID non-existent-id not found", responseObject: null, statusCode: 404 })
+        Promise.resolve({
+          success: false,
+          message: "User with ID non-existent-id not found",
+          responseObject: null,
+          statusCode: 404,
+        }),
       );
 
       const response = await request(app).get("/users/non-existent-id");
@@ -125,7 +140,12 @@ describe("User API endpoints", () => {
 
     it("should return 422 for invalid UUID format", async () => {
       mockUserService.findById.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User ID is required", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "User ID is required",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
       const response = await request(app).get("/users/invalid-uuid");
@@ -148,12 +168,15 @@ describe("User API endpoints", () => {
     it("should create a new user successfully", async () => {
       const createdUser = { ...mockUser, ...newUserData };
       mockUserService.createUser.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "User created successfully", responseObject: createdUser, statusCode: 201 })
+        Promise.resolve({
+          success: true,
+          message: "User created successfully",
+          responseObject: createdUser,
+          statusCode: 201,
+        }),
       );
 
-      const response = await request(app)
-        .post("/users")
-        .send(newUserData);
+      const response = await request(app).post("/users").send(newUserData);
       const result = response.body as ServiceResponse<User>;
 
       expect(response.statusCode).toBe(StatusCodes.CREATED);
@@ -165,12 +188,15 @@ describe("User API endpoints", () => {
 
     it("should return 422 for missing required fields", async () => {
       mockUserService.createUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Username is required", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "Username is required",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
-      const response = await request(app)
-        .post("/users")
-        .send({ email: "test@example.com" });
+      const response = await request(app).post("/users").send({ email: "test@example.com" });
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.UNPROCESSABLE_ENTITY);
@@ -179,12 +205,15 @@ describe("User API endpoints", () => {
 
     it("should return 409 for duplicate email", async () => {
       mockUserService.createUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User with this email already exists", responseObject: null, statusCode: 409 })
+        Promise.resolve({
+          success: false,
+          message: "User with this email already exists",
+          responseObject: null,
+          statusCode: 409,
+        }),
       );
 
-      const response = await request(app)
-        .post("/users")
-        .send(newUserData);
+      const response = await request(app).post("/users").send(newUserData);
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.CONFLICT);
@@ -194,12 +223,15 @@ describe("User API endpoints", () => {
 
     it("should return 409 for duplicate username", async () => {
       mockUserService.createUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User with this username already exists", responseObject: null, statusCode: 409 })
+        Promise.resolve({
+          success: false,
+          message: "User with this username already exists",
+          responseObject: null,
+          statusCode: 409,
+        }),
       );
 
-      const response = await request(app)
-        .post("/users")
-        .send(newUserData);
+      const response = await request(app).post("/users").send(newUserData);
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.CONFLICT);
@@ -219,12 +251,15 @@ describe("User API endpoints", () => {
     it("should update a user successfully", async () => {
       const updatedUser = { ...mockUser, ...updateData };
       mockUserService.updateUser.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "User updated successfully", responseObject: updatedUser, statusCode: 200 })
+        Promise.resolve({
+          success: true,
+          message: "User updated successfully",
+          responseObject: updatedUser,
+          statusCode: 200,
+        }),
       );
 
-      const response = await request(app)
-        .patch(`/users/${mockUser.id}`)
-        .send(updateData);
+      const response = await request(app).patch(`/users/${mockUser.id}`).send(updateData);
       const result = response.body as ServiceResponse<User>;
 
       expect(response.statusCode).toBe(StatusCodes.OK);
@@ -235,12 +270,15 @@ describe("User API endpoints", () => {
 
     it("should return 404 for non-existent user", async () => {
       mockUserService.updateUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User with ID non-existent-id not found", responseObject: null, statusCode: 404 })
+        Promise.resolve({
+          success: false,
+          message: "User with ID non-existent-id not found",
+          responseObject: null,
+          statusCode: 404,
+        }),
       );
 
-      const response = await request(app)
-        .patch("/users/non-existent-id")
-        .send(updateData);
+      const response = await request(app).patch("/users/non-existent-id").send(updateData);
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.NOT_FOUND);
@@ -249,12 +287,15 @@ describe("User API endpoints", () => {
 
     it("should return 422 for empty update data", async () => {
       mockUserService.updateUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "At least one field must be provided for update", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "At least one field must be provided for update",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
-      const response = await request(app)
-        .patch(`/users/${mockUser.id}`)
-        .send({});
+      const response = await request(app).patch(`/users/${mockUser.id}`).send({});
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.UNPROCESSABLE_ENTITY);
@@ -263,7 +304,12 @@ describe("User API endpoints", () => {
 
     it("should return 409 for conflicting email", async () => {
       mockUserService.updateUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User with this email already exists", responseObject: null, statusCode: 409 })
+        Promise.resolve({
+          success: false,
+          message: "User with this email already exists",
+          responseObject: null,
+          statusCode: 409,
+        }),
       );
 
       const response = await request(app)
@@ -277,12 +323,15 @@ describe("User API endpoints", () => {
 
     it("should return 409 for conflicting username", async () => {
       mockUserService.updateUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User with this username already exists", responseObject: null, statusCode: 409 })
+        Promise.resolve({
+          success: false,
+          message: "User with this username already exists",
+          responseObject: null,
+          statusCode: 409,
+        }),
       );
 
-      const response = await request(app)
-        .patch(`/users/${mockUser.id}`)
-        .send({ username: "existinguser" });
+      const response = await request(app).patch(`/users/${mockUser.id}`).send({ username: "existinguser" });
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.CONFLICT);
@@ -293,7 +342,12 @@ describe("User API endpoints", () => {
   describe("DELETE /users/:id", () => {
     it("should delete a user successfully", async () => {
       mockUserService.deleteUser.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "User deleted successfully", responseObject: null, statusCode: 204 })
+        Promise.resolve({
+          success: true,
+          message: "User deleted successfully",
+          responseObject: null,
+          statusCode: 204,
+        }),
       );
 
       const response = await request(app).delete(`/users/${mockUser.id}`);
@@ -304,7 +358,12 @@ describe("User API endpoints", () => {
 
     it("should return 404 for non-existent user", async () => {
       mockUserService.deleteUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User with ID non-existent-id not found", responseObject: null, statusCode: 404 })
+        Promise.resolve({
+          success: false,
+          message: "User with ID non-existent-id not found",
+          responseObject: null,
+          statusCode: 404,
+        }),
       );
 
       const response = await request(app).delete("/users/non-existent-id");
@@ -316,7 +375,12 @@ describe("User API endpoints", () => {
 
     it("should return 422 for invalid user ID", async () => {
       mockUserService.deleteUser.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "User ID is required", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "User ID is required",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
       const response = await request(app).delete("/users/invalid-uuid");
@@ -327,3 +391,4 @@ describe("User API endpoints", () => {
     });
   });
 });
+

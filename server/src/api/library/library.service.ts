@@ -54,7 +54,7 @@ export const LibraryService = {
     }
 
     try {
-      // Check if library with same name already exists
+      
       const existingLibrary = await drizzle.query.library.findFirst({
         where: (libraries, { eq }) => eq(libraries.name, libraryData.name.trim()),
       });

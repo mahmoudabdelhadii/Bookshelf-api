@@ -19,7 +19,7 @@ export const libraryBooksRegistry = new OpenAPIRegistry();
 libraryBooksRegistry.register("LibraryBook", libraryBookSchema.openapi("LibraryBook"));
 libraryBooksRegistry.register("LibraryBookWithDetails", libraryBookWithDetailsSchema.openapi("LibraryBookWithDetails"));
 
-// Get all library books (with pagination support)
+
 libraryBooksRegistry.registerPath({
   method: "get",
   path: "/library-books",
@@ -28,7 +28,7 @@ libraryBooksRegistry.registerPath({
 });
 libraryBooksRouter.get("/", libraryBooksController.getAllLibraryBooks);
 
-// Get books in a specific library
+
 libraryBooksRegistry.registerPath({
   method: "get",
   path: "/libraries/{libraryId}/books",
@@ -40,7 +40,7 @@ libraryBooksRegistry.registerPath({
 });
 libraryBooksRouter.get("/libraries/:libraryId/books", libraryBooksController.getLibraryBooks);
 
-// Get specific library book entry
+
 libraryBooksRegistry.registerPath({
   method: "get",
   path: "/library-books/{id}",
@@ -52,7 +52,7 @@ libraryBooksRegistry.registerPath({
 });
 libraryBooksRouter.get("/:id", libraryBooksController.getLibraryBook);
 
-// Add book to library
+
 libraryBooksRegistry.registerPath({
   method: "post",
   path: "/library-books",
@@ -82,7 +82,7 @@ libraryBooksRegistry.registerPath({
 });
 libraryBooksRouter.post("/", libraryBooksController.addBookToLibrary);
 
-// Update library book details
+
 libraryBooksRegistry.registerPath({
   method: "patch",
   path: "/library-books/{id}",
@@ -105,7 +105,7 @@ libraryBooksRegistry.registerPath({
 });
 libraryBooksRouter.patch("/:id", libraryBooksController.updateLibraryBook);
 
-// Remove book from library
+
 libraryBooksRegistry.registerPath({
   method: "delete",
   path: "/library-books/{id}",

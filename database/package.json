@@ -47,6 +47,7 @@
   },
   "exports": {
     ".": "./build/src/index.js",
-    "./drizzle": "./build/src/drizzle.js"
+    "./drizzle": "./build/src/drizzle.js",
+    "./test-utils": "./build/src/test-utils/index.js"
   }
 }

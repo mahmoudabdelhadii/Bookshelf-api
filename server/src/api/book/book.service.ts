@@ -28,7 +28,7 @@ export const BookService = {
     },
   ) => {
     try {
-      // Validate required fields
+      
       if (!bookData.title.trim()) {
         const validationError = new ValidationError("Book title is required");
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
@@ -44,7 +44,7 @@ export const BookService = {
 
       const { isbn, title, author, publisher, genre, publishedYear, language } = bookData;
       
-      // Check for existing ISBN if provided
+      
       if (isbn?.trim()) {
         const existing = await drizzle.query.book.findFirst({
           where: (b, { eq }) => eq(b.isbn, isbn),
@@ -55,7 +55,7 @@ export const BookService = {
         }
       }
 
-      // Ensure author exists or create new one
+      
       let authorRec = await drizzle.query.author.findFirst({
         where: (a, { eq }) => eq(a.name, author),
       });
@@ -63,7 +63,7 @@ export const BookService = {
         [authorRec] = await drizzle.insert(schema.author).values({ name: author }).returning();
       }
 
-      // Ensure publisher exists or create new one
+      
       let publisherRec = await drizzle.query.publisher.findFirst({
         where: (p, { eq }) => eq(p.name, publisher),
       });
@@ -71,7 +71,7 @@ export const BookService = {
         [publisherRec] = await drizzle.insert(schema.publisher).values({ name: publisher }).returning();
       }
 
-      // Insert book with correct foreign keys
+      
       const insertData = {
         title,
         authorId: authorRec.id,
@@ -243,16 +243,16 @@ export const BookService = {
       return localBook;
     }
 
-    const apiResponse = await isbndb.fetchBookDetails(isbn);
-    const bookInfo = apiResponse.book;
+    const bookInfo = await isbndb.fetchBookDetails(isbn);
     if (!bookInfo) {
       throw new NotFound("Book not found");
     }
-    // Map API response to local book schema and save
+    
+    
     const createdBook = await BookService.createBook(drizzle, {
       title: bookInfo.title ?? "",
-      author: bookInfo.authors?.[0] ?? "",
-      publisher: bookInfo.publisher ?? "",
+      author: "Unknown Author",
+      publisher: "Unknown Publisher",
       isbn: bookInfo.isbn,
       genre: undefined,
       publishedYear: undefined,
@@ -328,7 +328,7 @@ export const BookService = {
     if (!authorDetails.author) {
       throw new NotFound("Author not found");
     }
-    // Ensure author exists locally
+    
     await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
     return authorDetails;
   },
@@ -365,7 +365,7 @@ export const BookService = {
     if (!publisherDetails.name) {
       throw new NotFound("Publisher not found");
     }
-    // Ensure publisher exists locally
+    
     await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
     return publisherDetails;
   },
@@ -378,7 +378,7 @@ export const BookService = {
     }
     await drizzle
       .insert(schema.author)
-      .values(authors.map((name) => ({ name })))
+      .values(authors.map((name: string) => ({ name })))
       .onConflictDoNothing();
     return authorsData;
   },

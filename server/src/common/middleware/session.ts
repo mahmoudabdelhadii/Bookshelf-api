@@ -1,10 +1,10 @@
 import session from "express-session";
-import RedisStore from "connect-redis";
+import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
 import type { Application } from "express";
 import { env } from "../utils/envConfig.js";
 
-// Redis client configuration
+
 export let redisClient: ReturnType<typeof createClient> | null = null;
 
 /**
@@ -12,42 +12,69 @@ export let redisClient: ReturnType<typeof createClient> | null = null;
  */
 export async function initializeRedis(): Promise<ReturnType<typeof createClient>> {
   try {
-    if (redisClient) {
+    if (redisClient && redisClient.isOpen) {
+      console.log("Redis client already initialized and connected");
       return redisClient;
     }
+
+    console.log("Initializing Redis client with URL:", env.REDIS_URL);
 
     redisClient = createClient({
       url: env.REDIS_URL,
       socket: {
-        connectTimeout: 5000,
-        lazyConnect: true,
+        connectTimeout: 10000,
+        reconnectStrategy: (retries) => {
+          if (retries > 5) {
+            console.error("Redis connection failed after 5 retries");
+            return false;
+          }
+          console.log(`Redis reconnection attempt ${retries + 1}`);
+          return Math.min(retries * 100, 3000);
+        },
       },
     });
 
-    // Error handling
+    
     redisClient.on("error", (err) => {
-      console.error("Redis Client Error:", err);
+      console.error("Redis Client Error:", err.message);
     });
 
     redisClient.on("connect", () => {
-      console.log("Redis Client Connected");
+      console.log("Redis Client Connected successfully");
     });
 
     redisClient.on("ready", () => {
-      console.log("Redis Client Ready");
+      console.log("Redis Client Ready for commands");
     });
 
     redisClient.on("end", () => {
       console.log("Redis Client Disconnected");
     });
 
-    // Connect to Redis
+    redisClient.on("reconnecting", () => {
+      console.log("Redis Client Reconnecting...");
+    });
+
+    
+    const connectTimeout = setTimeout(() => {
+      if (redisClient && !redisClient.isOpen) {
+        redisClient.disconnect().catch(() => {});
+        throw new Error("Redis connection timeout after 10 seconds");
+      }
+    }, 10000);
+
     await redisClient.connect();
+    clearTimeout(connectTimeout);
+
+    
+    await redisClient.ping();
+    console.log("Redis connection test successful");
 
     return redisClient;
-  } catch (error) {
-    console.error("Failed to initialize Redis:", error);
-    throw error;
+  } catch (err) {
+    console.error("Failed to initialize Redis:", err);
+    redisClient = null;
+    throw err;
   }
 }
 
@@ -60,8 +87,8 @@ export async function closeRedis(): Promise<void> {
       await redisClient.disconnect();
       redisClient = null;
       console.log("Redis connection closed");
-    } catch (error) {
-      console.error("Error closing Redis connection:", error);
+    } catch (err) {
+      console.error("Error closing Redis connection:", err);
     }
   }
 }
@@ -74,35 +101,42 @@ export function configureSession(app: Application): void {
     throw new Error("Redis client not initialized. Call initializeRedis() first.");
   }
 
-  // Initialize Redis store
-  const redisStore = new RedisStore({
-    client: redisClient,
-    prefix: env.REDIS_SESSION_PREFIX,
-    ttl: env.SESSION_MAX_AGE / 1000, // Convert milliseconds to seconds
-  });
+  try {
+    
+    const redisStore = new RedisStore({
+      client: redisClient,
+      prefix: env.REDIS_SESSION_PREFIX,
+      ttl: Math.floor(env.SESSION_MAX_AGE / 1000), 
+      disableTouch: false, 
+    });
 
-  // Configure session middleware
-  const sessionConfig: session.SessionOptions = {
-    store: redisStore,
-    name: env.SESSION_NAME,
-    secret: env.SESSION_SECRET,
-    resave: false, // Don't save session if unmodified
-    saveUninitialized: false, // Don't create session until something stored
-    rolling: true, // Reset expiration on each response
-    cookie: {
-      secure: env.isProduction, // HTTPS only in production
-      httpOnly: true, // Prevent XSS attacks
-      maxAge: env.SESSION_MAX_AGE,
-      sameSite: env.isProduction ? "strict" : "lax", // CSRF protection
-    },
-  };
+    
+    const sessionConfig: session.SessionOptions = {
+      store: redisStore,
+      name: env.SESSION_NAME,
+      secret: env.SESSION_SECRET,
+      resave: false, 
+      saveUninitialized: false, 
+      rolling: true, 
+      cookie: {
+        secure: env.isProduction, 
+        httpOnly: true, 
+        maxAge: env.SESSION_MAX_AGE,
+        sameSite: env.isProduction ? "strict" : "lax", 
+      },
+    };
 
-  // In production, ensure trust proxy is set for secure cookies
-  if (env.isProduction) {
-    app.set("trust proxy", 1);
+    
+    if (env.isProduction) {
+      app.set("trust proxy", 1);
+    }
+
+    app.use(session(sessionConfig));
+    console.log("Session middleware configured successfully with Redis store");
+  } catch (err) {
+    console.error("Failed to configure session middleware:", err);
+    throw err;
   }
-
-  app.use(session(sessionConfig));
 }
 
 /**
@@ -112,14 +146,17 @@ export class SessionManager {
   /**
    * Store user data in session
    */
-  static storeUserSession(req: any, userData: {
-    userId: string;
-    username: string;
-    email: string;
-    role: string;
-    permissions: string[];
-    lastLogin: Date;
-  }): void {
+  static storeUserSession(
+    req: any,
+    userData: {
+      userId: string;
+      username: string;
+      email: string;
+      role: string;
+      permissions: string[];
+      lastLogin: Date;
+    },
+  ): void {
     req.session.user = {
       ...userData,
       sessionStartTime: new Date(),
@@ -166,11 +203,14 @@ export class SessionManager {
   /**
    * Update session with new data
    */
-  static updateSession(req: any, updates: Partial<{
-    permissions: string[];
-    role: string;
-    lastActivity: Date;
-  }>): void {
+  static updateSession(
+    req: any,
+    updates: Partial<{
+      permissions: string[];
+      role: string;
+      lastActivity: Date;
+    }>,
+  ): void {
     if (req.session?.user) {
       Object.assign(req.session.user, {
         ...updates,
@@ -191,7 +231,7 @@ export class SessionManager {
     const now = new Date();
     const sessionAge = now.getTime() - sessionStartTime.getTime();
 
-    // Check if session has exceeded maximum age
+    
     return sessionAge < env.SESSION_MAX_AGE;
   }
 
@@ -228,7 +268,7 @@ export class SessionManager {
  */
 export function validateSession(req: any, res: any, next: any): void {
   if (req.session?.user && !SessionManager.isSessionValid(req)) {
-    // Session expired, clear it
+    
     SessionManager.clearUserSession(req)
       .then(() => {
         res.status(401).json({
@@ -245,7 +285,7 @@ export function validateSession(req: any, res: any, next: any): void {
     return;
   }
 
-  // Update last activity if user is authenticated
+  
   if (req.session?.user) {
     SessionManager.updateSession(req, { lastActivity: new Date() });
   }
@@ -293,14 +333,14 @@ export function authenticateSession(req: any, res: any, next: any): void {
  * Hybrid authentication (JWT or Session)
  */
 export function hybridAuth(req: any, res: any, next: any): void {
-  // First try JWT authentication
+  
   const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    // JWT authentication takes precedence
+  if (authHeader?.startsWith("Bearer ")) {
+    
     return next();
   }
 
-  // Fall back to session authentication
+  
   authenticateSession(req, res, next);
 }
 
@@ -320,32 +360,32 @@ export class SessionCleanup {
     try {
       const pattern = `${env.REDIS_SESSION_PREFIX}*`;
       const keys = await redisClient.keys(pattern);
-      
+
       if (keys.length === 0) {
         return;
       }
 
-      // Check each session key for expiration
-      const pipeline = redisClient.multi();
       
+      const pipeline = redisClient.multi();
+
       for (const key of keys) {
         pipeline.ttl(key);
       }
-      
+
       const ttls = await pipeline.exec();
+
       
-      // Remove sessions that have very low TTL (about to expire)
       const keysToDelete = keys.filter((key, index) => {
-        const ttl = ttls?.[index] as number;
-        return ttl !== null && ttl >= 0 && ttl < 60; // Remove if expires in less than 1 minute
+        const ttl = ttls[index] as unknown as number;
+        return ttl !== null && ttl >= 0 && ttl < 60; 
       });
 
       if (keysToDelete.length > 0) {
         await redisClient.del(keysToDelete);
         console.log(`Cleaned up ${keysToDelete.length} expired sessions`);
       }
-    } catch (error) {
-      console.error("Error during session cleanup:", error);
+    } catch (err) {
+      console.error("Error during session cleanup:", err);
     }
   }
 
@@ -379,19 +419,20 @@ export class SessionCleanup {
       let activeSessions = 0;
       let expiringSoon = 0;
 
-      ttls?.forEach((ttl) => {
-        const ttlValue = ttl as number;
+      if (ttls) for (const ttl of ttls) {
+        const ttlValue = ttl as unknown as number;
         if (ttlValue > 0) {
           activeSessions++;
-          if (ttlValue < 300) { // Expires in less than 5 minutes
+          if (ttlValue < 300) {
+            
             expiringSoon++;
           }
         }
-      });
+      }
 
       return { totalSessions, activeSessions, expiringSoon };
-    } catch (error) {
-      console.error("Error getting session stats:", error);
+    } catch (err) {
+      console.error("Error getting session stats:", err);
       return { totalSessions: 0, activeSessions: 0, expiringSoon: 0 };
     }
   }
@@ -401,13 +442,58 @@ export class SessionCleanup {
  * Setup session cleanup interval
  */
 export function setupSessionCleanup(): NodeJS.Timeout {
-  // Clean up expired sessions every 15 minutes
-  return setInterval(() => {
-    SessionCleanup.cleanupExpiredSessions();
-  }, 15 * 60 * 1000);
+  
+  return setInterval(
+    () => {
+      SessionCleanup.cleanupExpiredSessions();
+    },
+    15 * 60 * 1000,
+  );
 }
 
-// Type extensions for Express session
+/**
+ * Create session record for database tracking
+ */
+export async function createSessionRecord(
+  drizzle: any,
+  userId: string,
+  sessionData: {
+    sessionToken: string;
+    refreshToken: string;
+    ipAddress?: string;
+    userAgent?: string;
+    expiresAt: Date;
+  }
+): Promise<void> {
+  try {
+    
+    
+    console.log(`Session created for user ${userId}:`, {
+      sessionToken: `${sessionData.sessionToken.substring(0, 10)  }...`,
+      expiresAt: sessionData.expiresAt,
+      ipAddress: sessionData.ipAddress,
+      userAgent: sessionData.userAgent?.substring(0, 50),
+    });
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  } catch (err) {
+    console.error("Failed to create session record:", err);
+    
+  }
+}
+
+
 declare module "express-session" {
   interface SessionData {
     user?: {
@@ -422,3 +508,4 @@ declare module "express-session" {
     };
   }
 }
+

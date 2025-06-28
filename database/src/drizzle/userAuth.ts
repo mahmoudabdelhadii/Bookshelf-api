@@ -2,8 +2,8 @@ import { text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 import { server } from "./_common.js";
 import { user } from "./user.js";
 
-// Extended user table with authentication fields
-// This extends the existing user table with additional auth-related columns
+
+
 export const userAuth = server.table(
   "user_auth",
   {
@@ -19,8 +19,8 @@ export const userAuth = server.table(
     suspendedBy: text("suspended_by").references(() => user.id),
     suspensionReason: text("suspension_reason"),
     twoFactorEnabled: boolean("two_factor_enabled").default(false).notNull(),
-    twoFactorSecret: text("two_factor_secret"), // For TOTP (encrypted)
-    backupCodes: text("backup_codes").array(), // Encrypted backup codes
+    twoFactorSecret: text("two_factor_secret"), 
+    backupCodes: text("backup_codes").array(), 
     failedLoginAttempts: integer("failed_login_attempts").default(0).notNull(),
     lastFailedLoginAt: timestamp("last_failed_login_at", { withTimezone: true, mode: "date" }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),

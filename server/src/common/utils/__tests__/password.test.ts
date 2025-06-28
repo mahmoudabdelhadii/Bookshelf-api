@@ -19,7 +19,7 @@ describe("Password utilities", () => {
 
       expect(hash).toBeDefined();
       expect(hash).not.toBe(password);
-      expect(hash.length).toBeGreaterThan(50); // bcrypt hashes are typically 60 characters
+      expect(hash.length).toBeGreaterThan(50); 
     });
 
     it("should throw error for empty password", async () => {
@@ -40,7 +40,7 @@ describe("Password utilities", () => {
       const hash1 = await hashPassword(password);
       const hash2 = await hashPassword(password);
 
-      expect(hash1).not.toBe(hash2); // Salt should make hashes different
+      expect(hash1).not.toBe(hash2); 
     });
   });
 
@@ -155,21 +155,21 @@ describe("Password utilities", () => {
     it("should detect common patterns", () => {
       const result = evaluatePasswordStrength("Password123!");
 
-      expect(result.score).toBeLessThan(80); // Should be penalized
+      expect(result.score).toBeLessThan(80); 
       expect(result.feedback).toContain("Password should not contain the word 'password'");
     });
 
     it("should detect repeated characters", () => {
       const result = evaluatePasswordStrength("Passsssword123!");
 
-      expect(result.score).toBeLessThan(90); // Should be penalized
+      expect(result.score).toBeLessThan(90); 
       expect(result.feedback).toContain("Password should not contain repeated characters");
     });
 
     it("should detect common sequences", () => {
       const result = evaluatePasswordStrength("Password123abc!");
 
-      expect(result.score).toBeLessThan(90); // Should be penalized
+      expect(result.score).toBeLessThan(90); 
       expect(result.feedback).toContain("Password should not contain common sequences");
     });
 
@@ -186,10 +186,10 @@ describe("Password utilities", () => {
       const password = generateSecurePassword();
 
       expect(password).toHaveLength(16);
-      expect(password).toMatch(/[A-Z]/); // Contains uppercase
-      expect(password).toMatch(/[a-z]/); // Contains lowercase
-      expect(password).toMatch(/\d/); // Contains digit
-      expect(password).toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/); // Contains special char
+      expect(password).toMatch(/[A-Z]/); 
+      expect(password).toMatch(/[a-z]/); 
+      expect(password).toMatch(/\d/); 
+      expect(password).toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/); 
     });
 
     it("should generate password with custom length", () => {
@@ -222,14 +222,14 @@ describe("Password utilities", () => {
     it("should generate token with default length", () => {
       const token = generateSecureToken();
 
-      expect(token).toHaveLength(64); // 32 bytes = 64 hex characters
-      expect(token).toMatch(/^[a-f0-9]+$/); // Only hex characters
+      expect(token).toHaveLength(64); 
+      expect(token).toMatch(/^[a-f0-9]+$/); 
     });
 
     it("should generate token with custom length", () => {
       const token = generateSecureToken(16);
 
-      expect(token).toHaveLength(32); // 16 bytes = 32 hex characters
+      expect(token).toHaveLength(32); 
     });
 
     it("should generate different tokens each time", () => {
@@ -274,10 +274,10 @@ describe("Password utilities", () => {
       const codes = generateBackupCodes();
 
       expect(codes).toHaveLength(10);
-      codes.forEach(code => {
+      for (const code of codes) {
         expect(code).toHaveLength(8);
-        expect(code).toMatch(/^[A-F0-9]+$/); // Uppercase hex
-      });
+        expect(code).toMatch(/^[A-F0-9]+$/); 
+      }
     });
 
     it("should generate custom number of codes", () => {
@@ -310,7 +310,7 @@ describe("Password utilities", () => {
       const token = "a".repeat(32);
       const hash = hashToken(token);
       
-      // Test with tokens of different lengths (should not leak timing info)
+      
       const shortToken = "a".repeat(16);
       const longToken = "a".repeat(64);
       

@@ -1,7 +1,7 @@
 import { env } from "../envConfig.js";
 
 export async function callISBNdb<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`https://api2.isbndb.com${path}`, {
+  const response = await fetch(`https:
     headers: Object.assign(
       {
         "Content-Type": "application/json",

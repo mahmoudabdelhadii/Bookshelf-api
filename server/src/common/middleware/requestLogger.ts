@@ -50,7 +50,7 @@ const customAttributeKeys: CustomAttributeKeys = {
 const customProps = (req: Request, res: Response): PinoCustomProps => ({
   request: req,
   response: res,
-  // Ensure error is correctly typed
+  
   error: res.locals.err instanceof Error ? res.locals.err : new Error(String(res.locals.err)),
   responseBody: res.locals.responseBody,
 });

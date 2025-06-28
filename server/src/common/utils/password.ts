@@ -1,17 +1,17 @@
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
+import crypto from "node:crypto";
 
 /**
  * Password hashing and validation utilities using bcrypt
  * Production-grade security with configurable salt rounds
  */
 
-// Configuration
-const SALT_ROUNDS = 12; // Higher number = more secure but slower
+
+const SALT_ROUNDS = 12; 
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 128;
 
-// Password strength requirements
+
 const PASSWORD_REQUIREMENTS = {
   minLength: MIN_PASSWORD_LENGTH,
   maxLength: MAX_PASSWORD_LENGTH,
@@ -24,7 +24,7 @@ const PASSWORD_REQUIREMENTS = {
 
 export interface PasswordStrengthResult {
   isValid: boolean;
-  score: number; // 0-100
+  score: number; 
   feedback: string[];
   requirements: {
     length: boolean;
@@ -55,8 +55,8 @@ export async function hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(SALT_ROUNDS);
     const hash = await bcrypt.hash(password, salt);
     return hash;
-  } catch (error) {
-    throw new Error(`Failed to hash password: ${error instanceof Error ? error.message : "Unknown error"}`);
+  } catch (err) {
+    throw new Error(`Failed to hash password: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
 }
 
@@ -70,9 +70,9 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 
   try {
     return await bcrypt.compare(password, hash);
-  } catch (error) {
-    // Log error in production but don't expose details
-    console.error("Password verification error:", error);
+  } catch (err) {
+    
+    console.error("Password verification error:", err);
     return false;
   }
 }
@@ -84,8 +84,8 @@ export function needsRehash(hash: string): boolean {
   try {
     const rounds = bcrypt.getRounds(hash);
     return rounds < SALT_ROUNDS;
-  } catch (error) {
-    // If we can't determine rounds, assume it needs rehashing
+  } catch (err) {
+    
     return true;
   }
 }
@@ -97,7 +97,7 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
   const feedback: string[] = [];
   let score = 0;
 
-  // Check length
+  
   const hasValidLength = password.length >= MIN_PASSWORD_LENGTH && password.length <= MAX_PASSWORD_LENGTH;
   if (!hasValidLength) {
     if (password.length < MIN_PASSWORD_LENGTH) {
@@ -107,12 +107,12 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
     }
   } else {
     score += 20;
-    // Bonus for longer passwords
+    
     if (password.length >= 12) score += 10;
     if (password.length >= 16) score += 10;
   }
 
-  // Check character types
+  
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumbers = /\d/.test(password);
@@ -142,7 +142,7 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
     score += 15;
   }
 
-  // Check for common patterns
+  
   if (password.toLowerCase().includes("password")) {
     feedback.push("Password should not contain the word 'password'");
     score -= 20;
@@ -158,7 +158,7 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
     score -= 15;
   }
 
-  // Check for dictionary words (basic check)
+  
   const commonWords = ["admin", "user", "test", "guest", "login", "welcome", "secret"];
   const lowerPassword = password.toLowerCase();
   if (commonWords.some(word => lowerPassword.includes(word))) {
@@ -166,7 +166,7 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
     score -= 15;
   }
 
-  // Ensure score is within bounds
+  
   score = Math.max(0, Math.min(100, score));
 
   const isValid = 
@@ -194,7 +194,7 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
 /**
  * Generate a secure random password
  */
-export function generateSecurePassword(length: number = 16): string {
+export function generateSecurePassword(length = 16): string {
   if (length < MIN_PASSWORD_LENGTH || length > MAX_PASSWORD_LENGTH) {
     throw new Error(`Password length must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH}`);
   }
@@ -204,27 +204,27 @@ export function generateSecurePassword(length: number = 16): string {
   const numbers = "0123456789";
   const specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
 
-  // Ensure at least one character from each required type
+  
   let password = "";
   password += uppercase[crypto.randomInt(uppercase.length)];
   password += lowercase[crypto.randomInt(lowercase.length)];
   password += numbers[crypto.randomInt(numbers.length)];
   password += specialChars[crypto.randomInt(specialChars.length)];
 
-  // Fill the rest randomly
+  
   const allChars = uppercase + lowercase + numbers + specialChars;
   for (let i = password.length; i < length; i++) {
     password += allChars[crypto.randomInt(allChars.length)];
   }
 
-  // Shuffle the password to randomize character positions
+  
   return password.split("").sort(() => crypto.randomInt(3) - 1).join("");
 }
 
 /**
  * Generate a secure token for password reset, email verification, etc.
  */
-export function generateSecureToken(length: number = 32): string {
+export function generateSecureToken(length = 32): string {
   return crypto.randomBytes(length).toString("hex");
 }
 
@@ -246,10 +246,10 @@ export function verifyToken(token: string, hash: string): boolean {
 /**
  * Generate backup codes for 2FA
  */
-export function generateBackupCodes(count: number = 10): string[] {
+export function generateBackupCodes(count = 10): string[] {
   const codes: string[] = [];
   for (let i = 0; i < count; i++) {
-    // Generate 8-character alphanumeric codes
+    
     codes.push(crypto.randomBytes(4).toString("hex").toUpperCase());
   }
   return codes;

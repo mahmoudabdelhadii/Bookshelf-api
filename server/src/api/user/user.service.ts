@@ -28,7 +28,7 @@ export const UserService = {
     },
   ) {
     try {
-      // Validate required fields
+      
       if (!id.trim()) {
         const validationError = new ValidationError("User ID is required");
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
@@ -42,7 +42,7 @@ export const UserService = {
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
       }
 
-      // Check for existing email
+      
       const existingByEmail = await drizzle.query.user.findFirst({
         where: (u, { eq }) => eq(u.email, email),
       });
@@ -51,7 +51,7 @@ export const UserService = {
         return ServiceResponse.failure(conflictError.message, { email }, conflictError.statusCode);
       }
 
-      // Check for existing username
+      
       const existingByUsername = await drizzle.query.user.findFirst({
         where: (u, { eq }) => eq(u.username, username),
       });
@@ -124,14 +124,14 @@ export const UserService = {
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
       }
 
-      // Check if at least one field is provided for update
+      
       const hasUpdates = Object.values(updates).some(value => value !== undefined && value !== null);
       if (!hasUpdates) {
         const validationError = new ValidationError("At least one field must be provided for update");
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
       }
 
-      // Check for email conflicts
+      
       if (updates.email?.trim()) {
         const existingByEmail = await drizzle.query.user.findFirst({
           where: (u, { eq }) => eq(u.email, updates.email!),
@@ -142,7 +142,7 @@ export const UserService = {
         }
       }
 
-      // Check for username conflicts
+      
       if (updates.username?.trim()) {
         const existingByUsername = await drizzle.query.user.findFirst({
           where: (u, { eq }) => eq(u.username, updates.username!),

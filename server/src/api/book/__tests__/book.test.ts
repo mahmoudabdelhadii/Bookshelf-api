@@ -7,9 +7,9 @@ import type { DrizzleClient } from "database";
 import { booksRouter } from "../book.router.js";
 import { BookService } from "../book.service.js";
 import type { ServiceResponse } from "../../../common/models/serviceResponse.js";
-import { setupTestDb } from "../../../common/utils/testUtils.js";
+import { setupTestDb } from "database/test-utils";
 
-// Mock the BookService
+
 const mockBookService = {
   createBook: vi.fn(),
   createBooksBulk: vi.fn(),
@@ -27,7 +27,7 @@ const mockBookService = {
   searchAll: vi.fn(),
 };
 
-// Replace the actual service with our mock
+
 Object.assign(BookService, mockBookService);
 
 const mockBook = {
@@ -59,16 +59,16 @@ describe("Book API endpoints", () => {
     const dbSetup = await setupTestDb("book-test");
     testDb = dbSetup.drizzle;
     close = dbSetup.close;
-    
+
     app = express();
     app.use(express.json());
+
     
-    // Add drizzle instance to request
     app.use((req: any, res, next) => {
       req.drizzle = testDb;
       next();
     });
-    
+
     app.use("/books", booksRouter);
   });
 
@@ -83,9 +83,7 @@ describe("Book API endpoints", () => {
   describe("GET /books", () => {
     it("should return all books successfully", async () => {
       const books = [mockBookWithDetails];
-      mockBookService.getBooks.mockImplementation(() =>
-        Promise.resolve(books)
-      );
+      mockBookService.getBooks.mockImplementation(() => Promise.resolve(books));
 
       const response = await request(app).get("/books");
 
@@ -96,9 +94,7 @@ describe("Book API endpoints", () => {
 
     it("should return books filtered by title", async () => {
       const books = [mockBookWithDetails];
-      mockBookService.getBooks.mockImplementation(() =>
-        Promise.resolve(books)
-      );
+      mockBookService.getBooks.mockImplementation(() => Promise.resolve(books));
 
       const response = await request(app).get("/books?title=Gatsby");
 
@@ -108,9 +104,7 @@ describe("Book API endpoints", () => {
 
     it("should return books filtered by author", async () => {
       const books = [mockBookWithDetails];
-      mockBookService.getBooks.mockImplementation(() =>
-        Promise.resolve(books)
-      );
+      mockBookService.getBooks.mockImplementation(() => Promise.resolve(books));
 
       const response = await request(app).get("/books?author=Fitzgerald");
 
@@ -132,7 +126,7 @@ describe("Book API endpoints", () => {
   describe("GET /books/:id", () => {
     it("should return a book by ID successfully", async () => {
       mockBookService.getBookById.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "Book found", responseObject: mockBook, statusCode: 200 })
+        Promise.resolve({ success: true, message: "Book found", responseObject: mockBook, statusCode: 200 }),
       );
 
       const response = await request(app).get(`/books/${mockBook.id}`);
@@ -146,7 +140,12 @@ describe("Book API endpoints", () => {
 
     it("should return 404 for non-existent book", async () => {
       mockBookService.getBookById.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Book with ID non-existent-id not found", responseObject: null, statusCode: 404 })
+        Promise.resolve({
+          success: false,
+          message: "Book with ID non-existent-id not found",
+          responseObject: null,
+          statusCode: 404,
+        }),
       );
 
       const response = await request(app).get("/books/non-existent-id");
@@ -159,7 +158,12 @@ describe("Book API endpoints", () => {
 
     it("should return 422 for invalid UUID format", async () => {
       mockBookService.getBookById.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Book ID is required", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "Book ID is required",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
       const response = await request(app).get("/books/invalid-uuid");
@@ -184,12 +188,15 @@ describe("Book API endpoints", () => {
     it("should create a new book successfully", async () => {
       const createdBook = { ...mockBook, ...newBookData };
       mockBookService.createBook.mockImplementation(() =>
-        Promise.resolve({ success: true, message: "Book created successfully", responseObject: createdBook, statusCode: 201 })
+        Promise.resolve({
+          success: true,
+          message: "Book created successfully",
+          responseObject: createdBook,
+          statusCode: 201,
+        }),
       );
 
-      const response = await request(app)
-        .post("/books")
-        .send(newBookData);
+      const response = await request(app).post("/books").send(newBookData);
       const result = response.body as ServiceResponse<typeof createdBook>;
 
       expect(response.statusCode).toBe(StatusCodes.CREATED);
@@ -201,12 +208,15 @@ describe("Book API endpoints", () => {
 
     it("should return 422 for missing required fields", async () => {
       mockBookService.createBook.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "Book title is required", responseObject: null, statusCode: 422 })
+        Promise.resolve({
+          success: false,
+          message: "Book title is required",
+          responseObject: null,
+          statusCode: 422,
+        }),
       );
 
-      const response = await request(app)
-        .post("/books")
-        .send({ author: "Test Author" });
+      const response = await request(app).post("/books").send({ author: "Test Author" });
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.UNPROCESSABLE_ENTITY);
@@ -215,12 +225,15 @@ describe("Book API endpoints", () => {
 
     it("should return 409 for duplicate ISBN", async () => {
       mockBookService.createBook.mockImplementation(() =>
-        Promise.resolve({ success: false, message: "A book with this ISBN already exists", responseObject: null, statusCode: 409 })
+        Promise.resolve({
+          success: false,
+          message: "A book with this ISBN already exists",
+          responseObject: null,
+          statusCode: 409,
+        }),
       );
 
-      const response = await request(app)
-        .post("/books")
-        .send(newBookData);
+      const response = await request(app).post("/books").send(newBookData);
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.CONFLICT);
@@ -247,13 +260,9 @@ describe("Book API endpoints", () => {
 
     it("should update a book successfully", async () => {
       const updatedBook = { ...mockBook, ...updateData };
-      mockBookService.updateBook.mockImplementation(() =>
-        Promise.resolve(updatedBook)
-      );
+      mockBookService.updateBook.mockImplementation(() => Promise.resolve(updatedBook));
 
-      const response = await request(app)
-        .patch(`/books/${mockBook.id}`)
-        .send(updateData);
+      const response = await request(app).patch(`/books/${mockBook.id}`).send(updateData);
 
       expect(response.statusCode).toBe(StatusCodes.OK);
       expect(response.body.title).toBe(updateData.title);
@@ -267,9 +276,7 @@ describe("Book API endpoints", () => {
         throw error;
       });
 
-      const response = await request(app)
-        .patch("/books/non-existent-id")
-        .send(updateData);
+      const response = await request(app).patch("/books/non-existent-id").send(updateData);
 
       expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
     });
@@ -279,9 +286,7 @@ describe("Book API endpoints", () => {
         throw new Error("Database error");
       });
 
-      const response = await request(app)
-        .patch(`/books/${mockBook.id}`)
-        .send(updateData);
+      const response = await request(app).patch(`/books/${mockBook.id}`).send(updateData);
 
       expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
     });
@@ -289,9 +294,7 @@ describe("Book API endpoints", () => {
 
   describe("DELETE /books/:id", () => {
     it("should delete a book successfully", async () => {
-      mockBookService.deleteBook.mockImplementation(() =>
-        Promise.resolve(mockBook)
-      );
+      mockBookService.deleteBook.mockImplementation(() => Promise.resolve(mockBook));
 
       const response = await request(app).delete(`/books/${mockBook.id}`);
 
@@ -314,9 +317,7 @@ describe("Book API endpoints", () => {
 
   describe("GET /books/isbn/:isbn", () => {
     it("should return a book by ISBN successfully", async () => {
-      mockBookService.getBookByISBN.mockImplementation(() =>
-        Promise.resolve(mockBook)
-      );
+      mockBookService.getBookByISBN.mockImplementation(() => Promise.resolve(mockBook));
 
       const response = await request(app).get(`/books/isbn/${mockBook.isbn}`);
 
@@ -360,13 +361,9 @@ describe("Book API endpoints", () => {
 
     it("should create books in bulk successfully", async () => {
       const createdBooks = bulkData.map((book, index) => ({ ...mockBook, ...book, id: `book-${index}` }));
-      mockBookService.createBooksBulk.mockImplementation(() =>
-        Promise.resolve(createdBooks)
-      );
+      mockBookService.createBooksBulk.mockImplementation(() => Promise.resolve(createdBooks));
 
-      const response = await request(app)
-        .post("/books/bulk")
-        .send(bulkData);
+      const response = await request(app).post("/books/bulk").send(bulkData);
 
       expect(response.statusCode).toBe(StatusCodes.CREATED);
       expect(Array.isArray(response.body)).toBe(true);
@@ -381,9 +378,7 @@ describe("Book API endpoints", () => {
         throw error;
       });
 
-      const response = await request(app)
-        .post("/books/bulk")
-        .send([]);
+      const response = await request(app).post("/books/bulk").send([]);
 
       expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
     });
@@ -393,9 +388,7 @@ describe("Book API endpoints", () => {
         throw new Error("Database error");
       });
 
-      const response = await request(app)
-        .post("/books/bulk")
-        .send(bulkData);
+      const response = await request(app).post("/books/bulk").send(bulkData);
 
       expect(response.statusCode).toBe(StatusCodes.INTERNAL_SERVER_ERROR);
     });
@@ -404,9 +397,7 @@ describe("Book API endpoints", () => {
   describe("GET /books/search/trigram", () => {
     it("should search books using trigram successfully", async () => {
       const searchResults = [{ ...mockBook, similarity: 0.8 }];
-      mockBookService.searchBooksByTrigram.mockImplementation(() =>
-        Promise.resolve(searchResults)
-      );
+      mockBookService.searchBooksByTrigram.mockImplementation(() => Promise.resolve(searchResults));
 
       const response = await request(app).get("/books/search/trigram?q=Gatsby");
 
@@ -425,9 +416,7 @@ describe("Book API endpoints", () => {
   describe("GET /books/search/weighted", () => {
     it("should search books using weighted search successfully", async () => {
       const searchResults = [{ ...mockBook, rank: 0.9 }];
-      mockBookService.searchBooksByWeighted.mockImplementation(() =>
-        Promise.resolve(searchResults)
-      );
+      mockBookService.searchBooksByWeighted.mockImplementation(() => Promise.resolve(searchResults));
 
       const response = await request(app).get("/books/search/weighted?q=Fitzgerald");
 
@@ -445,13 +434,11 @@ describe("Book API endpoints", () => {
 
   describe("GET /books/authors/:name", () => {
     it("should return author details successfully", async () => {
-      const authorDetails = { 
-        author: "F. Scott Fitzgerald", 
-        books: [mockBook] 
+      const authorDetails = {
+        author: "F. Scott Fitzgerald",
+        books: [mockBook],
       };
-      mockBookService.getAuthorDetails.mockImplementation(() =>
-        Promise.resolve(authorDetails)
-      );
+      mockBookService.getAuthorDetails.mockImplementation(() => Promise.resolve(authorDetails));
 
       const response = await request(app).get("/books/authors/F.%20Scott%20Fitzgerald");
 
@@ -462,36 +449,32 @@ describe("Book API endpoints", () => {
     });
 
     it("should handle pagination parameters", async () => {
-      const authorDetails = { 
-        author: "F. Scott Fitzgerald", 
-        books: [mockBook] 
+      const authorDetails = {
+        author: "F. Scott Fitzgerald",
+        books: [mockBook],
       };
-      mockBookService.getAuthorDetails.mockImplementation(() =>
-        Promise.resolve(authorDetails)
-      );
+      mockBookService.getAuthorDetails.mockImplementation(() => Promise.resolve(authorDetails));
 
       const response = await request(app).get("/books/authors/F.%20Scott%20Fitzgerald?page=2&pageSize=5");
 
       expect(response.statusCode).toBe(StatusCodes.OK);
       expect(mockBookService.getAuthorDetails).toHaveBeenCalledWith(
-        expect.anything(), 
-        "F. Scott Fitzgerald", 
-        2, 
-        5, 
-        undefined
+        expect.anything(),
+        "F. Scott Fitzgerald",
+        2,
+        5,
+        undefined,
       );
     });
   });
 
   describe("GET /books/publishers/:name", () => {
     it("should return publisher details successfully", async () => {
-      const publisherDetails = { 
-        publisher: "Scribner", 
-        books: [mockBook] 
+      const publisherDetails = {
+        publisher: "Scribner",
+        books: [mockBook],
       };
-      mockBookService.getPublisherDetails.mockImplementation(() =>
-        Promise.resolve(publisherDetails)
-      );
+      mockBookService.getPublisherDetails.mockImplementation(() => Promise.resolve(publisherDetails));
 
       const response = await request(app).get("/books/publishers/Scribner");
 
@@ -502,3 +485,4 @@ describe("Book API endpoints", () => {
     });
   });
 });
+
