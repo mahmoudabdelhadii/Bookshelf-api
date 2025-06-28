@@ -42,14 +42,11 @@ const logger = pino({
 
 const app = express();
 
-
 async function initializeServer() {
   try {
-    
     await initializeRedis();
     logger.info("Redis initialized successfully");
 
-    
     configureSession(app);
     logger.info("Session middleware configured");
   } catch (err) {
@@ -69,7 +66,6 @@ app.use((req, _res, next) => {
   next();
 });
 
-
 configurePassport(drizzle);
 configureOAuthStrategies(drizzle);
 
@@ -78,7 +74,6 @@ app.use(urlencoded({ extended: true }));
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
 app.use(rateLimiter);
-
 
 app.use(passport.initialize());
 app.use(passport.session());
