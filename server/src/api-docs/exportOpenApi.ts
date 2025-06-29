@@ -3,9 +3,17 @@ import path from "node:path";
 import { generateOpenAPIDocument } from "./openAPIDocumentGenerator.js";
 
 async function main() {
-  const openAPIDocument = generateOpenAPIDocument();
-  const outputPath = path.resolve(process.cwd(), "swagger.json");
-  fs.writeFileSync(outputPath, JSON.stringify(openAPIDocument, null, 2));
+  try {
+    console.log("Generating OpenAPI document...");
+    const openAPIDocument = generateOpenAPIDocument();
+    const outputPath = path.resolve(process.cwd(), "swagger.json");
+    fs.writeFileSync(outputPath, JSON.stringify(openAPIDocument, null, 2));
+    console.log("OpenAPI document generated successfully at:", outputPath);
+  } catch (error) {
+    console.error("Error generating OpenAPI document:", error);
+    console.error("Stack trace:", error.stack);
+    process.exit(1);
+  }
 }
 
-main();
+main().catch(console.error);

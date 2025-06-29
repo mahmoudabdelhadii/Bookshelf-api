@@ -34,18 +34,12 @@ export const getSubjectSchema = z.object({
 export const subjectArraySchema = z.array(subjectSchema).openapi({ description: "Array of subjects" });
 
 // Subject with hierarchical structure (business logic layer)
-type SubjectWithChildren = z.infer<typeof subjectSchema> & {
-  children?: SubjectWithChildren[];
-  totalBooksIncludingChildren?: number;
-  depth?: number;
-  path?: string[];
-};
-
-export const subjectWithChildrenSchema: z.ZodType<SubjectWithChildren> = subjectSchema.extend({
-  children: z.array(z.lazy(() => subjectWithChildrenSchema)).optional(),
-  totalBooksIncludingChildren: z.number().int().min(0).optional(),
-  depth: z.number().int().min(0).optional(),
-  path: z.array(z.string()).optional(),
+// Note: Simplified to avoid z.lazy() which causes OpenAPI generation issues
+export const subjectWithChildrenSchema = subjectSchema.extend({
+  children: z.array(subjectSchema).optional().openapi({ description: "Child subjects (limited to one level for OpenAPI)" }),
+  totalBooksIncludingChildren: z.number().int().min(0).optional().openapi({ description: "Total books including all child subjects" }),
+  depth: z.number().int().min(0).optional().openapi({ description: "Depth level in hierarchy" }),
+  path: z.array(z.string()).optional().openapi({ description: "Path from root to this subject" }),
 }).openapi({ description: "Subject with nested children" });
 
 // Subject with computed statistics (business logic layer)
@@ -64,4 +58,5 @@ export const subjectWithStatsSchema = subjectSchema.extend({
 export type Subject = z.infer<typeof subjectSchema>;
 export type CreateSubject = z.infer<typeof createSubjectSchema>;
 export type UpdateSubject = z.infer<typeof updateSubjectSchema>;
+export type SubjectWithChildren = z.infer<typeof subjectWithChildrenSchema>;
 export type SubjectWithStats = z.infer<typeof subjectWithStatsSchema>;

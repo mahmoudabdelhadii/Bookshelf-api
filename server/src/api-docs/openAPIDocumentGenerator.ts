@@ -5,8 +5,9 @@ import { booksRegistry } from "@/api/book/book.router.js";
 import { authRegistry } from "@/api/auth/auth.router.js";
 import { libraryRegistry } from "@/api/library/library.router.js";
 import { libraryBooksRegistry } from "@/api/libraryBooks/libraryBooks.router.js";
-import { subjectRegistry } from "@/api/subject/subject.router.js";
+import { authorRegistry } from "@/api/author/author.router.js";
 import { publisherRegistry } from "@/api/publisher/publisher.router.js";
+import { subjectRegistry } from "@/api/subject/subject.router.js";
 import { borrowRequestRegistry } from "@/api/borrowRequest/borrowRequest.router.js";
 import { libraryMemberRegistry } from "@/api/libraryMember/libraryMember.router.js";
 
@@ -18,11 +19,11 @@ export function generateOpenAPIDocument() {
     libraryRegistry,
     libraryBooksRegistry,
     authRegistry,
-    subjectRegistry,
+    authorRegistry,
     publisherRegistry,
-    // borrowRequestRegistry,
-    // libraryMemberRegistry,
-    authRegistry,
+    subjectRegistry,
+    borrowRequestRegistry,
+    libraryMemberRegistry,
   ]);
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
