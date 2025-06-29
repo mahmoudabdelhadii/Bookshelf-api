@@ -31,3 +31,7 @@ export * from "./publisher.js";
 export * from "./publisherRelations.js";
 export * from "./subject.js";
 export * from "./subjectRelations.js";
+export * from "./borrowRequest.js";
+export * from "./borrowRequestRelations.js";
+export * from "./libraryMember.js";
+export * from "./libraryMemberRelations.js";

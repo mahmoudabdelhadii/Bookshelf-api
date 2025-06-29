@@ -6,11 +6,9 @@ import crypto from "node:crypto";
  * Production-grade security with configurable salt rounds
  */
 
-
-const SALT_ROUNDS = 12; 
+const SALT_ROUNDS = 12;
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 128;
-
 
 const PASSWORD_REQUIREMENTS = {
   minLength: MIN_PASSWORD_LENGTH,
@@ -24,7 +22,7 @@ const PASSWORD_REQUIREMENTS = {
 
 export interface PasswordStrengthResult {
   isValid: boolean;
-  score: number; 
+  score: number;
   feedback: string[];
   requirements: {
     length: boolean;
@@ -71,7 +69,6 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   try {
     return await bcrypt.compare(password, hash);
   } catch (err) {
-    
     console.error("Password verification error:", err);
     return false;
   }
@@ -85,7 +82,6 @@ export function needsRehash(hash: string): boolean {
     const rounds = bcrypt.getRounds(hash);
     return rounds < SALT_ROUNDS;
   } catch (err) {
-    
     return true;
   }
 }
@@ -97,7 +93,6 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
   const feedback: string[] = [];
   let score = 0;
 
-  
   const hasValidLength = password.length >= MIN_PASSWORD_LENGTH && password.length <= MAX_PASSWORD_LENGTH;
   if (!hasValidLength) {
     if (password.length < MIN_PASSWORD_LENGTH) {
@@ -107,16 +102,17 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
     }
   } else {
     score += 20;
-    
+
     if (password.length >= 12) score += 10;
     if (password.length >= 16) score += 10;
   }
 
-  
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasNumbers = /\d/.test(password);
-  const hasSpecialChars = new RegExp(`[${PASSWORD_REQUIREMENTS.specialChars.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}]`).test(password);
+  const hasSpecialChars = new RegExp(
+    `[${PASSWORD_REQUIREMENTS.specialChars.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}]`,
+  ).test(password);
 
   if (!hasUppercase && PASSWORD_REQUIREMENTS.requireUppercase) {
     feedback.push("Password must contain at least one uppercase letter");
@@ -137,12 +133,13 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
   }
 
   if (!hasSpecialChars && PASSWORD_REQUIREMENTS.requireSpecialChars) {
-    feedback.push(`Password must contain at least one special character (${PASSWORD_REQUIREMENTS.specialChars})`);
+    feedback.push(
+      `Password must contain at least one special character (${PASSWORD_REQUIREMENTS.specialChars})`,
+    );
   } else {
     score += 15;
   }
 
-  
   if (password.toLowerCase().includes("password")) {
     feedback.push("Password should not contain the word 'password'");
     score -= 20;
@@ -158,24 +155,17 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
     score -= 15;
   }
 
-  
   const commonWords = ["admin", "user", "test", "guest", "login", "welcome", "secret"];
   const lowerPassword = password.toLowerCase();
-  if (commonWords.some(word => lowerPassword.includes(word))) {
+  if (commonWords.some((word) => lowerPassword.includes(word))) {
     feedback.push("Password should not contain common words");
     score -= 15;
   }
 
-  
   score = Math.max(0, Math.min(100, score));
 
-  const isValid = 
-    hasValidLength && 
-    hasUppercase && 
-    hasLowercase && 
-    hasNumbers && 
-    hasSpecialChars &&
-    feedback.length === 0;
+  const isValid =
+    hasValidLength && hasUppercase && hasLowercase && hasNumbers && hasSpecialChars && feedback.length === 0;
 
   return {
     isValid,
@@ -204,21 +194,21 @@ export function generateSecurePassword(length = 16): string {
   const numbers = "0123456789";
   const specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
 
-  
   let password = "";
   password += uppercase[crypto.randomInt(uppercase.length)];
   password += lowercase[crypto.randomInt(lowercase.length)];
   password += numbers[crypto.randomInt(numbers.length)];
   password += specialChars[crypto.randomInt(specialChars.length)];
 
-  
   const allChars = uppercase + lowercase + numbers + specialChars;
   for (let i = password.length; i < length; i++) {
     password += allChars[crypto.randomInt(allChars.length)];
   }
 
-  
-  return password.split("").sort(() => crypto.randomInt(3) - 1).join("");
+  return password
+    .split("")
+    .sort(() => crypto.randomInt(3) - 1)
+    .join("");
 }
 
 /**
@@ -249,7 +239,6 @@ export function verifyToken(token: string, hash: string): boolean {
 export function generateBackupCodes(count = 10): string[] {
   const codes: string[] = [];
   for (let i = 0; i < count; i++) {
-    
     codes.push(crypto.randomBytes(4).toString("hex").toUpperCase());
   }
   return codes;
@@ -262,12 +251,12 @@ export function encryptSensitiveData(data: string, key: string): string {
   const algorithm = "aes-256-gcm";
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipher(algorithm, key);
-  
+
   let encrypted = cipher.update(data, "utf8", "hex");
   encrypted += cipher.final("hex");
-  
+
   const authTag = cipher.getAuthTag();
-  
+
   return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted}`;
 }
 
@@ -277,20 +266,20 @@ export function encryptSensitiveData(data: string, key: string): string {
 export function decryptSensitiveData(encryptedData: string, key: string): string {
   const algorithm = "aes-256-gcm";
   const parts = encryptedData.split(":");
-  
+
   if (parts.length !== 3) {
     throw new Error("Invalid encrypted data format");
   }
-  
+
   const iv = Buffer.from(parts[0], "hex");
   const authTag = Buffer.from(parts[1], "hex");
   const encrypted = parts[2];
-  
+
   const decipher = crypto.createDecipher(algorithm, key);
   decipher.setAuthTag(authTag);
-  
+
   let decrypted = decipher.update(encrypted, "hex", "utf8");
   decrypted += decipher.final("utf8");
-  
+
   return decrypted;
 }

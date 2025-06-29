@@ -8,61 +8,42 @@ import {
   ConflictError,
 } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import type { User } from "./user.model.js";
+import type { User, CreateUser } from "./user.model.js";
 
 export const UserService = {
   async createUser(
     drizzle: DrizzleClient,
-    {
-      id,
-      username,
-      email,
-      firstName,
-      lastName,
-    }: {
-      id: string;
-      username: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-    },
+    userData: CreateUser,
   ) {
     try {
-      
-      if (!id.trim()) {
-        const validationError = new ValidationError("User ID is required");
-        return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
-      }
-      if (!username.trim()) {
+      if (!userData.username.trim()) {
         const validationError = new ValidationError("Username is required");
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
       }
-      if (!email.trim()) {
+      if (!userData.email.trim()) {
         const validationError = new ValidationError("Email is required");
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
       }
 
-      
       const existingByEmail = await drizzle.query.user.findFirst({
-        where: (u, { eq }) => eq(u.email, email),
+        where: (u, { eq }) => eq(u.email, userData.email),
       });
       if (existingByEmail) {
         const conflictError = new ConflictError("User with this email already exists");
-        return ServiceResponse.failure(conflictError.message, { email }, conflictError.statusCode);
+        return ServiceResponse.failure(conflictError.message, { email: userData.email }, conflictError.statusCode);
       }
 
-      
       const existingByUsername = await drizzle.query.user.findFirst({
-        where: (u, { eq }) => eq(u.username, username),
+        where: (u, { eq }) => eq(u.username, userData.username),
       });
       if (existingByUsername) {
         const conflictError = new ConflictError("User with this username already exists");
-        return ServiceResponse.failure(conflictError.message, { username }, conflictError.statusCode);
+        return ServiceResponse.failure(conflictError.message, { username: userData.username }, conflictError.statusCode);
       }
 
       const [newUser] = await drizzle
         .insert(schema.user)
-        .values({ username, email, firstName, lastName })
+        .values(userData)
         .returning();
 
       return ServiceResponse.success("User created successfully", newUser);
@@ -84,7 +65,10 @@ export const UserService = {
     }
   },
 
-  async findById(drizzle: DrizzleClient, id: string): Promise<ServiceResponse<User | null | Record<string, unknown>>> {
+  async findById(
+    drizzle: DrizzleClient,
+    id: string,
+  ): Promise<ServiceResponse<User | null | Record<string, unknown>>> {
     try {
       if (!id.trim()) {
         const validationError = new ValidationError("User ID is required");
@@ -104,7 +88,11 @@ export const UserService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to fetch user: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { userId: id, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { userId: id, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -124,32 +112,37 @@ export const UserService = {
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
       }
 
-      
-      const hasUpdates = Object.values(updates).some(value => value !== undefined && value !== null);
+      const hasUpdates = Object.values(updates).some((value) => value !== undefined && value !== null);
       if (!hasUpdates) {
         const validationError = new ValidationError("At least one field must be provided for update");
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
       }
 
-      
       if (updates.email?.trim()) {
         const existingByEmail = await drizzle.query.user.findFirst({
           where: (u, { eq }) => eq(u.email, updates.email!),
         });
         if (existingByEmail && existingByEmail.id !== id) {
           const conflictError = new ConflictError("User with this email already exists");
-          return ServiceResponse.failure(conflictError.message, { email: updates.email }, conflictError.statusCode);
+          return ServiceResponse.failure(
+            conflictError.message,
+            { email: updates.email },
+            conflictError.statusCode,
+          );
         }
       }
 
-      
       if (updates.username?.trim()) {
         const existingByUsername = await drizzle.query.user.findFirst({
           where: (u, { eq }) => eq(u.username, updates.username!),
         });
         if (existingByUsername && existingByUsername.id !== id) {
           const conflictError = new ConflictError("User with this username already exists");
-          return ServiceResponse.failure(conflictError.message, { username: updates.username }, conflictError.statusCode);
+          return ServiceResponse.failure(
+            conflictError.message,
+            { username: updates.username },
+            conflictError.statusCode,
+          );
         }
       }
 
@@ -169,7 +162,11 @@ export const UserService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to update user: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { userId: id, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { userId: id, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -181,7 +178,7 @@ export const UserService = {
       }
 
       const deletedUsers = await drizzle.delete(schema.user).where(eq(schema.user.id, id)).returning();
-      
+
       if (deletedUsers.length === 0) {
         const notFoundError = new NotFoundError("User", id);
         return ServiceResponse.failure(notFoundError.message, null, notFoundError.statusCode);
@@ -191,7 +188,11 @@ export const UserService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to delete user: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { userId: id, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { userId: id, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 } as const;

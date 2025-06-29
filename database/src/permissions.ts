@@ -1,5 +1,3 @@
-
-
 export enum ResourceType {
   USER = "user",
   BOOK = "book",
@@ -30,7 +28,6 @@ export enum ActionType {
 }
 
 export const PERMISSIONS = {
-  
   USER_CREATE: "user:create",
   USER_READ: "user:read",
   USER_READ_OWN: "user:read:own",
@@ -43,7 +40,6 @@ export const PERMISSIONS = {
   USER_SUSPEND: "user:suspend",
   USER_ACTIVATE: "user:activate",
 
-  
   BOOK_CREATE: "book:create",
   BOOK_READ: "book:read",
   BOOK_UPDATE: "book:update",
@@ -57,7 +53,6 @@ export const PERMISSIONS = {
   BOOK_BULK_UPDATE: "book:update:bulk",
   BOOK_BULK_DELETE: "book:delete:bulk",
 
-  
   LIBRARY_CREATE: "library:create",
   LIBRARY_READ: "library:read",
   LIBRARY_UPDATE: "library:update",
@@ -65,7 +60,6 @@ export const PERMISSIONS = {
   LIBRARY_LIST: "library:list",
   LIBRARY_MANAGE: "library:manage",
 
-  
   LIBRARY_BOOK_ADD: "library_book:create",
   LIBRARY_BOOK_READ: "library_book:read",
   LIBRARY_BOOK_UPDATE: "library_book:update",
@@ -74,7 +68,6 @@ export const PERMISSIONS = {
   LIBRARY_BOOK_MANAGE: "library_book:manage",
   LIBRARY_BOOK_TRANSFER: "library_book:transfer",
 
-  
   AUTHOR_CREATE: "author:create",
   AUTHOR_READ: "author:read",
   AUTHOR_UPDATE: "author:update",
@@ -83,7 +76,6 @@ export const PERMISSIONS = {
   AUTHOR_SEARCH: "author:search",
   AUTHOR_MANAGE: "author:manage",
 
-  
   PUBLISHER_CREATE: "publisher:create",
   PUBLISHER_READ: "publisher:read",
   PUBLISHER_UPDATE: "publisher:update",
@@ -92,7 +84,6 @@ export const PERMISSIONS = {
   PUBLISHER_SEARCH: "publisher:search",
   PUBLISHER_MANAGE: "publisher:manage",
 
-  
   ROLE_CREATE: "role:create",
   ROLE_READ: "role:read",
   ROLE_UPDATE: "role:update",
@@ -102,7 +93,6 @@ export const PERMISSIONS = {
   ROLE_ASSIGN: "role:assign",
   ROLE_REVOKE: "role:revoke",
 
-  
   SYSTEM_CONFIG: "system:config",
   SYSTEM_MONITOR: "system:monitor",
   SYSTEM_BACKUP: "system:backup",
@@ -110,19 +100,16 @@ export const PERMISSIONS = {
   SYSTEM_MAINTAIN: "system:maintain",
   SYSTEM_MANAGE: "system:manage",
 
-  
   AUDIT_LOG_READ: "audit_log:read",
   AUDIT_LOG_EXPORT: "audit_log:export",
   AUDIT_LOG_MANAGE: "audit_log:manage",
   SECURITY_MANAGE: "security:manage",
   SECURITY_MONITOR: "security:monitor",
 
-  
   API_ACCESS: "api:access",
   API_ADMIN: "api:admin",
   INTEGRATION_MANAGE: "integration:manage",
 } as const;
-
 
 export const ROLE_TEMPLATES = {
   SUPER_ADMIN: {
@@ -299,7 +286,6 @@ export const ROLE_TEMPLATES = {
   },
 } as const;
 
-
 export class PermissionValidator {
   static isValidPermission(permission: string): boolean {
     return Object.values(PERMISSIONS).includes(permission as any);
@@ -323,12 +309,10 @@ export class PermissionValidator {
   }
 
   static hasPermission(userPermissions: string[], requiredPermission: string): boolean {
-    
     if (userPermissions.includes(requiredPermission)) {
       return true;
     }
 
-    
     const parsed = this.parsePermission(requiredPermission);
     if (!parsed) return false;
 
@@ -337,7 +321,6 @@ export class PermissionValidator {
       return true;
     }
 
-    
     if (userPermissions.includes(PERMISSIONS.SYSTEM_MANAGE)) {
       return true;
     }
@@ -353,7 +336,6 @@ export class PermissionValidator {
     return requiredPermissions.every((permission) => this.hasPermission(userPermissions, permission));
   }
 }
-
 
 export type Permission = keyof typeof PERMISSIONS;
 export type PermissionString = (typeof PERMISSIONS)[Permission];

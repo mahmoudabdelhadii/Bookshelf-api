@@ -8,7 +8,6 @@ import { generateSecurePassword, hashPassword } from "../utils/password.js";
 import { generateSessionId } from "./jwt.js";
 import emailService from "../services/email.js";
 
-
 export interface GoogleProfile {
   id: string;
   provider: "google";
@@ -50,7 +49,6 @@ export interface OAuthUser {
  * Configure OAuth strategies for Google and Apple
  */
 export function configureOAuthStrategies(drizzle: DrizzleClient) {
-  
   if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
     passport.use(
       new GoogleStrategy(
@@ -66,21 +64,19 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             const email = googleProfile.emails[0]?.value;
 
             if (!email) {
-              done(new Error("No email provided by Google"), false); return;
+              done(new Error("No email provided by Google"), false);
+              return;
             }
 
-            
             let user = await findUserByEmail(drizzle, email);
 
             if (user) {
-              
               await updateUserOAuthInfo(drizzle, user.id, {
                 provider: "google",
                 providerId: googleProfile.id,
                 avatar: googleProfile.photos[0]?.value,
               });
             } else {
-              
               const newUser = await createOAuthUser(drizzle, {
                 email,
                 firstName: googleProfile.name.givenName || "User",
@@ -90,15 +86,14 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
                 avatar: googleProfile.photos[0]?.value,
               });
 
-              
               user = await findUserByEmail(drizzle, email);
             }
 
             const authUser = await buildAuthUser(drizzle, user, "google", googleProfile.id);
-            done(null, authUser); 
+            done(null, authUser);
           } catch (err) {
             console.error("Google OAuth error:", err);
-            done(err as Error, undefined); 
+            done(err as Error, undefined);
           }
         },
       ),
@@ -122,24 +117,21 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
           try {
             const appleProfile = profile as any as AppleProfile;
 
-            
             const email = appleProfile.email;
 
             if (!email) {
-              done(new Error("No email provided by Apple"), undefined); return;
+              done(new Error("No email provided by Apple"), undefined);
+              return;
             }
 
-            
             let user = await findUserByEmail(drizzle, email);
 
             if (user) {
-              
               await updateUserOAuthInfo(drizzle, user.id, {
                 provider: "apple",
                 providerId: appleProfile.id,
               });
             } else {
-              
               const newUser = await createOAuthUser(drizzle, {
                 email,
                 firstName: appleProfile.name?.firstName || "User",
@@ -148,15 +140,14 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
                 providerId: appleProfile.id,
               });
 
-              
               user = await findUserByEmail(drizzle, email);
             }
 
             const authUser = await buildAuthUser(drizzle, user, "apple", appleProfile.id);
-            done(null, authUser); 
+            done(null, authUser);
           } catch (err) {
             console.error("Apple OAuth error:", err);
-            done(err as Error, undefined); 
+            done(err as Error, undefined);
           }
         },
       ),
@@ -198,14 +189,11 @@ async function createOAuthUser(
   },
 ) {
   return await drizzle.transaction(async (tx) => {
-    
     const username = generateUsernameFromEmail(data.email);
 
-    
     const randomPassword = generateSecurePassword(32);
     const passwordHash = await hashPassword(randomPassword);
 
-    
     const [newUser] = await tx
       .insert(schema.user)
       .values({
@@ -217,11 +205,10 @@ async function createOAuthUser(
       })
       .returning();
 
-    
     await tx.insert(schema.userAuth).values({
       userId: newUser.id,
       passwordHash,
-      isEmailVerified: true, 
+      isEmailVerified: true,
       emailVerifiedAt: new Date(),
       isActive: true,
       isSuspended: false,
@@ -229,7 +216,6 @@ async function createOAuthUser(
       failedLoginAttempts: 0,
     });
 
-    
     await tx.insert(schema.oauthProfile).values({
       userId: newUser.id,
       provider: data.provider,
@@ -241,7 +227,6 @@ async function createOAuthUser(
       }),
     });
 
-    
     const readerRole = await tx.query.role.findFirst({
       where: (role, { eq }) => eq(role.name, "Reader"),
     });
@@ -253,7 +238,6 @@ async function createOAuthUser(
       });
     }
 
-    
     emailService
       .sendWelcomeEmail({
         email: data.email,
@@ -263,7 +247,6 @@ async function createOAuthUser(
       })
       .catch(console.error);
 
-    
     await tx.insert(schema.securityAuditLog).values({
       userId: newUser.id,
       action: `oauth_registration_${data.provider}`,
@@ -292,12 +275,10 @@ async function updateUserOAuthInfo(
   },
 ) {
   await drizzle.transaction(async (tx) => {
-    
     const existingProfile = await tx.query.oauthProfile.findFirst({
       where: (profile, { eq, and }) => and(eq(profile.userId, userId), eq(profile.provider, data.provider)),
     });
     if (existingProfile) {
-      
       await tx
         .update(schema.oauthProfile)
         .set({
@@ -346,7 +327,6 @@ async function buildAuthUser(
 ): Promise<OAuthUser> {
   const permissions = user.userRoles?.flatMap((ur: any) => ur.role.permissions || []) || [];
 
-  
   await drizzle.insert(schema.securityAuditLog).values({
     userId: user.id,
     action: `oauth_login_${provider}`,
@@ -379,7 +359,7 @@ async function buildAuthUser(
  */
 function generateUsernameFromEmail(email: string): string {
   const baseUsername = email.split("@")[0].toLowerCase();
-  
+
   const cleanUsername = baseUsername.replace(/[^a-z0-9]/g, "");
   const randomSuffix = Math.random().toString(36).substring(2, 6);
   return `${cleanUsername}_${randomSuffix}`;
@@ -403,7 +383,6 @@ export class OAuthService {
     },
   ) {
     try {
-      
       const existingLink = await drizzle.query.oauthProfile.findFirst({
         where: (profile, { eq, and }) =>
           and(eq(profile.provider, oauthData.provider), eq(profile.providerId, oauthData.providerId)),
@@ -414,7 +393,6 @@ export class OAuthService {
       }
 
       if (existingLink) {
-        
         await drizzle
           .update(schema.oauthProfile)
           .set({
@@ -424,7 +402,6 @@ export class OAuthService {
           })
           .where(eq(schema.oauthProfile.id, existingLink.id));
       } else {
-        
         await drizzle.insert(schema.oauthProfile).values({
           userId,
           provider: oauthData.provider,
@@ -434,7 +411,6 @@ export class OAuthService {
         });
       }
 
-      
       await drizzle.insert(schema.securityAuditLog).values({
         userId,
         action: `oauth_account_linked_${oauthData.provider}`,
@@ -467,7 +443,6 @@ export class OAuthService {
 
       await drizzle.delete(schema.oauthProfile).where(eq(schema.oauthProfile.id, profile.id));
 
-      
       await drizzle.insert(schema.securityAuditLog).values({
         userId,
         action: `oauth_account_unlinked_${provider}`,

@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { schema, eq, and, gte, lte  } from "database";
+import { schema, eq, and, gte, lte } from "database";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import { hashPassword, verifyPassword, generateSecureToken, hashToken } from "../../common/utils/password.js";
 import { generateTokenPair, generateSessionId, verifyRefreshToken } from "../../common/auth/jwt.js";
@@ -12,7 +12,6 @@ import {
   UnauthorizedError,
 } from "../../errors.js";
 import type { AuthUser } from "../../common/auth/strategies.js";
-
 
 export interface RegisterUserData {
   username: string;
@@ -81,7 +80,6 @@ export const AuthService = {
     try {
       const { username, email, firstName, lastName, password } = userData;
 
-      
       if (!username.trim()) {
         const error = new ValidationError("Username is required");
         return ServiceResponse.failure(error.message, null, error.statusCode);
@@ -107,12 +105,8 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       const existingUser = await drizzle.query.user.findFirst({
-        where: (user, { or, eq }) => or(
-          eq(user.email, email),
-          eq(user.username, username)
-        ),
+        where: (user, { or, eq }) => or(eq(user.email, email), eq(user.username, username)),
       });
 
       if (existingUser) {
@@ -121,12 +115,9 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, { field }, error.statusCode);
       }
 
-      
       const passwordHash = await hashPassword(password);
 
-      
       const result = await drizzle.transaction(async (tx) => {
-        
         const [newUser] = await tx
           .insert(schema.user)
           .values({
@@ -138,50 +129,40 @@ export const AuthService = {
           })
           .returning();
 
-        
-        await tx
-          .insert(schema.userAuth)
-          .values({
-            userId: newUser.id,
-            passwordHash,
-            isEmailVerified: false,
-            isActive: true,
-            isSuspended: false,
-            twoFactorEnabled: false,
-            failedLoginAttempts: 0,
-          });
+        await tx.insert(schema.userAuth).values({
+          userId: newUser.id,
+          passwordHash,
+          isEmailVerified: false,
+          isActive: true,
+          isSuspended: false,
+          twoFactorEnabled: false,
+          failedLoginAttempts: 0,
+        });
 
-        
         const readerRole = await tx.query.role.findFirst({
           where: (role, { eq }) => eq(role.name, "Reader"),
         });
 
         if (readerRole) {
-          await tx
-            .insert(schema.userRole)
-            .values({
-              userId: newUser.id,
-              roleId: readerRole.id,
-            });
+          await tx.insert(schema.userRole).values({
+            userId: newUser.id,
+            roleId: readerRole.id,
+          });
         }
 
-        
         const verificationToken = generateSecureToken();
         const tokenHash = hashToken(verificationToken);
         const expiresAt = new Date(Date.now() + env.EMAIL_VERIFICATION_EXPIRES);
 
-        await tx
-          .insert(schema.emailVerificationToken)
-          .values({
-            userId: newUser.id,
-            token: tokenHash,
-            expiresAt,
-          });
+        await tx.insert(schema.emailVerificationToken).values({
+          userId: newUser.id,
+          token: tokenHash,
+          expiresAt,
+        });
 
         return { user: newUser, verificationToken };
       });
 
-      
       await this.logSecurityEvent(drizzle, {
         userId: result.user.id,
         action: "user_registered",
@@ -199,9 +180,9 @@ export const AuthService = {
             firstName: result.user.firstName,
             lastName: result.user.lastName,
           },
-          verificationToken: result.verificationToken, 
+          verificationToken: result.verificationToken,
         },
-        201
+        201,
       );
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
@@ -217,7 +198,6 @@ export const AuthService = {
     try {
       const { email, password, ipAddress, userAgent } = credentials;
 
-      
       const userWithAuth = await drizzle.query.user.findFirst({
         where: (user, { eq }) => eq(user.email, email),
         with: {
@@ -231,7 +211,6 @@ export const AuthService = {
       });
 
       if (!userWithAuth) {
-        
         await this.logLoginAttempt(drizzle, {
           email,
           ipAddress: ipAddress || "unknown",
@@ -251,7 +230,6 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       if (!userAuth.isActive) {
         const error = new UnauthorizedError("Account is deactivated");
         return ServiceResponse.failure(error.message, null, error.statusCode);
@@ -262,9 +240,8 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       if (userAuth.failedLoginAttempts >= env.MAX_LOGIN_ATTEMPTS) {
-        const lockoutExpiry = userAuth.lastFailedLoginAt 
+        const lockoutExpiry = userAuth.lastFailedLoginAt
           ? new Date(userAuth.lastFailedLoginAt.getTime() + env.LOCKOUT_TIME)
           : new Date();
 
@@ -274,11 +251,9 @@ export const AuthService = {
         }
       }
 
-      
       const isValidPassword = await verifyPassword(password, userAuth.passwordHash);
 
       if (!isValidPassword) {
-        
         await drizzle
           .update(schema.userAuth)
           .set({
@@ -287,7 +262,6 @@ export const AuthService = {
           })
           .where(eq(schema.userAuth.userId, user.id));
 
-        
         await this.logLoginAttempt(drizzle, {
           email,
           ipAddress: ipAddress || "unknown",
@@ -300,9 +274,8 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       const sessionId = generateSessionId();
-      const permissions = userRoles.flatMap(ur => ur.role.permissions || []);
+      const permissions = userRoles.flatMap((ur) => ur.role.permissions || []);
 
       const tokenPayload = {
         userId: user.id,
@@ -315,21 +288,17 @@ export const AuthService = {
 
       const tokens = generateTokenPair(tokenPayload);
 
-      
       const sessionExpiresAt = new Date(Date.now() + tokens.refreshExpiresIn * 1000);
-      
-      await drizzle
-        .insert(schema.userSession)
-        .values({
-          userId: user.id,
-          sessionToken: sessionId,
-          refreshToken: tokens.refreshToken,
-          ipAddress: ipAddress || "unknown",
-          userAgent: userAgent || "unknown",
-          expiresAt: sessionExpiresAt,
-        });
 
-      
+      await drizzle.insert(schema.userSession).values({
+        userId: user.id,
+        sessionToken: sessionId,
+        refreshToken: tokens.refreshToken,
+        ipAddress: ipAddress || "unknown",
+        userAgent: userAgent || "unknown",
+        expiresAt: sessionExpiresAt,
+      });
+
       await drizzle
         .update(schema.userAuth)
         .set({
@@ -339,7 +308,6 @@ export const AuthService = {
         })
         .where(eq(schema.userAuth.userId, user.id));
 
-      
       await this.logLoginAttempt(drizzle, {
         email,
         ipAddress: ipAddress || "unknown",
@@ -347,7 +315,6 @@ export const AuthService = {
         isSuccessful: true,
       });
 
-      
       await this.logSecurityEvent(drizzle, {
         userId: user.id,
         action: "login",
@@ -389,16 +356,11 @@ export const AuthService = {
    */
   async logout(drizzle: DrizzleClient, sessionId: string, userId: string) {
     try {
-      
       await drizzle
         .update(schema.userSession)
         .set({ isActive: false })
-        .where(and(
-          eq(schema.userSession.sessionToken, sessionId),
-          eq(schema.userSession.userId, userId)
-        ));
+        .where(and(eq(schema.userSession.sessionToken, sessionId), eq(schema.userSession.userId, userId)));
 
-      
       await this.logSecurityEvent(drizzle, {
         userId,
         action: "logout",
@@ -421,7 +383,6 @@ export const AuthService = {
     try {
       const { refreshToken, ipAddress, userAgent } = data;
 
-      
       const verification = verifyRefreshToken(refreshToken);
       if (!verification.isValid || !verification.payload) {
         const error = new UnauthorizedError("Invalid or expired refresh token");
@@ -430,13 +391,9 @@ export const AuthService = {
 
       const payload = verification.payload;
 
-      
       const session = await drizzle.query.userSession.findFirst({
-        where: (s, { eq, and }) => and(
-          eq(s.refreshToken, refreshToken),
-          eq(s.userId, payload.userId),
-          eq(s.isActive, true)
-        ),
+        where: (s, { eq, and }) =>
+          and(eq(s.refreshToken, refreshToken), eq(s.userId, payload.userId), eq(s.isActive, true)),
       });
 
       if (!session || session.expiresAt < new Date()) {
@@ -444,7 +401,6 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       const userWithRoles = await drizzle.query.user.findFirst({
         where: (user, { eq }) => eq(user.id, payload.userId),
         with: {
@@ -461,8 +417,7 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
-      const permissions = userWithRoles.userRoles.flatMap(ur => ur.role.permissions || []);
+      const permissions = userWithRoles.userRoles.flatMap((ur) => ur.role.permissions || []);
       const newTokenPayload = {
         userId: userWithRoles.id,
         username: userWithRoles.username,
@@ -474,7 +429,6 @@ export const AuthService = {
 
       const newTokens = generateTokenPair(newTokenPayload);
 
-      
       await drizzle
         .update(schema.userSession)
         .set({
@@ -483,7 +437,6 @@ export const AuthService = {
         })
         .where(eq(schema.userSession.id, session.id));
 
-      
       await this.logSecurityEvent(drizzle, {
         userId: payload.userId,
         action: "token_refresh",
@@ -518,28 +471,22 @@ export const AuthService = {
       });
 
       if (!user) {
-        
         return ServiceResponse.success(
           "If an account with that email exists, password reset instructions have been sent.",
-          null
+          null,
         );
       }
 
-      
       const resetToken = generateSecureToken();
       const tokenHash = hashToken(resetToken);
       const expiresAt = new Date(Date.now() + env.PASSWORD_RESET_EXPIRES);
 
-      
-      await drizzle
-        .insert(schema.passwordResetToken)
-        .values({
-          userId: user.id,
-          token: tokenHash,
-          expiresAt,
-        });
+      await drizzle.insert(schema.passwordResetToken).values({
+        userId: user.id,
+        token: tokenHash,
+        expiresAt,
+      });
 
-      
       await this.logSecurityEvent(drizzle, {
         userId: user.id,
         action: "password_reset_requested",
@@ -551,7 +498,7 @@ export const AuthService = {
 
       return ServiceResponse.success(
         "If an account with that email exists, password reset instructions have been sent.",
-        { resetToken } 
+        { resetToken },
       );
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
@@ -569,12 +516,8 @@ export const AuthService = {
 
       const tokenHash = hashToken(token);
 
-      
       const resetToken = await drizzle.query.passwordResetToken.findFirst({
-        where: (t, { eq, and }) => and(
-          eq(t.token, tokenHash),
-          eq(t.isUsed, false)
-        ),
+        where: (t, { eq, and }) => and(eq(t.token, tokenHash), eq(t.isUsed, false)),
         with: {
           user: true,
         },
@@ -585,35 +528,29 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       const passwordHash = await hashPassword(newPassword);
 
-      
       await drizzle.transaction(async (tx) => {
-        
         await tx
           .update(schema.userAuth)
           .set({
             passwordHash,
             lastPasswordChangeAt: new Date(),
-            failedLoginAttempts: 0, 
+            failedLoginAttempts: 0,
           })
           .where(eq(schema.userAuth.userId, resetToken.userId));
 
-        
         await tx
           .update(schema.passwordResetToken)
           .set({ isUsed: true })
           .where(eq(schema.passwordResetToken.id, resetToken.id));
 
-        
         await tx
           .update(schema.userSession)
           .set({ isActive: false })
           .where(eq(schema.userSession.userId, resetToken.userId));
       });
 
-      
       await this.logSecurityEvent(drizzle, {
         userId: resetToken.userId,
         action: "password_reset_completed",
@@ -640,12 +577,8 @@ export const AuthService = {
 
       const tokenHash = hashToken(token);
 
-      
       const verificationToken = await drizzle.query.emailVerificationToken.findFirst({
-        where: (t, { eq, and }) => and(
-          eq(t.token, tokenHash),
-          eq(t.isUsed, false)
-        ),
+        where: (t, { eq, and }) => and(eq(t.token, tokenHash), eq(t.isUsed, false)),
       });
 
       if (!verificationToken || verificationToken.expiresAt < new Date()) {
@@ -653,7 +586,6 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       await drizzle.transaction(async (tx) => {
         await tx
           .update(schema.userAuth)
@@ -669,7 +601,6 @@ export const AuthService = {
           .where(eq(schema.emailVerificationToken.id, verificationToken.id));
       });
 
-      
       await this.logSecurityEvent(drizzle, {
         userId: verificationToken.userId,
         action: "email_verified",
@@ -693,7 +624,6 @@ export const AuthService = {
     try {
       const { userId, currentPassword, newPassword, ipAddress, userAgent } = data;
 
-      
       const userAuthData = await drizzle.query.userAuth.findFirst({
         where: (auth, { eq }) => eq(auth.userId, userId),
       });
@@ -703,7 +633,6 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       const isValidPassword = await verifyPassword(currentPassword, userAuthData.passwordHash);
 
       if (!isValidPassword) {
@@ -711,10 +640,8 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      
       const passwordHash = await hashPassword(newPassword);
 
-      
       await drizzle
         .update(schema.userAuth)
         .set({
@@ -723,7 +650,6 @@ export const AuthService = {
         })
         .where(eq(schema.userAuth.userId, userId));
 
-      
       await this.logSecurityEvent(drizzle, {
         userId,
         action: "password_changed",
@@ -743,25 +669,26 @@ export const AuthService = {
   /**
    * Log security events
    */
-  async logSecurityEvent(drizzle: DrizzleClient, event: {
-    userId?: string;
-    action: string;
-    details?: string;
-    ipAddress?: string;
-    userAgent?: string;
-    severity?: "info" | "warning" | "critical";
-  }) {
+  async logSecurityEvent(
+    drizzle: DrizzleClient,
+    event: {
+      userId?: string;
+      action: string;
+      details?: string;
+      ipAddress?: string;
+      userAgent?: string;
+      severity?: "info" | "warning" | "critical";
+    },
+  ) {
     try {
-      await drizzle
-        .insert(schema.securityAuditLog)
-        .values({
-          userId: event.userId || null,
-          action: event.action,
-          details: event.details || null,
-          ipAddress: event.ipAddress || null,
-          userAgent: event.userAgent || null,
-          severity: event.severity || "info",
-        });
+      await drizzle.insert(schema.securityAuditLog).values({
+        userId: event.userId || null,
+        action: event.action,
+        details: event.details || null,
+        ipAddress: event.ipAddress || null,
+        userAgent: event.userAgent || null,
+        severity: event.severity || "info",
+      });
     } catch (err) {
       console.error("Failed to log security event:", err);
     }
@@ -770,29 +697,26 @@ export const AuthService = {
   /**
    * Log login attempts
    */
-  async logLoginAttempt(drizzle: DrizzleClient, attempt: {
-    email: string;
-    ipAddress: string;
-    userAgent: string;
-    isSuccessful: boolean;
-    failureReason?: string;
-  }) {
+  async logLoginAttempt(
+    drizzle: DrizzleClient,
+    attempt: {
+      email: string;
+      ipAddress: string;
+      userAgent: string;
+      isSuccessful: boolean;
+      failureReason?: string;
+    },
+  ) {
     try {
-      await drizzle
-        .insert(schema.loginAttempt)
-        .values({
-          email: attempt.email,
-          ipAddress: attempt.ipAddress,
-          userAgent: attempt.userAgent,
-          isSuccessful: attempt.isSuccessful,
-          failureReason: attempt.failureReason || null,
-        });
+      await drizzle.insert(schema.loginAttempt).values({
+        email: attempt.email,
+        ipAddress: attempt.ipAddress,
+        userAgent: attempt.userAgent,
+        isSuccessful: attempt.isSuccessful,
+        failureReason: attempt.failureReason || null,
+      });
     } catch (err) {
       console.error("Failed to log login attempt:", err);
     }
   },
 } as const;
-
-
-
-

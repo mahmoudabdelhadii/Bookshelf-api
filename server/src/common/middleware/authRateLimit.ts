@@ -5,7 +5,6 @@ import { env } from "../utils/envConfig.js";
 import { redisClient } from "./session.js";
 import { Request, Response } from "express";
 
-
 declare global {
   namespace Express {
     interface Request {
@@ -23,7 +22,6 @@ declare global {
  * Enhanced rate limiting specifically for authentication endpoints
  * with Redis backing for distributed rate limiting
  */
-
 
 const rateLimitResponse = (limit: number, windowMs: number) => ({
   success: false,
@@ -46,7 +44,7 @@ function createRedisStore() {
       prefix: "rl:",
     });
   }
-  return undefined; 
+  return undefined;
 }
 
 /**
@@ -55,8 +53,8 @@ function createRedisStore() {
  */
 export const authRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS, 
-  max: env.AUTH_RATE_LIMIT_MAX_REQUESTS, 
+  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS,
+  max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
   message: rateLimitResponse(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
   standardHeaders: true,
   legacyHeaders: false,
@@ -74,8 +72,8 @@ export const authRateLimit = rateLimit({
 
 export const loginRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 15 * 60 * 1000, 
-  max: 5, 
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: rateLimitResponse(5, 15 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
@@ -96,8 +94,8 @@ export const loginRateLimit = rateLimit({
  */
 export const passwordResetRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 60 * 60 * 1000, 
-  max: 3, 
+  windowMs: 60 * 60 * 1000,
+  max: 3,
   message: rateLimitResponse(3, 60 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
@@ -125,8 +123,8 @@ export const passwordResetRateLimit = rateLimit({
  */
 export const emailVerificationRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 10 * 60 * 1000, 
-  max: 5, 
+  windowMs: 10 * 60 * 1000,
+  max: 5,
   message: rateLimitResponse(5, 10 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
@@ -156,8 +154,8 @@ export const emailVerificationRateLimit = rateLimit({
  */
 export const registrationRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 60 * 60 * 1000, 
-  max: 5, 
+  windowMs: 60 * 60 * 1000,
+  max: 5,
   message: rateLimitResponse(5, 60 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
@@ -186,8 +184,8 @@ export const registrationRateLimit = rateLimit({
  */
 export const refreshTokenRateLimit = rateLimit({
   store: createRedisStore(),
-  windowMs: 15 * 60 * 1000, 
-  max: 10, 
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: rateLimitResponse(10, 15 * 60 * 1000),
   standardHeaders: true,
   legacyHeaders: false,
@@ -219,17 +217,15 @@ export const createAdaptiveRateLimit = (baseMax: number, baseWindowMs: number) =
     store: createRedisStore(),
     windowMs: baseWindowMs,
     max: (req: Request) => {
-      
       const userAgent = req.get("user-agent") || "";
       const hasValidUserAgent = userAgent.length > 10 && !userAgent.includes("bot");
 
-      
       const suspiciousHeaders = ["automation", "selenium", "crawler", "spider", "scraper"].some((keyword) =>
         userAgent.toLowerCase().includes(keyword),
       );
 
       if (!hasValidUserAgent || suspiciousHeaders) {
-        return Math.max(1, Math.floor(baseMax / 2)); 
+        return Math.max(1, Math.floor(baseMax / 2));
       }
 
       return baseMax;
@@ -262,8 +258,7 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
         return baseMax;
       }
 
-      
-      const multiplier = Math.min(violation.count, 5); 
+      const multiplier = Math.min(violation.count, 5);
       return Math.max(1, Math.floor(baseMax / multiplier));
     },
     message: (req: Request) => {
@@ -293,10 +288,8 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
  * Rate limiting middleware that combines multiple strategies
  */
 export const authSecurityRateLimit = [
-  
   authRateLimit,
 
-  
   createAdaptiveRateLimit(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
 ];
 
@@ -373,4 +366,3 @@ export class RateLimitUtils {
     return false;
   }
 }
-

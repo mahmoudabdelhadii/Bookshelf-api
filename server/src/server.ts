@@ -18,6 +18,7 @@ import { configurePassport } from "./common/auth/strategies.js";
 import { configureOAuthStrategies } from "./common/auth/oauthStrategies.js";
 import { initializeRedis, configureSession } from "./common/middleware/session.js";
 import passport from "passport";
+import session from "express-session";
 
 import { LOG_LEVEL } from "../env.js";
 import { connect } from "database";
@@ -51,13 +52,20 @@ async function initializeServer() {
     logger.info("Session middleware configured");
   } catch (err) {
     logger.error("Failed to initialize Redis or session middleware:", err);
-    logger.warn("Continuing without Redis session support");
-  }
-}
+    logger.warn("Falling back to memory session store");
 
-initializeServer().catch((err: unknown) => {
-  logger.error("Server initialization failed:", err);
-});
+    app.use(
+      session({
+        secret: env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+      }),
+    );
+  }
+
+  app.use(passport.initialize());
+  app.use(passport.session());
+}
 
 app.set("trust proxy", true);
 
@@ -75,8 +83,9 @@ app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
 app.use(rateLimiter);
 
-app.use(passport.initialize());
-app.use(passport.session());
+initializeServer().catch((err: unknown) => {
+  logger.error("Server initialization failed:", err);
+});
 
 app.use(requestLogger);
 

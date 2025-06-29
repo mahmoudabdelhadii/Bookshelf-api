@@ -1,15 +1,13 @@
-import jwt, { sign, SignOptions } from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import crypto from "node:crypto";
 import { env } from "../utils/envConfig.js";
-
 
 const JWT_SECRET = env.JWT_SECRET || crypto.randomBytes(64).toString("hex");
 const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET || crypto.randomBytes(64).toString("hex");
 const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN || "15m";
-const JWT_REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN || "7d"; 
+const JWT_REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN || "7d";
 const JWT_ISSUER = env.JWT_ISSUER || "bookshelf-api";
 const JWT_AUDIENCE = env.JWT_AUDIENCE || "bookshelf-users";
-
 
 export interface JwtPayload {
   userId: string;
@@ -53,11 +51,11 @@ export function generateAccessToken(
   };
 
   const options: SignOptions = {
-    expiresIn: JWT_EXPIRES_IN,
+    expiresIn: JWT_EXPIRES_IN as any,
     algorithm: "HS256",
   };
 
-  return sign(tokenPayload, JWT_SECRET, options);
+  return jwt.sign(tokenPayload, JWT_SECRET, options);
 }
 
 export function generateRefreshToken(
@@ -71,11 +69,11 @@ export function generateRefreshToken(
   };
 
   const options: SignOptions = {
-    expiresIn: JWT_REFRESH_EXPIRES_IN,
+    expiresIn: JWT_REFRESH_EXPIRES_IN as any,
     algorithm: "HS256",
   };
 
-  return sign(tokenPayload, JWT_REFRESH_SECRET, options);
+  return jwt.sign(tokenPayload, JWT_REFRESH_SECRET, options);
 } /**
  * Generate both access and refresh tokens
  */
@@ -85,7 +83,6 @@ export function generateTokenPair(
   const accessToken = generateAccessToken(userPayload);
   const refreshToken = generateRefreshToken(userPayload);
 
-  
   const accessExpiresIn = parseExpiration(JWT_EXPIRES_IN);
   const refreshExpiresIn = parseExpiration(JWT_REFRESH_EXPIRES_IN);
 
@@ -313,14 +310,13 @@ export const TokenUtils = {
     };
 
     return jwt.sign(tokenPayload, JWT_SECRET, {
-      expiresIn: "-1s", 
+      expiresIn: "-1s",
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
       algorithm: "HS256",
     });
   },
 };
-
 
 export const JwtConfig = {
   JWT_SECRET,
@@ -330,4 +326,3 @@ export const JwtConfig = {
   JWT_ISSUER,
   JWT_AUDIENCE,
 } as const;
-

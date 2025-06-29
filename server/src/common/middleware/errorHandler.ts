@@ -13,7 +13,6 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
   };
 
   const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
-    
     const errorContext = {
       url: req.url,
       method: req.method,
@@ -21,39 +20,32 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       ip: req.ip,
       stack: err.stack,
     };
-    
+
     logger?.error({ err, ...errorContext }, "Error occurred in request");
 
-    
     if (err instanceof ApiError) {
       const response = ServiceResponse.failure(err.message, err.context, err.statusCode);
       return res.status(err.statusCode).send(response);
     }
 
-    
     if (err instanceof ZodError) {
-      const formattedErrors = err.errors.map(error => ({
+      const formattedErrors = err.errors.map((error) => ({
         field: error.path.join("."),
         message: error.message,
-        code: error.code
+        code: error.code,
       }));
-      
+
       const message = "Validation failed";
       const response = ServiceResponse.failure(
-        message, 
-        { validationErrors: formattedErrors }, 
-        StatusCodes.BAD_REQUEST
+        message,
+        { validationErrors: formattedErrors },
+        StatusCodes.BAD_REQUEST,
       );
       return res.status(StatusCodes.BAD_REQUEST).send(response);
     }
 
-    
     if (err.name === "CastError") {
-      const response = ServiceResponse.failure(
-        "Invalid ID format provided",
-        null,
-        StatusCodes.BAD_REQUEST
-      );
+      const response = ServiceResponse.failure("Invalid ID format provided", null, StatusCodes.BAD_REQUEST);
       return res.status(StatusCodes.BAD_REQUEST).send(response);
     }
 
@@ -61,42 +53,34 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       const response = ServiceResponse.failure(
         "Service temporarily unavailable",
         null,
-        StatusCodes.SERVICE_UNAVAILABLE
+        StatusCodes.SERVICE_UNAVAILABLE,
       );
       return res.status(StatusCodes.SERVICE_UNAVAILABLE).send(response);
     }
 
-    
     if (err.type === "entity.too.large") {
       const response = ServiceResponse.failure(
         "Request payload too large",
         null,
-        StatusCodes.REQUEST_TOO_LONG
+        StatusCodes.REQUEST_TOO_LONG,
       );
       return res.status(StatusCodes.REQUEST_TOO_LONG).send(response);
     }
 
-    
     if (err instanceof SyntaxError && err.message.includes("JSON")) {
       const response = ServiceResponse.failure(
         "Invalid JSON format in request body",
         null,
-        StatusCodes.BAD_REQUEST
+        StatusCodes.BAD_REQUEST,
       );
       return res.status(StatusCodes.BAD_REQUEST).send(response);
     }
 
-    
     if (err.code === "ETIMEDOUT" || err.message.includes("timeout")) {
-      const response = ServiceResponse.failure(
-        "Request timeout",
-        null,
-        StatusCodes.REQUEST_TIMEOUT
-      );
+      const response = ServiceResponse.failure("Request timeout", null, StatusCodes.REQUEST_TIMEOUT);
       return res.status(StatusCodes.REQUEST_TIMEOUT).send(response);
     }
 
-    
     const isDevelopment = process.env.NODE_ENV === "development";
     const response = ServiceResponse.failure(
       "An unexpected error occurred",

@@ -2,23 +2,19 @@ import type { DrizzleClient } from "database";
 import { eq, and, schema } from "database";
 import type { LibraryBook, CreateLibraryBook, UpdateLibraryBook } from "./libraryBooks.model.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import { logger } from "../../server.js";
-import { 
-  DatabaseError, 
-  NotFound, 
-  ValidationError,
-  ResourceAlreadyExistsError 
-} from "../../errors.js";
+import { DatabaseError, NotFound, ValidationError, ResourceAlreadyExistsError } from "../../errors.js";
 
 export const LibraryBooksService = {
-  findByLibraryId: async (drizzle: DrizzleClient, libraryId: string): Promise<ServiceResponse<any[] | null>> => {
+  findByLibraryId: async (
+    drizzle: DrizzleClient,
+    libraryId: string,
+  ): Promise<ServiceResponse<any[] | null>> => {
     if (!libraryId.trim()) {
       const validationError = new ValidationError("Library ID is required");
       return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
     }
 
     try {
-      
       const library = await drizzle.query.library.findFirst({
         where: (libraries, { eq }) => eq(libraries.id, libraryId),
       });
@@ -38,8 +34,10 @@ export const LibraryBooksService = {
       });
       return ServiceResponse.success("Library books found", libraryBooks);
     } catch (err) {
-      const dbError = new DatabaseError("Failed to retrieve library books", { libraryId, originalError: err });
-      logger.error(dbError.message, { error: dbError.context });
+      const dbError = new DatabaseError("Failed to retrieve library books", {
+        libraryId,
+        originalError: err,
+      });
       return ServiceResponse.failure(dbError.message, null, dbError.statusCode);
     }
   },
@@ -59,12 +57,14 @@ export const LibraryBooksService = {
       return ServiceResponse.success("Library book found", libraryBook);
     } catch (err) {
       const errorMessage = `Error finding library book with id ${id}: ${(err as Error).message}`;
-      logger.error(errorMessage);
       return ServiceResponse.failure("An error occurred while finding library book.", null, 500);
     }
   },
 
-  addBookToLibrary: async (drizzle: DrizzleClient, libraryBookData: CreateLibraryBook): Promise<ServiceResponse<LibraryBook | null>> => {
+  addBookToLibrary: async (
+    drizzle: DrizzleClient,
+    libraryBookData: CreateLibraryBook,
+  ): Promise<ServiceResponse<LibraryBook | null>> => {
     if (!libraryBookData.libraryId.trim()) {
       const validationError = new ValidationError("Library ID is required");
       return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
@@ -76,7 +76,6 @@ export const LibraryBooksService = {
     }
 
     try {
-      
       const library = await drizzle.query.library.findFirst({
         where: (libraries, { eq }) => eq(libraries.id, libraryBookData.libraryId),
       });
@@ -85,7 +84,6 @@ export const LibraryBooksService = {
         return ServiceResponse.failure(notFoundError.message, null, notFoundError.statusCode);
       }
 
-      
       const book = await drizzle.query.book.findFirst({
         where: (books, { eq }) => eq(books.id, libraryBookData.bookId),
       });
@@ -94,20 +92,19 @@ export const LibraryBooksService = {
         return ServiceResponse.failure(notFoundError.message, null, notFoundError.statusCode);
       }
 
-      
       const existingEntry = await drizzle.query.libraryBooks.findFirst({
-        where: (libraryBooks, { and, eq }) => 
+        where: (libraryBooks, { and, eq }) =>
           and(
             eq(libraryBooks.libraryId, libraryBookData.libraryId),
-            eq(libraryBooks.bookId, libraryBookData.bookId)
+            eq(libraryBooks.bookId, libraryBookData.bookId),
           ),
       });
       if (existingEntry) {
-        const conflictError = new ResourceAlreadyExistsError("Book is already in this library", { 
+        const conflictError = new ResourceAlreadyExistsError("Book is already in this library", {
           libraryId: libraryBookData.libraryId,
           bookId: libraryBookData.bookId,
           libraryName: library.name,
-          bookTitle: book.title
+          bookTitle: book.title,
         });
         return ServiceResponse.failure(conflictError.message, null, conflictError.statusCode);
       }
@@ -115,13 +112,19 @@ export const LibraryBooksService = {
       const [newLibraryBook] = await drizzle.insert(schema.libraryBooks).values(libraryBookData).returning();
       return ServiceResponse.success("Book added to library successfully", newLibraryBook, 201);
     } catch (err) {
-      const dbError = new DatabaseError("Failed to add book to library", { libraryBookData, originalError: err });
-      logger.error(dbError.message, { error: dbError.context });
+      const dbError = new DatabaseError("Failed to add book to library", {
+        libraryBookData,
+        originalError: err,
+      });
       return ServiceResponse.failure(dbError.message, null, dbError.statusCode);
     }
   },
 
-  updateLibraryBook: async (drizzle: DrizzleClient, id: string, libraryBookData: UpdateLibraryBook): Promise<ServiceResponse<LibraryBook | null>> => {
+  updateLibraryBook: async (
+    drizzle: DrizzleClient,
+    id: string,
+    libraryBookData: UpdateLibraryBook,
+  ): Promise<ServiceResponse<LibraryBook | null>> => {
     try {
       const existingLibraryBook = await drizzle.query.libraryBooks.findFirst({
         where: (libraryBooks, { eq }) => eq(libraryBooks.id, id),
@@ -140,7 +143,6 @@ export const LibraryBooksService = {
       return ServiceResponse.success("Library book updated successfully", updatedLibraryBook);
     } catch (err) {
       const errorMessage = `Error updating library book with id ${id}: ${(err as Error).message}`;
-      logger.error(errorMessage);
       return ServiceResponse.failure("An error occurred while updating library book.", null, 500);
     }
   },
@@ -159,7 +161,6 @@ export const LibraryBooksService = {
       return ServiceResponse.success("Book removed from library successfully", null, 204);
     } catch (err) {
       const errorMessage = `Error removing book from library with id ${id}: ${(err as Error).message}`;
-      logger.error(errorMessage);
       return ServiceResponse.failure("An error occurred while removing book from library.", null, 500);
     }
   },
@@ -176,12 +177,7 @@ export const LibraryBooksService = {
       return ServiceResponse.success("All library books found", libraryBooks);
     } catch (err) {
       const errorMessage = `Error finding all library books: ${(err as Error).message}`;
-      logger.error(errorMessage);
-      return ServiceResponse.failure(
-        "An error occurred while retrieving library books.",
-        null,
-        500,
-      );
+      return ServiceResponse.failure("An error occurred while retrieving library books.", null, 500);
     }
   },
 };

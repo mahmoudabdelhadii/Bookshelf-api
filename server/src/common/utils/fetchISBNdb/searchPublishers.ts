@@ -1,6 +1,8 @@
 import { callISBNdb } from "./callISBNdb.js";
-import type { Publisher as ISBNdbPublisherResponse } from "../../types/shared/isbndbAPI.js";
-
+type ISBNdbPublisherResponse = {
+  name?: string;
+  [key: string]: any;
+};
 export interface PublisherSearchResponse {
   total: number;
   publishers: ISBNdbPublisherResponse[];

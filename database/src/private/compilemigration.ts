@@ -32,11 +32,6 @@ async function main() {
 
     const includeContent = await readFile(join(dirname(last.filename), match[1]), "utf-8");
 
-    
-    
-    
-    
-    
     let j = i + 1;
     for (; j < lines.length; ++j) {
       if (INCLUDE_START.test(lines[j])) {

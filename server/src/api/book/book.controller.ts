@@ -42,7 +42,10 @@ class BooksController {
       const updated = await BookService.updateBook(drizzle, req.params.id, parsed);
       return handleServiceResponse(ServiceResponse.success("Book updated", updated), res);
     } catch (_err) {
-      return handleServiceResponse(ServiceResponse.failure("Update failed", _err, StatusCodes.NOT_FOUND), res);
+      return handleServiceResponse(
+        ServiceResponse.failure("Update failed", _err, StatusCodes.NOT_FOUND),
+        res,
+      );
     }
   };
 
@@ -116,7 +119,7 @@ class BooksController {
 
   public searchBooks: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
-    const search = (typeof req.query.search === "string" ? req.query.search : "");
+    const search = typeof req.query.search === "string" ? req.query.search : "";
     if (!search) {
       return handleServiceResponse(
         ServiceResponse.failure("Missing 'search' query param", null, StatusCodes.BAD_REQUEST),
@@ -137,7 +140,7 @@ class BooksController {
 
   public searchBooksWeighted: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
-    const search = (typeof req.query.search === "string" ? req.query.search : "");
+    const search = typeof req.query.search === "string" ? req.query.search : "";
     if (!search) {
       return handleServiceResponse(
         ServiceResponse.failure("Missing 'search' query param", null, StatusCodes.BAD_REQUEST),

@@ -1,6 +1,5 @@
 import { callISBNdb } from "./callISBNdb.js";
 
-
 type ISBNdbAuthorResponse = any;
 
 export async function fetchAuthorDetails(

@@ -6,7 +6,6 @@ import { extractTokenFromHeader, verifyAccessToken } from "../auth/jwt.js";
 import { AuthUser } from "../auth/strategies.js";
 import { PermissionValidator } from "database";
 
-
 declare global {
   namespace Express {
     interface User extends AuthUser {}
@@ -45,7 +44,6 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     return res.status(status).json(errorResponse);
   }
 
-  
   return passport.authenticate("jwt", { session: false }, (err: any, user: AuthUser | false, info: any) => {
     if (err) {
       console.error("JWT authentication error:", err);
@@ -68,7 +66,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
     req.user = user;
     next();
-    
+    return;
   })(req, res, next);
 };
 
@@ -92,13 +90,11 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction): v
     return;
   }
 
-  
   passport.authenticate("jwt", { session: false }, (err: any, user: AuthUser | false) => {
     if (!err && user) {
       req.user = user;
     }
     next();
-    
   })(req, res, next);
 };
 
@@ -129,8 +125,7 @@ export const authenticateLocal = (req: Request, res: Response, next: NextFunctio
 
     req.user = user;
     next();
-    
-    
+    return;
   })(req, res, next);
 };
 
@@ -153,7 +148,7 @@ export const requireEmailVerified = (req: Request, res: Response, next: NextFunc
   }
 
   next();
-  
+  return;
 };
 
 /**
@@ -184,7 +179,7 @@ export const requireActiveAccount = (req: Request, res: Response, next: NextFunc
   }
 
   next();
-  
+  return;
 };
 
 export const requireRoles = (...allowedRoles: string[]) => {
@@ -208,7 +203,7 @@ export const requireRoles = (...allowedRoles: string[]) => {
     }
 
     next();
-    
+    return;
   };
 };
 
@@ -235,7 +230,7 @@ export const requirePermissions = (...requiredPermissions: string[]) => {
     }
 
     next();
-    
+    return;
   };
 };
 
@@ -262,7 +257,7 @@ export const requireAnyPermission = (...requiredPermissions: string[]) => {
     }
 
     next();
-    
+    return;
   };
 };
 
@@ -280,7 +275,6 @@ export const requireOwnershipOrAdmin = (userIdField = "userId") => {
     if (req.user.role === "admin" || req.user.role === "Super Administrator") {
       next();
       return;
-      return;
     }
 
     const hasManagementPermission = req.user.permissions.some(
@@ -289,7 +283,6 @@ export const requireOwnershipOrAdmin = (userIdField = "userId") => {
 
     if (hasManagementPermission) {
       next();
-      return;
       return;
     }
 
@@ -314,7 +307,7 @@ export const requireOwnershipOrAdmin = (userIdField = "userId") => {
     }
 
     next();
-    
+    return;
   };
 };
 
@@ -339,7 +332,7 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction) =>
   }
 
   next();
-  
+  return;
 };
 
 export const developmentOnly = (_req: Request, res: Response, next: NextFunction) => {
@@ -353,7 +346,7 @@ export const developmentOnly = (_req: Request, res: Response, next: NextFunction
   }
 
   next();
-  
+  return;
 };
 
 export const combineAuthMiddleware = (

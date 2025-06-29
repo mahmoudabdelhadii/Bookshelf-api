@@ -38,25 +38,25 @@ export class OAuthController {
       try {
         if (err) {
           console.error("Google OAuth error:", err);
-          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`); return;
+          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
+          return;
         }
 
         if (!user) {
           console.error("Google OAuth failed:", info);
-          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`); return;
+          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
+          return;
         }
 
-        
         const tokenPair = generateTokenPair({
           userId: user.id,
           username: user.username,
           email: user.email,
           role: user.role,
           permissions: user.permissions,
-          sessionId: user.id, 
+          sessionId: user.id,
         });
 
-        
         await createSessionRecord((req as OAuthRequest).drizzle, user.id, {
           sessionToken: tokenPair.accessToken,
           refreshToken: tokenPair.refreshToken,
@@ -65,10 +65,8 @@ export class OAuthController {
           expiresAt: new Date(Date.now() + tokenPair.refreshExpiresIn * 1000),
         });
 
-        
         OAuthController.setAuthCookies(res, tokenPair);
 
-        
         res.redirect(`${env.FRONTEND_URL}/auth/success?provider=google`);
       } catch (err_) {
         console.error("Google OAuth callback error:", err_);
@@ -92,25 +90,25 @@ export class OAuthController {
       try {
         if (err) {
           console.error("Apple OAuth error:", err);
-          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`); return;
+          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
+          return;
         }
 
         if (!user) {
           console.error("Apple OAuth failed:", info);
-          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`); return;
+          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
+          return;
         }
 
-        
         const tokenPair = generateTokenPair({
           userId: user.id,
           username: user.username,
           email: user.email,
           role: user.role,
           permissions: user.permissions,
-          sessionId: user.id, 
+          sessionId: user.id,
         });
 
-        
         await createSessionRecord((req as OAuthRequest).drizzle, user.id, {
           sessionToken: tokenPair.accessToken,
           refreshToken: tokenPair.refreshToken,
@@ -119,10 +117,8 @@ export class OAuthController {
           expiresAt: new Date(Date.now() + tokenPair.refreshExpiresIn * 1000),
         });
 
-        
         OAuthController.setAuthCookies(res, tokenPair);
 
-        
         res.redirect(`${env.FRONTEND_URL}/auth/success?provider=apple`);
       } catch (err_) {
         console.error("Apple OAuth callback error:", err_);
@@ -274,21 +270,19 @@ export class OAuthController {
   private static setAuthCookies(res: Response, tokenPair: any) {
     const isProduction = env.isProduction;
 
-    
     res.cookie("accessToken", tokenPair.accessToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "strict" : "lax",
-      maxAge: tokenPair.expiresIn * 1000, 
+      maxAge: tokenPair.expiresIn * 1000,
       path: "/",
     });
 
-    
     res.cookie("refreshToken", tokenPair.refreshToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "strict" : "lax",
-      maxAge: tokenPair.refreshExpiresIn * 1000, 
+      maxAge: tokenPair.refreshExpiresIn * 1000,
       path: "/",
     });
   }

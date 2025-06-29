@@ -1,6 +1,9 @@
 import { callISBNdb } from "./callISBNdb.js";
-import type { AuthorQueryResults as ISBNdbAuthorQueryResults } from "../../types/shared/isbndbAPI.js";
 
+type ISBNdbAuthorQueryResults = {
+  authors?: any[];
+  [key: string]: any;
+};
 export async function searchAuthors(
   query: string,
   options?: { page?: number; pageSize?: number },

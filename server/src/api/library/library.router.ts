@@ -1,6 +1,4 @@
 import { Router } from "express";
-import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import { z } from "zod";
 
 import { libraryController } from "./library.controller.js";
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
@@ -9,10 +7,13 @@ import {
   getLibrarySchema,
   createLibrarySchema,
   updateLibrarySchema,
+  libraryArraySchema,
+  errorMessageSchema,
 } from "./library.model.js";
+import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+export const libraryRegistry = new OpenAPIRegistry();
 
 export const libraryRouter = Router();
-export const libraryRegistry = new OpenAPIRegistry();
 
 libraryRegistry.register("Library", librarySchema.openapi("Library"));
 
@@ -20,7 +21,7 @@ libraryRegistry.registerPath({
   method: "get",
   path: "/libraries",
   tags: ["Library"],
-  responses: createApiResponse(z.array(librarySchema), "Libraries retrieved successfully"),
+  responses: createApiResponse(libraryArraySchema, "Libraries retrieved successfully"),
 });
 libraryRouter.get("/", libraryController.getLibraries);
 
@@ -91,11 +92,11 @@ libraryRegistry.registerPath({
       description: "Library not found",
       content: {
         "application/json": {
-          schema: z.object({ message: z.string() }),
+          schema: errorMessageSchema,
         },
       },
     },
   },
 });
-libraryRouter.delete("/:id", libraryController.deleteLibrary);
 
+libraryRouter.delete("/:id", libraryController.deleteLibrary);

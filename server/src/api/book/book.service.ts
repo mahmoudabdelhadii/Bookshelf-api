@@ -10,7 +10,7 @@ import {
 } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import * as isbndb from "../../common/utils/fetchISBNdb/index.js";
-import type { Book } from "./book.model.js";
+import type { Book, CreateBookWithIds } from "./book.model.js";
 
 type Language = (typeof schema.book.language.enumValues)[number];
 
@@ -28,7 +28,6 @@ export const BookService = {
     },
   ) => {
     try {
-      
       if (!bookData.title.trim()) {
         const validationError = new ValidationError("Book title is required");
         return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
@@ -43,8 +42,7 @@ export const BookService = {
       }
 
       const { isbn, title, author, publisher, genre, publishedYear, language } = bookData;
-      
-      
+
       if (isbn?.trim()) {
         const existing = await drizzle.query.book.findFirst({
           where: (b, { eq }) => eq(b.isbn, isbn),
@@ -55,7 +53,6 @@ export const BookService = {
         }
       }
 
-      
       let authorRec = await drizzle.query.author.findFirst({
         where: (a, { eq }) => eq(a.name, author),
       });
@@ -63,7 +60,6 @@ export const BookService = {
         [authorRec] = await drizzle.insert(schema.author).values({ name: author }).returning();
       }
 
-      
       let publisherRec = await drizzle.query.publisher.findFirst({
         where: (p, { eq }) => eq(p.name, publisher),
       });
@@ -71,7 +67,6 @@ export const BookService = {
         [publisherRec] = await drizzle.insert(schema.publisher).values({ name: publisher }).returning();
       }
 
-      
       const insertData = {
         title,
         authorId: authorRec.id,
@@ -82,7 +77,7 @@ export const BookService = {
         language,
       };
       const [insertedBook] = await drizzle.insert(schema.book).values(insertData).returning();
-      
+
       return ServiceResponse.success("Book created successfully", insertedBook, 201);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
@@ -93,14 +88,7 @@ export const BookService = {
 
   createBooksBulk: async (
     drizzle: DrizzleClient,
-    bookList: {
-      title: string;
-      authorId: string;
-      isbn: string;
-      genre: string;
-      publisherId: string;
-      publishedYear?: number;
-    }[],
+    bookList: CreateBookWithIds[],
   ) => {
     if (!Array.isArray(bookList) || bookList.length === 0) {
       throw new ValidationError("The 'books' array must contain at least one book.", { bookList });
@@ -133,7 +121,11 @@ export const BookService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to fetch book: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { bookId, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { bookId, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -247,8 +239,7 @@ export const BookService = {
     if (!bookInfo) {
       throw new NotFound("Book not found");
     }
-    
-    
+
     const createdBook = await BookService.createBook(drizzle, {
       title: bookInfo.title ?? "",
       author: "Unknown Author",
@@ -328,7 +319,7 @@ export const BookService = {
     if (!authorDetails.author) {
       throw new NotFound("Author not found");
     }
-    
+
     await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
     return authorDetails;
   },
@@ -365,7 +356,7 @@ export const BookService = {
     if (!publisherDetails.name) {
       throw new NotFound("Publisher not found");
     }
-    
+
     await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
     return publisherDetails;
   },
@@ -479,5 +470,5 @@ export const BookService = {
       default:
         throw new BadRequest("Invalid search index");
     }
-  }
-}
+  },
+};

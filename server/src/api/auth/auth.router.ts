@@ -2,6 +2,8 @@ import { Router, Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit";
 import { body, param, validationResult } from "express-validator";
 import { StatusCodes } from "http-status-codes";
+import { extendZodWithOpenApi, OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+
 import { AuthController } from "./auth.controller.js";
 import { OAuthController } from "./oauth.controller.js";
 import { authRequired } from "../../common/middleware/auth.js";
@@ -14,16 +16,20 @@ import {
   emailVerificationSchema,
   changePasswordSchema,
   logoutSchema,
+  userResponseSchema,
+  loginResponseSchema,
+  refreshTokenResponseSchema,
 } from "./auth.model.js";
 import { env } from "../../common/utils/envConfig.js";
 
+import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
+export const authRegistry = new OpenAPIRegistry();
 
 export const authRouter = Router();
 
-
 const authRateLimit = rateLimit({
-  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS, 
-  max: env.AUTH_RATE_LIMIT_MAX_REQUESTS, 
+  windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS,
+  max: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
   message: {
     success: false,
     message: "Too many authentication attempts. Please try again later.",
@@ -33,14 +39,13 @@ const authRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (_req: Request) => {
-    
     return process.env.NODE_ENV === "test";
   },
 });
 
 const passwordResetRateLimit = rateLimit({
-  windowMs: 60 * 60 * 1000, 
-  max: 3, 
+  windowMs: 60 * 60 * 1000,
+  max: 3,
   message: {
     success: false,
     message: "Too many password reset requests. Please try again later.",
@@ -53,8 +58,8 @@ const passwordResetRateLimit = rateLimit({
 });
 
 const emailVerificationRateLimit = rateLimit({
-  windowMs: 10 * 60 * 1000, 
-  max: 5, 
+  windowMs: 10 * 60 * 1000,
+  max: 5,
   message: {
     success: false,
     message: "Too many email verification attempts. Please try again later.",
@@ -65,7 +70,6 @@ const emailVerificationRateLimit = rateLimit({
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
 });
-
 
 const validateRequest = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
@@ -78,7 +82,7 @@ const validateRequest = (req: Request, res: Response, next: NextFunction) => {
     });
   }
   next();
-  
+  return;
 };
 
 const registerValidation = [
@@ -144,13 +148,91 @@ const changePasswordValidation = [
 
 const sessionIdValidation = [param("sessionId").notEmpty().withMessage("Session ID is required")];
 
+// Register OpenAPI schemas
+authRegistry.register("User", userResponseSchema);
+authRegistry.register("LoginResponse", loginResponseSchema);
+authRegistry.register("TokenResponse", refreshTokenResponseSchema);
+authRegistry.register("RegisterRequest", registerSchema);
+authRegistry.register("LoginRequest", loginSchema);
+
+// Register auth routes with OpenAPI
+authRegistry.registerPath({
+  method: "post",
+  path: "/auth/register",
+  tags: ["Authentication"],
+  summary: "Register a new user",
+  request: {
+    body: {
+      description: "User registration data",
+      required: true,
+      content: {
+        "application/json": {
+          schema: registerSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    ...createApiResponse(userResponseSchema, "User registered successfully", 201),
+    400: {
+      description: "Validation error",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              message: { type: "string" },
+              statusCode: { type: "number", example: 400 },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+authRegistry.registerPath({
+  method: "post",
+  path: "/auth/login",
+  tags: ["Authentication"],
+  summary: "Login user",
+  request: {
+    body: {
+      description: "User login credentials",
+      required: true,
+      content: {
+        "application/json": {
+          schema: loginSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    ...createApiResponse(loginResponseSchema, "Login successful"),
+    401: {
+      description: "Invalid credentials",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              message: { type: "string" },
+              statusCode: { type: "number", example: 401 },
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
 authRouter.post("/register", authRateLimit, registerValidation, validateRequest, AuthController.register);
 
 authRouter.post("/login", authRateLimit, loginValidation, validateRequest, AuthController.login);
 
 authRouter.post("/refresh", refreshTokenValidation, validateRequest, AuthController.refreshToken);
-
 
 authRouter.post(
   "/password/reset-request",
@@ -161,7 +243,6 @@ authRouter.post(
 );
 
 authRouter.post("/password/reset", passwordResetValidation, validateRequest, AuthController.resetPassword);
-
 
 authRouter.post(
   "/email/verify",
@@ -178,7 +259,6 @@ authRouter.post(
   AuthController.resendEmailVerification,
 );
 
-
 authRouter.post("/logout", authRequired, AuthController.logout);
 
 authRouter.post(
@@ -190,7 +270,6 @@ authRouter.post(
 );
 
 authRouter.get("/profile", authRequired, AuthController.getProfile);
-
 
 authRouter.get("/sessions", authRequired, AuthController.getUserSessions);
 
@@ -204,16 +283,13 @@ authRouter.delete(
 
 authRouter.delete("/sessions", authRequired, AuthController.revokeAllSessions);
 
-
 authRouter.get("/google", OAuthController.googleAuth);
 
 authRouter.get("/google/callback", OAuthController.googleCallback);
 
-
 authRouter.get("/apple", OAuthController.appleAuth);
 
 authRouter.get("/apple/callback", OAuthController.appleCallback);
-
 
 authRouter.post("/oauth/link", authRequired, OAuthController.linkOAuthAccount);
 
@@ -226,7 +302,6 @@ authRouter.delete(
 );
 
 authRouter.get("/oauth/accounts", authRequired, OAuthController.getConnectedAccounts);
-
 
 authRouter.get("/health", (req, res) => {
   res.status(StatusCodes.OK).json({

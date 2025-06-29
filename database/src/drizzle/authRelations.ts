@@ -1,4 +1,3 @@
-
 export { userAuthRelations } from "./userAuthRelations.js";
 export { userSessionRelations } from "./userSessionRelations.js";
 export { passwordResetTokenRelations } from "./passwordResetTokenRelations.js";
@@ -8,7 +7,6 @@ export { roleRelations } from "./roleRelations.js";
 export { securityAuditLogRelations } from "./securityAuditLogRelations.js";
 export { accountLockoutRelations } from "./accountLockoutRelations.js";
 export { oauthProfileRelations } from "./oauthProfileRelations.js";
-
 
 import { relations } from "drizzle-orm";
 import { user } from "./user.js";
@@ -30,7 +28,7 @@ export const userRelations = relations(user, ({ one, many }) => ({
   passwordResetTokens: many(passwordResetToken),
   emailVerificationTokens: many(emailVerificationToken),
   userRoles: many(userRole),
-  assignedRoles: many(userRole), 
+  assignedRoles: many(userRole),
   auditLogs: many(securityAuditLog),
   accountLockouts: many(accountLockout),
   oauthProfiles: many(oauthProfile),

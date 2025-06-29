@@ -2,12 +2,13 @@ import { text, timestamp, boolean, uniqueIndex, index } from "drizzle-orm/pg-cor
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 
-
 export const emailVerificationToken = server.table(
   "email_verification_token",
   {
     id: idpk("id"),
-    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
     token: text("token").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
     isUsed: boolean("is_used").default(false).notNull(),
@@ -17,5 +18,5 @@ export const emailVerificationToken = server.table(
     uniqueIndex("unique_email_verification_token").on(table.token),
     index("idx_email_verification_user_id").on(table.userId),
     index("idx_email_verification_expires_at").on(table.expiresAt),
-  ]
+  ],
 );

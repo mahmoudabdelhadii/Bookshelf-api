@@ -1,12 +1,12 @@
-import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
 import { GetUserSchema, userSchema, createUserSchema, updateUserSchema } from "./user.model.js";
 import { userController } from "./user.controller.js";
-
+import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 export const userRegistry = new OpenAPIRegistry();
+
 export const userRouter = Router();
 
 userRegistry.register("User", userSchema.openapi("User"));

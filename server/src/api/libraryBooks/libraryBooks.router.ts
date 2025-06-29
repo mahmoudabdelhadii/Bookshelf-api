@@ -1,33 +1,36 @@
 import { Router } from "express";
-import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import { z } from "zod";
 
 import { libraryBooksController } from "./libraryBooks.controller.js";
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
-import { 
-  libraryBookSchema, 
+import {
+  libraryBookSchema,
   libraryBookWithDetailsSchema,
-  getLibraryBookSchema, 
+  getLibraryBookSchema,
   getLibraryBooksSchema,
-  createLibraryBookSchema, 
-  updateLibraryBookSchema 
+  createLibraryBookSchema,
+  updateLibraryBookSchema,
+  libraryBookWithDetailsArraySchema,
+  errorMessageSchema,
 } from "./libraryBooks.model.js";
+import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 
-export const libraryBooksRouter = Router();
 export const libraryBooksRegistry = new OpenAPIRegistry();
 
-libraryBooksRegistry.register("LibraryBook", libraryBookSchema.openapi("LibraryBook"));
-libraryBooksRegistry.register("LibraryBookWithDetails", libraryBookWithDetailsSchema.openapi("LibraryBookWithDetails"));
+export const libraryBooksRouter = Router();
 
+libraryBooksRegistry.register("LibraryBook", libraryBookSchema.openapi("LibraryBook"));
+libraryBooksRegistry.register(
+  "LibraryBookWithDetails",
+  libraryBookWithDetailsSchema.openapi("LibraryBookWithDetails"),
+);
 
 libraryBooksRegistry.registerPath({
   method: "get",
   path: "/library-books",
   tags: ["Library Books"],
-  responses: createApiResponse(z.array(libraryBookWithDetailsSchema), "All library books retrieved successfully"),
+  responses: createApiResponse(libraryBookWithDetailsArraySchema, "All library books retrieved successfully"),
 });
 libraryBooksRouter.get("/", libraryBooksController.getAllLibraryBooks);
-
 
 libraryBooksRegistry.registerPath({
   method: "get",
@@ -36,10 +39,9 @@ libraryBooksRegistry.registerPath({
   request: {
     params: getLibraryBooksSchema.shape.params,
   },
-  responses: createApiResponse(z.array(libraryBookWithDetailsSchema), "Library books retrieved successfully"),
+  responses: createApiResponse(libraryBookWithDetailsArraySchema, "Library books retrieved successfully"),
 });
 libraryBooksRouter.get("/libraries/:libraryId/books", libraryBooksController.getLibraryBooks);
-
 
 libraryBooksRegistry.registerPath({
   method: "get",
@@ -51,7 +53,6 @@ libraryBooksRegistry.registerPath({
   responses: createApiResponse(libraryBookWithDetailsSchema, "Library book retrieved successfully"),
 });
 libraryBooksRouter.get("/:id", libraryBooksController.getLibraryBook);
-
 
 libraryBooksRegistry.registerPath({
   method: "post",
@@ -74,14 +75,13 @@ libraryBooksRegistry.registerPath({
       description: "Book already exists in this library",
       content: {
         "application/json": {
-          schema: z.object({ message: z.string() }),
+          schema: errorMessageSchema,
         },
       },
     },
   },
 });
 libraryBooksRouter.post("/", libraryBooksController.addBookToLibrary);
-
 
 libraryBooksRegistry.registerPath({
   method: "patch",
@@ -105,7 +105,6 @@ libraryBooksRegistry.registerPath({
 });
 libraryBooksRouter.patch("/:id", libraryBooksController.updateLibraryBook);
 
-
 libraryBooksRegistry.registerPath({
   method: "delete",
   path: "/library-books/{id}",
@@ -119,7 +118,7 @@ libraryBooksRegistry.registerPath({
       description: "Library book entry not found",
       content: {
         "application/json": {
-          schema: z.object({ message: z.string() }),
+          schema: errorMessageSchema,
         },
       },
     },

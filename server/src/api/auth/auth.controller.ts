@@ -14,7 +14,6 @@ import {
   type LogoutRequest,
 } from "./auth.model.js";
 
-
 interface AuthRequest extends Request {
   drizzle: DrizzleClient;
   user?: {
@@ -38,7 +37,7 @@ export class AuthController {
   public static async register(req: AuthRequest, res: Response) {
     try {
       const userData: RegisterRequest = req.body;
-      
+
       const serviceResponse = await AuthService.registerUser(req.drizzle, {
         username: userData.username,
         email: userData.email,
@@ -65,7 +64,7 @@ export class AuthController {
   public static async login(req: AuthRequest, res: Response) {
     try {
       const credentials: LoginRequest = req.body;
-      
+
       const serviceResponse = await AuthService.login(req.drizzle, {
         email: credentials.email,
         password: credentials.password,
@@ -73,15 +72,18 @@ export class AuthController {
         userAgent: req.get("user-agent"),
       });
 
-      
-      if (serviceResponse.success && serviceResponse.responseObject && "tokens" in serviceResponse.responseObject) {
+      if (
+        serviceResponse.success &&
+        serviceResponse.responseObject &&
+        "tokens" in serviceResponse.responseObject
+      ) {
         const { tokens } = serviceResponse.responseObject;
-        
+
         res.cookie("refreshToken", tokens.refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
-          maxAge: tokens.refreshExpiresIn * 1000, 
+          maxAge: tokens.refreshExpiresIn * 1000,
           path: "/auth/refresh",
         });
       }
@@ -103,9 +105,8 @@ export class AuthController {
    */
   public static async refreshToken(req: AuthRequest, res: Response) {
     try {
-      
       const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
-      
+
       if (!refreshToken) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
           success: false,
@@ -121,10 +122,13 @@ export class AuthController {
         userAgent: req.get("user-agent"),
       });
 
-      
-      if (serviceResponse.success && serviceResponse.responseObject && "refreshToken" in serviceResponse.responseObject) {
+      if (
+        serviceResponse.success &&
+        serviceResponse.responseObject &&
+        "refreshToken" in serviceResponse.responseObject
+      ) {
         const tokens = serviceResponse.responseObject;
-        
+
         res.cookie("refreshToken", tokens.refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
@@ -160,16 +164,10 @@ export class AuthController {
         });
       }
 
-      
-      const sessionId = req.body.sessionId || "current-session"; 
+      const sessionId = req.body.sessionId || "current-session";
 
-      const serviceResponse = await AuthService.logout(
-        req.drizzle, 
-        sessionId, 
-        req.user.id
-      );
+      const serviceResponse = await AuthService.logout(req.drizzle, sessionId, req.user.id);
 
-      
       res.clearCookie("refreshToken", {
         path: "/auth/refresh",
       });
@@ -192,7 +190,7 @@ export class AuthController {
   public static async requestPasswordReset(req: AuthRequest, res: Response) {
     try {
       const data: PasswordResetRequest = req.body;
-      
+
       const serviceResponse = await AuthService.requestPasswordReset(req.drizzle, {
         email: data.email,
         ipAddress: req.ip,
@@ -217,7 +215,7 @@ export class AuthController {
   public static async resetPassword(req: AuthRequest, res: Response) {
     try {
       const data: PasswordResetData = req.body;
-      
+
       const serviceResponse = await AuthService.resetPassword(req.drizzle, {
         token: data.token,
         newPassword: data.newPassword,
@@ -243,7 +241,7 @@ export class AuthController {
   public static async verifyEmail(req: AuthRequest, res: Response) {
     try {
       const data: EmailVerificationData = req.body;
-      
+
       const serviceResponse = await AuthService.verifyEmail(req.drizzle, {
         token: data.token,
         ipAddress: req.ip,
@@ -277,7 +275,7 @@ export class AuthController {
       }
 
       const data: ChangePasswordRequest = req.body;
-      
+
       const serviceResponse = await AuthService.changePassword(req.drizzle, {
         userId: req.user.id,
         currentPassword: data.currentPassword,
@@ -352,8 +350,6 @@ export class AuthController {
         });
       }
 
-      
-      
       return res.status(StatusCodes.OK).json({
         success: true,
         message: "Verification email sent successfully",
@@ -385,8 +381,6 @@ export class AuthController {
         });
       }
 
-      
-      
       const sessions = [
         {
           id: "session-1",
@@ -441,7 +435,6 @@ export class AuthController {
         });
       }
 
-      
       const serviceResponse = await AuthService.logout(req.drizzle, sessionId, req.user.id);
 
       return handleServiceResponse(serviceResponse, res);
@@ -470,8 +463,6 @@ export class AuthController {
         });
       }
 
-      
-      
       return res.status(StatusCodes.OK).json({
         success: true,
         message: "All other sessions revoked successfully",

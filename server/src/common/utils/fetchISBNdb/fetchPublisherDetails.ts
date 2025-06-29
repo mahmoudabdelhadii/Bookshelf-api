@@ -1,6 +1,8 @@
 import { callISBNdb } from "./callISBNdb.js";
-import type { Publisher as ISBNdbPublisherResponse } from "../../types/shared/isbndbAPI.js";
-
+type ISBNdbPublisherResponse = {
+  name?: string;
+  [key: string]: any;
+};
 export async function fetchPublisherDetails(
   name: string,
   options?: { page?: number; pageSize?: number; language?: string },

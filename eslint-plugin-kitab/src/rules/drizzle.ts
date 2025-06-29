@@ -19,7 +19,7 @@ export const rule = ESLintUtils.RuleCreator.withoutDocs<[Options], "drizzle-clie
         if (node.callee.property.type !== AST_NODE_TYPES.Identifier) return;
         if (node.callee.property.name !== "transaction") return;
         if (!node.arguments.length) return;
-        if (!CALLABLE.includes(node.arguments[0].type)) return; 
+        if (!CALLABLE.includes(node.arguments[0].type)) return;
         const fn = node.arguments[0] as TSESTree.ArrowFunctionExpression | TSESTree.FunctionExpression;
         transactionNode = fn;
         if (fn.params[0].type === AST_NODE_TYPES.Identifier) {

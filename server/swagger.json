@@ -16,90 +16,95 @@
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
           },
           "username": {
             "type": "string",
             "minLength": 2,
-            "maxLength": 50
-          },
-          "firstName": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 50
-          },
-          "lastName": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 50
+            "maxLength": 50,
+            "description": "User's unique username"
           },
           "email": {
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "description": "User's email address"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "User's first name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "User's last name"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "default": "user",
+            "description": "User's role in the system"
           },
           "createdAt": {
-            "type": "string"
+            "type": "string",
+            "description": "Timestamp when the user was created"
           },
           "updatedAt": {
-            "type": "string"
+            "type": "string",
+            "description": "Timestamp when the user was last updated"
           }
         },
         "required": [
           "id",
           "username",
+          "email",
           "firstName",
           "lastName",
-          "email",
           "createdAt",
           "updatedAt"
-        ]
+        ],
+        "description": "User profile information"
       },
       "Book": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
           },
           "title": {
             "type": "string",
             "minLength": 2,
             "maxLength": 200,
-            "description": "The title of the book."
+            "description": "Book title"
           },
-          "authorId": {
+          "titleLong": {
             "type": "string",
-            "minLength": 2,
-            "maxLength": 100,
-            "description": "The author of the book."
-          },
-          "publisherId": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 100,
-            "description": "The publisher of the book."
-          },
-          "publishedYear": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2025,
-            "description": "The year the book was published."
+            "nullable": true,
+            "description": "Extended book title"
           },
           "isbn": {
             "type": "string",
-            "maxLength": 20,
-            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-            "description": "The ISBN of the book."
+            "nullable": true,
+            "description": "ISBN number"
           },
-          "genre": {
+          "isbn13": {
             "type": "string",
-            "minLength": 2,
-            "maxLength": 50,
-            "description": "The genre of the book."
+            "nullable": true,
+            "description": "ISBN-13 number"
           },
-          "createdAt": {
+          "deweyDecimal": {
             "type": "string",
-            "description": "Timestamp when the book was created."
+            "nullable": true,
+            "description": "Dewey decimal classification"
+          },
+          "binding": {
+            "type": "string",
+            "nullable": true,
+            "description": "Book binding type"
           },
           "language": {
             "type": "string",
@@ -108,7 +113,69 @@
               "ar",
               "other"
             ],
-            "description": "The language of the book."
+            "default": "other",
+            "description": "Book language"
+          },
+          "authorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Author ID"
+          },
+          "publisherId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Publisher ID"
+          },
+          "subjectId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid",
+            "description": "Subject ID"
+          },
+          "genre": {
+            "type": "string",
+            "nullable": true,
+            "description": "Book genre"
+          },
+          "datePublished": {
+            "type": "string",
+            "nullable": true,
+            "description": "Publication date"
+          },
+          "edition": {
+            "type": "string",
+            "nullable": true,
+            "description": "Book edition"
+          },
+          "pages": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 0,
+            "description": "Number of pages"
+          },
+          "overview": {
+            "type": "string",
+            "nullable": true,
+            "description": "Book overview"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "description": "Book cover image URL"
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true,
+            "description": "Book excerpt"
+          },
+          "synopsis": {
+            "type": "string",
+            "nullable": true,
+            "description": "Book synopsis"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Timestamp when the book was created"
           }
         },
         "required": [
@@ -116,9 +183,458 @@
           "title",
           "authorId",
           "publisherId",
+          "createdAt"
+        ],
+        "description": "Complete book information"
+      },
+      "Library": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Library name"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500,
+            "description": "Library description"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 200,
+            "description": "Library address"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Library city"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 20,
+            "description": "Library phone number"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "format": "email",
+            "description": "Library email"
+          },
+          "website": {
+            "type": "string",
+            "nullable": true,
+            "format": "uri",
+            "description": "Library website"
+          },
+          "hours": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 200,
+            "description": "Library hours"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "description": "Library image URL"
+          },
+          "rating": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Library rating"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the library owner"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 200,
+            "description": "Library location"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Timestamp when the library was created"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Timestamp when the library was last updated"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "ownerId",
           "createdAt",
-          "language"
-        ]
+          "updatedAt"
+        ],
+        "description": "Library entity information"
+      },
+      "LibraryBook": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "libraryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the library"
+          },
+          "bookId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the book"
+          },
+          "shelfLocation": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Location of the book on shelf"
+          },
+          "condition": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 50,
+            "description": "Condition of the book"
+          },
+          "addedAt": {
+            "type": "string",
+            "description": "Timestamp when the book was added to library"
+          }
+        },
+        "required": [
+          "id",
+          "libraryId",
+          "bookId",
+          "addedAt"
+        ],
+        "description": "Library book entry information"
+      },
+      "LibraryBookWithDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier (UUID)"
+          },
+          "libraryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the library"
+          },
+          "bookId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the book"
+          },
+          "shelfLocation": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100,
+            "description": "Location of the book on shelf"
+          },
+          "condition": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 50,
+            "description": "Condition of the book"
+          },
+          "addedAt": {
+            "type": "string",
+            "description": "Timestamp when the book was added to library"
+          },
+          "book": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "title": {
+                "type": "string"
+              },
+              "author": {
+                "type": "string"
+              },
+              "isbn": {
+                "type": "string"
+              },
+              "genre": {
+                "type": "string"
+              },
+              "publishedYear": {
+                "type": "number"
+              },
+              "language": {
+                "type": "string",
+                "enum": [
+                  "en",
+                  "ar",
+                  "other"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "author",
+              "language"
+            ],
+            "description": "Book details"
+          },
+          "library": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "location": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "description": "Library details"
+          }
+        },
+        "required": [
+          "id",
+          "libraryId",
+          "bookId",
+          "addedAt",
+          "book",
+          "library"
+        ],
+        "description": "Library book entry information"
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Unique identifier (UUID)"
+              },
+              "username": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 30,
+                "pattern": "^[a-zA-Z0-9_-]+$",
+                "description": "Unique username for the user"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "description": "Valid email address"
+              },
+              "firstName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
+                "description": "User's first or last name"
+              },
+              "lastName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
+                "description": "User's first or last name"
+              },
+              "role": {
+                "type": "string",
+                "description": "User role"
+              },
+              "permissions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "User permissions"
+              },
+              "isActive": {
+                "type": "boolean",
+                "description": "Whether the user account is active"
+              },
+              "isEmailVerified": {
+                "type": "boolean",
+                "description": "Whether the user's email is verified"
+              },
+              "isSuspended": {
+                "type": "boolean",
+                "description": "Whether the user account is suspended"
+              }
+            },
+            "required": [
+              "id",
+              "username",
+              "email",
+              "firstName",
+              "lastName",
+              "role",
+              "permissions",
+              "isActive",
+              "isEmailVerified",
+              "isSuspended"
+            ],
+            "description": "User profile information"
+          },
+          "tokens": {
+            "type": "object",
+            "properties": {
+              "accessToken": {
+                "type": "string",
+                "description": "JWT access token"
+              },
+              "refreshToken": {
+                "type": "string",
+                "description": "JWT refresh token"
+              },
+              "expiresIn": {
+                "type": "number",
+                "description": "Access token expiration time in seconds"
+              },
+              "refreshExpiresIn": {
+                "type": "number",
+                "description": "Refresh token expiration time in seconds"
+              }
+            },
+            "required": [
+              "accessToken",
+              "refreshToken",
+              "expiresIn",
+              "refreshExpiresIn"
+            ],
+            "description": "Authentication tokens"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Session identifier"
+          }
+        },
+        "required": [
+          "user",
+          "tokens",
+          "sessionId"
+        ],
+        "description": "Successful login response"
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "New JWT access token"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "New JWT refresh token"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "New access token expiration time in seconds"
+          },
+          "refreshExpiresIn": {
+            "type": "number",
+            "description": "New refresh token expiration time in seconds"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "expiresIn",
+          "refreshExpiresIn"
+        ],
+        "description": "Refreshed authentication tokens"
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30,
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Unique username for the user"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Valid email address"
+          },
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "User's first or last name"
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "User's first or last name"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "pattern": "[A-Z]",
+            "description": "User password with security requirements"
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "firstName",
+          "lastName",
+          "password"
+        ],
+        "description": "User registration data"
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Valid email address"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "description": "User password for login"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "description": "User login credentials"
       }
     },
     "parameters": {}
@@ -188,43 +704,56 @@
                         "properties": {
                           "id": {
                             "type": "string",
-                            "format": "uuid"
+                            "format": "uuid",
+                            "description": "Unique identifier (UUID)"
                           },
                           "username": {
                             "type": "string",
                             "minLength": 2,
-                            "maxLength": 50
-                          },
-                          "firstName": {
-                            "type": "string",
-                            "minLength": 2,
-                            "maxLength": 50
-                          },
-                          "lastName": {
-                            "type": "string",
-                            "minLength": 2,
-                            "maxLength": 50
+                            "maxLength": 50,
+                            "description": "User's unique username"
                           },
                           "email": {
                             "type": "string",
-                            "format": "email"
+                            "format": "email",
+                            "description": "User's email address"
+                          },
+                          "firstName": {
+                            "type": "string",
+                            "description": "User's first name"
+                          },
+                          "lastName": {
+                            "type": "string",
+                            "description": "User's last name"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "user",
+                              "admin"
+                            ],
+                            "default": "user",
+                            "description": "User's role in the system"
                           },
                           "createdAt": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Timestamp when the user was created"
                           },
                           "updatedAt": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Timestamp when the user was last updated"
                           }
                         },
                         "required": [
                           "id",
                           "username",
+                          "email",
                           "firstName",
                           "lastName",
-                          "email",
                           "createdAt",
                           "updatedAt"
-                        ]
+                        ],
+                        "description": "User profile information"
                       }
                     },
                     "statusCode": {
@@ -254,37 +783,33 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "id": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
                   "username": {
                     "type": "string",
                     "minLength": 2,
-                    "maxLength": 50
+                    "maxLength": 50,
+                    "description": "User's unique username"
                   },
                   "email": {
                     "type": "string",
-                    "format": "email"
+                    "format": "email",
+                    "description": "User's email address"
                   },
                   "firstName": {
                     "type": "string",
-                    "minLength": 2,
-                    "maxLength": 50
+                    "description": "User's first name"
                   },
                   "lastName": {
                     "type": "string",
-                    "minLength": 2,
-                    "maxLength": 50
+                    "description": "User's last name"
                   }
                 },
                 "required": [
-                  "id",
                   "username",
                   "email",
                   "firstName",
                   "lastName"
-                ]
+                ],
+                "description": "User creation data"
               }
             }
           }
@@ -308,43 +833,56 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "format": "uuid"
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
                         },
                         "username": {
                           "type": "string",
                           "minLength": 2,
-                          "maxLength": 50
-                        },
-                        "firstName": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50
-                        },
-                        "lastName": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50
+                          "maxLength": 50,
+                          "description": "User's unique username"
                         },
                         "email": {
                           "type": "string",
-                          "format": "email"
+                          "format": "email",
+                          "description": "User's email address"
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "description": "User's first name"
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "description": "User's last name"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "admin"
+                          ],
+                          "default": "user",
+                          "description": "User's role in the system"
                         },
                         "createdAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Timestamp when the user was created"
                         },
                         "updatedAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Timestamp when the user was last updated"
                         }
                       },
                       "required": [
                         "id",
                         "username",
+                        "email",
                         "firstName",
                         "lastName",
-                        "email",
                         "createdAt",
                         "updatedAt"
-                      ]
+                      ],
+                      "description": "User profile information"
                     },
                     "statusCode": {
                       "type": "number"
@@ -389,7 +927,8 @@
           {
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "Unique identifier (UUID)"
             },
             "required": true,
             "name": "id",
@@ -415,43 +954,56 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "format": "uuid"
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
                         },
                         "username": {
                           "type": "string",
                           "minLength": 2,
-                          "maxLength": 50
-                        },
-                        "firstName": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50
-                        },
-                        "lastName": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50
+                          "maxLength": 50,
+                          "description": "User's unique username"
                         },
                         "email": {
                           "type": "string",
-                          "format": "email"
+                          "format": "email",
+                          "description": "User's email address"
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "description": "User's first name"
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "description": "User's last name"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "admin"
+                          ],
+                          "default": "user",
+                          "description": "User's role in the system"
                         },
                         "createdAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Timestamp when the user was created"
                         },
                         "updatedAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Timestamp when the user was last updated"
                         }
                       },
                       "required": [
                         "id",
                         "username",
+                        "email",
                         "firstName",
                         "lastName",
-                        "email",
                         "createdAt",
                         "updatedAt"
-                      ]
+                      ],
+                      "description": "User profile information"
                     },
                     "statusCode": {
                       "type": "number"
@@ -476,7 +1028,8 @@
           {
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "Unique identifier (UUID)"
             },
             "required": true,
             "name": "id",
@@ -494,27 +1047,28 @@
                   "username": {
                     "type": "string",
                     "minLength": 2,
-                    "maxLength": 50
+                    "maxLength": 50,
+                    "description": "User's unique username"
                   },
                   "email": {
                     "type": "string",
-                    "format": "email"
+                    "format": "email",
+                    "description": "Valid email address"
                   },
                   "firstName": {
                     "type": "string",
                     "minLength": 2,
-                    "maxLength": 50
+                    "maxLength": 50,
+                    "description": "Person's name"
                   },
                   "lastName": {
                     "type": "string",
                     "minLength": 2,
-                    "maxLength": 50
+                    "maxLength": 50,
+                    "description": "Person's name"
                   }
                 },
-                "required": [
-                  "firstName",
-                  "lastName"
-                ]
+                "description": "User update data"
               }
             }
           }
@@ -538,43 +1092,56 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "format": "uuid"
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
                         },
                         "username": {
                           "type": "string",
                           "minLength": 2,
-                          "maxLength": 50
-                        },
-                        "firstName": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50
-                        },
-                        "lastName": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50
+                          "maxLength": 50,
+                          "description": "User's unique username"
                         },
                         "email": {
                           "type": "string",
-                          "format": "email"
+                          "format": "email",
+                          "description": "User's email address"
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "description": "User's first name"
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "description": "User's last name"
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "user",
+                            "admin"
+                          ],
+                          "default": "user",
+                          "description": "User's role in the system"
                         },
                         "createdAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Timestamp when the user was created"
                         },
                         "updatedAt": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Timestamp when the user was last updated"
                         }
                       },
                       "required": [
                         "id",
                         "username",
+                        "email",
                         "firstName",
                         "lastName",
-                        "email",
                         "createdAt",
                         "updatedAt"
-                      ]
+                      ],
+                      "description": "User profile information"
                     },
                     "statusCode": {
                       "type": "number"
@@ -599,7 +1166,8 @@
           {
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "Unique identifier (UUID)"
             },
             "required": true,
             "name": "id",
@@ -648,37 +1216,37 @@
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 200,
-                    "description": "The title of the book."
+                    "description": "The title of the book"
                   },
                   "author": {
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 100,
-                    "description": "The author of the book."
+                    "description": "Author name (will be linked to existing author or create new)"
                   },
                   "publisher": {
                     "type": "string",
-                    "minLength": 2,
+                    "minLength": 1,
                     "maxLength": 100,
-                    "description": "The publisher of the book."
+                    "description": "Publisher name (will be linked to existing publisher or create new)"
                   },
                   "isbn": {
                     "type": "string",
                     "maxLength": 20,
                     "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                    "description": "The ISBN of the book."
+                    "description": "The ISBN of the book"
                   },
                   "genre": {
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 50,
-                    "description": "The genre of the book."
+                    "description": "The genre of the book"
                   },
                   "publishedYear": {
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2025,
-                    "description": "The year the book was published."
+                    "description": "The year the book was published"
                   },
                   "language": {
                     "type": "string",
@@ -687,17 +1255,16 @@
                       "ar",
                       "other"
                     ],
-                    "description": "The language of the book."
+                    "description": "The language of the book"
                   }
                 },
                 "required": [
                   "title",
                   "author",
                   "publisher",
-                  "isbn",
-                  "genre",
                   "language"
-                ]
+                ],
+                "description": "Book creation data"
               }
             }
           }
@@ -721,47 +1288,39 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "format": "uuid"
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
                         },
                         "title": {
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 200,
-                          "description": "The title of the book."
+                          "description": "Book title"
                         },
-                        "authorId": {
+                        "titleLong": {
                           "type": "string",
-                          "minLength": 2,
-                          "maxLength": 100,
-                          "description": "The author of the book."
-                        },
-                        "publisherId": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 100,
-                          "description": "The publisher of the book."
-                        },
-                        "publishedYear": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 2025,
-                          "description": "The year the book was published."
+                          "nullable": true,
+                          "description": "Extended book title"
                         },
                         "isbn": {
                           "type": "string",
-                          "maxLength": 20,
-                          "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                          "description": "The ISBN of the book."
+                          "nullable": true,
+                          "description": "ISBN number"
                         },
-                        "genre": {
+                        "isbn13": {
                           "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50,
-                          "description": "The genre of the book."
+                          "nullable": true,
+                          "description": "ISBN-13 number"
                         },
-                        "createdAt": {
+                        "deweyDecimal": {
                           "type": "string",
-                          "description": "Timestamp when the book was created."
+                          "nullable": true,
+                          "description": "Dewey decimal classification"
+                        },
+                        "binding": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book binding type"
                         },
                         "language": {
                           "type": "string",
@@ -770,7 +1329,69 @@
                             "ar",
                             "other"
                           ],
-                          "description": "The language of the book."
+                          "default": "other",
+                          "description": "Book language"
+                        },
+                        "authorId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Author ID"
+                        },
+                        "publisherId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Publisher ID"
+                        },
+                        "subjectId": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "uuid",
+                          "description": "Subject ID"
+                        },
+                        "genre": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book genre"
+                        },
+                        "datePublished": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Publication date"
+                        },
+                        "edition": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book edition"
+                        },
+                        "pages": {
+                          "type": "integer",
+                          "nullable": true,
+                          "minimum": 0,
+                          "description": "Number of pages"
+                        },
+                        "overview": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book overview"
+                        },
+                        "image": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book cover image URL"
+                        },
+                        "excerpt": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book excerpt"
+                        },
+                        "synopsis": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book synopsis"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was created"
                         }
                       },
                       "required": [
@@ -778,9 +1399,9 @@
                         "title",
                         "authorId",
                         "publisherId",
-                        "createdAt",
-                        "language"
-                      ]
+                        "createdAt"
+                      ],
+                      "description": "Complete book information"
                     },
                     "statusCode": {
                       "type": "number"
@@ -864,47 +1485,39 @@
                         "properties": {
                           "id": {
                             "type": "string",
-                            "format": "uuid"
+                            "format": "uuid",
+                            "description": "Unique identifier (UUID)"
                           },
                           "title": {
                             "type": "string",
                             "minLength": 2,
                             "maxLength": 200,
-                            "description": "The title of the book."
+                            "description": "Book title"
                           },
-                          "authorId": {
+                          "titleLong": {
                             "type": "string",
-                            "minLength": 2,
-                            "maxLength": 100,
-                            "description": "The author of the book."
-                          },
-                          "publisherId": {
-                            "type": "string",
-                            "minLength": 2,
-                            "maxLength": 100,
-                            "description": "The publisher of the book."
-                          },
-                          "publishedYear": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 2025,
-                            "description": "The year the book was published."
+                            "nullable": true,
+                            "description": "Extended book title"
                           },
                           "isbn": {
                             "type": "string",
-                            "maxLength": 20,
-                            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                            "description": "The ISBN of the book."
+                            "nullable": true,
+                            "description": "ISBN number"
                           },
-                          "genre": {
+                          "isbn13": {
                             "type": "string",
-                            "minLength": 2,
-                            "maxLength": 50,
-                            "description": "The genre of the book."
+                            "nullable": true,
+                            "description": "ISBN-13 number"
                           },
-                          "createdAt": {
+                          "deweyDecimal": {
                             "type": "string",
-                            "description": "Timestamp when the book was created."
+                            "nullable": true,
+                            "description": "Dewey decimal classification"
+                          },
+                          "binding": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book binding type"
                           },
                           "language": {
                             "type": "string",
@@ -913,7 +1526,69 @@
                               "ar",
                               "other"
                             ],
-                            "description": "The language of the book."
+                            "default": "other",
+                            "description": "Book language"
+                          },
+                          "authorId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Author ID"
+                          },
+                          "publisherId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Publisher ID"
+                          },
+                          "subjectId": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "uuid",
+                            "description": "Subject ID"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book genre"
+                          },
+                          "datePublished": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Publication date"
+                          },
+                          "edition": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book edition"
+                          },
+                          "pages": {
+                            "type": "integer",
+                            "nullable": true,
+                            "minimum": 0,
+                            "description": "Number of pages"
+                          },
+                          "overview": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book overview"
+                          },
+                          "image": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book cover image URL"
+                          },
+                          "excerpt": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book excerpt"
+                          },
+                          "synopsis": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book synopsis"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was created"
                           }
                         },
                         "required": [
@@ -921,9 +1596,9 @@
                           "title",
                           "authorId",
                           "publisherId",
-                          "createdAt",
-                          "language"
-                        ]
+                          "createdAt"
+                        ],
+                        "description": "Complete book information"
                       }
                     },
                     "statusCode": {
@@ -964,37 +1639,37 @@
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 200,
-                          "description": "The title of the book."
+                          "description": "The title of the book"
                         },
                         "author": {
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 100,
-                          "description": "The author of the book."
+                          "description": "Author name (will be linked to existing author or create new)"
                         },
                         "publisher": {
                           "type": "string",
-                          "minLength": 2,
+                          "minLength": 1,
                           "maxLength": 100,
-                          "description": "The publisher of the book."
+                          "description": "Publisher name (will be linked to existing publisher or create new)"
                         },
                         "isbn": {
                           "type": "string",
                           "maxLength": 20,
                           "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                          "description": "The ISBN of the book."
+                          "description": "The ISBN of the book"
                         },
                         "genre": {
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 50,
-                          "description": "The genre of the book."
+                          "description": "The genre of the book"
                         },
                         "publishedYear": {
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 2025,
-                          "description": "The year the book was published."
+                          "description": "The year the book was published"
                         },
                         "language": {
                           "type": "string",
@@ -1003,17 +1678,16 @@
                             "ar",
                             "other"
                           ],
-                          "description": "The language of the book."
+                          "description": "The language of the book"
                         }
                       },
                       "required": [
                         "title",
                         "author",
                         "publisher",
-                        "isbn",
-                        "genre",
                         "language"
-                      ]
+                      ],
+                      "description": "Book creation data"
                     }
                   }
                 },
@@ -1045,47 +1719,39 @@
                         "properties": {
                           "id": {
                             "type": "string",
-                            "format": "uuid"
+                            "format": "uuid",
+                            "description": "Unique identifier (UUID)"
                           },
                           "title": {
                             "type": "string",
                             "minLength": 2,
                             "maxLength": 200,
-                            "description": "The title of the book."
+                            "description": "Book title"
                           },
-                          "authorId": {
+                          "titleLong": {
                             "type": "string",
-                            "minLength": 2,
-                            "maxLength": 100,
-                            "description": "The author of the book."
-                          },
-                          "publisherId": {
-                            "type": "string",
-                            "minLength": 2,
-                            "maxLength": 100,
-                            "description": "The publisher of the book."
-                          },
-                          "publishedYear": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 2025,
-                            "description": "The year the book was published."
+                            "nullable": true,
+                            "description": "Extended book title"
                           },
                           "isbn": {
                             "type": "string",
-                            "maxLength": 20,
-                            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                            "description": "The ISBN of the book."
+                            "nullable": true,
+                            "description": "ISBN number"
                           },
-                          "genre": {
+                          "isbn13": {
                             "type": "string",
-                            "minLength": 2,
-                            "maxLength": 50,
-                            "description": "The genre of the book."
+                            "nullable": true,
+                            "description": "ISBN-13 number"
                           },
-                          "createdAt": {
+                          "deweyDecimal": {
                             "type": "string",
-                            "description": "Timestamp when the book was created."
+                            "nullable": true,
+                            "description": "Dewey decimal classification"
+                          },
+                          "binding": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book binding type"
                           },
                           "language": {
                             "type": "string",
@@ -1094,7 +1760,69 @@
                               "ar",
                               "other"
                             ],
-                            "description": "The language of the book."
+                            "default": "other",
+                            "description": "Book language"
+                          },
+                          "authorId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Author ID"
+                          },
+                          "publisherId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Publisher ID"
+                          },
+                          "subjectId": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "uuid",
+                            "description": "Subject ID"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book genre"
+                          },
+                          "datePublished": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Publication date"
+                          },
+                          "edition": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book edition"
+                          },
+                          "pages": {
+                            "type": "integer",
+                            "nullable": true,
+                            "minimum": 0,
+                            "description": "Number of pages"
+                          },
+                          "overview": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book overview"
+                          },
+                          "image": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book cover image URL"
+                          },
+                          "excerpt": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book excerpt"
+                          },
+                          "synopsis": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book synopsis"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was created"
                           }
                         },
                         "required": [
@@ -1102,9 +1830,9 @@
                           "title",
                           "authorId",
                           "publisherId",
-                          "createdAt",
-                          "language"
-                        ]
+                          "createdAt"
+                        ],
+                        "description": "Complete book information"
                       }
                     },
                     "statusCode": {
@@ -1132,7 +1860,8 @@
           {
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "Unique identifier (UUID)"
             },
             "required": true,
             "name": "id",
@@ -1158,47 +1887,39 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "format": "uuid"
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
                         },
                         "title": {
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 200,
-                          "description": "The title of the book."
+                          "description": "Book title"
                         },
-                        "authorId": {
+                        "titleLong": {
                           "type": "string",
-                          "minLength": 2,
-                          "maxLength": 100,
-                          "description": "The author of the book."
-                        },
-                        "publisherId": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 100,
-                          "description": "The publisher of the book."
-                        },
-                        "publishedYear": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 2025,
-                          "description": "The year the book was published."
+                          "nullable": true,
+                          "description": "Extended book title"
                         },
                         "isbn": {
                           "type": "string",
-                          "maxLength": 20,
-                          "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                          "description": "The ISBN of the book."
+                          "nullable": true,
+                          "description": "ISBN number"
                         },
-                        "genre": {
+                        "isbn13": {
                           "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50,
-                          "description": "The genre of the book."
+                          "nullable": true,
+                          "description": "ISBN-13 number"
                         },
-                        "createdAt": {
+                        "deweyDecimal": {
                           "type": "string",
-                          "description": "Timestamp when the book was created."
+                          "nullable": true,
+                          "description": "Dewey decimal classification"
+                        },
+                        "binding": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book binding type"
                         },
                         "language": {
                           "type": "string",
@@ -1207,7 +1928,69 @@
                             "ar",
                             "other"
                           ],
-                          "description": "The language of the book."
+                          "default": "other",
+                          "description": "Book language"
+                        },
+                        "authorId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Author ID"
+                        },
+                        "publisherId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Publisher ID"
+                        },
+                        "subjectId": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "uuid",
+                          "description": "Subject ID"
+                        },
+                        "genre": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book genre"
+                        },
+                        "datePublished": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Publication date"
+                        },
+                        "edition": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book edition"
+                        },
+                        "pages": {
+                          "type": "integer",
+                          "nullable": true,
+                          "minimum": 0,
+                          "description": "Number of pages"
+                        },
+                        "overview": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book overview"
+                        },
+                        "image": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book cover image URL"
+                        },
+                        "excerpt": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book excerpt"
+                        },
+                        "synopsis": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book synopsis"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was created"
                         }
                       },
                       "required": [
@@ -1215,9 +1998,9 @@
                         "title",
                         "authorId",
                         "publisherId",
-                        "createdAt",
-                        "language"
-                      ]
+                        "createdAt"
+                      ],
+                      "description": "Complete book information"
                     },
                     "statusCode": {
                       "type": "number"
@@ -1242,7 +2025,8 @@
           {
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "Unique identifier (UUID)"
             },
             "required": true,
             "name": "id",
@@ -1261,37 +2045,37 @@
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 200,
-                    "description": "The title of the book."
+                    "description": "The title of the book"
                   },
                   "author": {
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 100,
-                    "description": "The author of the book."
+                    "description": "Author name (will be linked to existing author or create new)"
                   },
                   "publisher": {
                     "type": "string",
-                    "minLength": 2,
+                    "minLength": 1,
                     "maxLength": 100,
-                    "description": "The publisher of the book."
+                    "description": "Publisher name (will be linked to existing publisher or create new)"
                   },
                   "isbn": {
                     "type": "string",
                     "maxLength": 20,
                     "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                    "description": "The ISBN of the book."
+                    "description": "The ISBN of the book"
                   },
                   "genre": {
                     "type": "string",
                     "minLength": 2,
                     "maxLength": 50,
-                    "description": "The genre of the book."
+                    "description": "The genre of the book"
                   },
                   "publishedYear": {
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2025,
-                    "description": "The year the book was published."
+                    "description": "The year the book was published"
                   },
                   "language": {
                     "type": "string",
@@ -1300,9 +2084,10 @@
                       "ar",
                       "other"
                     ],
-                    "description": "The language of the book."
+                    "description": "The language of the book"
                   }
-                }
+                },
+                "description": "Book update data"
               }
             }
           }
@@ -1326,47 +2111,39 @@
                       "properties": {
                         "id": {
                           "type": "string",
-                          "format": "uuid"
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
                         },
                         "title": {
                           "type": "string",
                           "minLength": 2,
                           "maxLength": 200,
-                          "description": "The title of the book."
+                          "description": "Book title"
                         },
-                        "authorId": {
+                        "titleLong": {
                           "type": "string",
-                          "minLength": 2,
-                          "maxLength": 100,
-                          "description": "The author of the book."
-                        },
-                        "publisherId": {
-                          "type": "string",
-                          "minLength": 2,
-                          "maxLength": 100,
-                          "description": "The publisher of the book."
-                        },
-                        "publishedYear": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 2025,
-                          "description": "The year the book was published."
+                          "nullable": true,
+                          "description": "Extended book title"
                         },
                         "isbn": {
                           "type": "string",
-                          "maxLength": 20,
-                          "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                          "description": "The ISBN of the book."
+                          "nullable": true,
+                          "description": "ISBN number"
                         },
-                        "genre": {
+                        "isbn13": {
                           "type": "string",
-                          "minLength": 2,
-                          "maxLength": 50,
-                          "description": "The genre of the book."
+                          "nullable": true,
+                          "description": "ISBN-13 number"
                         },
-                        "createdAt": {
+                        "deweyDecimal": {
                           "type": "string",
-                          "description": "Timestamp when the book was created."
+                          "nullable": true,
+                          "description": "Dewey decimal classification"
+                        },
+                        "binding": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book binding type"
                         },
                         "language": {
                           "type": "string",
@@ -1375,7 +2152,69 @@
                             "ar",
                             "other"
                           ],
-                          "description": "The language of the book."
+                          "default": "other",
+                          "description": "Book language"
+                        },
+                        "authorId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Author ID"
+                        },
+                        "publisherId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Publisher ID"
+                        },
+                        "subjectId": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "uuid",
+                          "description": "Subject ID"
+                        },
+                        "genre": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book genre"
+                        },
+                        "datePublished": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Publication date"
+                        },
+                        "edition": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book edition"
+                        },
+                        "pages": {
+                          "type": "integer",
+                          "nullable": true,
+                          "minimum": 0,
+                          "description": "Number of pages"
+                        },
+                        "overview": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book overview"
+                        },
+                        "image": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book cover image URL"
+                        },
+                        "excerpt": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book excerpt"
+                        },
+                        "synopsis": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Book synopsis"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was created"
                         }
                       },
                       "required": [
@@ -1383,9 +2222,9 @@
                         "title",
                         "authorId",
                         "publisherId",
-                        "createdAt",
-                        "language"
-                      ]
+                        "createdAt"
+                      ],
+                      "description": "Complete book information"
                     },
                     "statusCode": {
                       "type": "number"
@@ -1410,7 +2249,8 @@
           {
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "description": "Unique identifier (UUID)"
             },
             "required": true,
             "name": "id",
@@ -1478,47 +2318,39 @@
                         "properties": {
                           "id": {
                             "type": "string",
-                            "format": "uuid"
+                            "format": "uuid",
+                            "description": "Unique identifier (UUID)"
                           },
                           "title": {
                             "type": "string",
                             "minLength": 2,
                             "maxLength": 200,
-                            "description": "The title of the book."
+                            "description": "Book title"
                           },
-                          "authorId": {
+                          "titleLong": {
                             "type": "string",
-                            "minLength": 2,
-                            "maxLength": 100,
-                            "description": "The author of the book."
-                          },
-                          "publisherId": {
-                            "type": "string",
-                            "minLength": 2,
-                            "maxLength": 100,
-                            "description": "The publisher of the book."
-                          },
-                          "publishedYear": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 2025,
-                            "description": "The year the book was published."
+                            "nullable": true,
+                            "description": "Extended book title"
                           },
                           "isbn": {
                             "type": "string",
-                            "maxLength": 20,
-                            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                            "description": "The ISBN of the book."
+                            "nullable": true,
+                            "description": "ISBN number"
                           },
-                          "genre": {
+                          "isbn13": {
                             "type": "string",
-                            "minLength": 2,
-                            "maxLength": 50,
-                            "description": "The genre of the book."
+                            "nullable": true,
+                            "description": "ISBN-13 number"
                           },
-                          "createdAt": {
+                          "deweyDecimal": {
                             "type": "string",
-                            "description": "Timestamp when the book was created."
+                            "nullable": true,
+                            "description": "Dewey decimal classification"
+                          },
+                          "binding": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book binding type"
                           },
                           "language": {
                             "type": "string",
@@ -1527,7 +2359,69 @@
                               "ar",
                               "other"
                             ],
-                            "description": "The language of the book."
+                            "default": "other",
+                            "description": "Book language"
+                          },
+                          "authorId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Author ID"
+                          },
+                          "publisherId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Publisher ID"
+                          },
+                          "subjectId": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "uuid",
+                            "description": "Subject ID"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book genre"
+                          },
+                          "datePublished": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Publication date"
+                          },
+                          "edition": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book edition"
+                          },
+                          "pages": {
+                            "type": "integer",
+                            "nullable": true,
+                            "minimum": 0,
+                            "description": "Number of pages"
+                          },
+                          "overview": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book overview"
+                          },
+                          "image": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book cover image URL"
+                          },
+                          "excerpt": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book excerpt"
+                          },
+                          "synopsis": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book synopsis"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was created"
                           }
                         },
                         "required": [
@@ -1535,9 +2429,9 @@
                           "title",
                           "authorId",
                           "publisherId",
-                          "createdAt",
-                          "language"
-                        ]
+                          "createdAt"
+                        ],
+                        "description": "Complete book information"
                       }
                     },
                     "statusCode": {
@@ -1592,47 +2486,39 @@
                         "properties": {
                           "id": {
                             "type": "string",
-                            "format": "uuid"
+                            "format": "uuid",
+                            "description": "Unique identifier (UUID)"
                           },
                           "title": {
                             "type": "string",
                             "minLength": 2,
                             "maxLength": 200,
-                            "description": "The title of the book."
+                            "description": "Book title"
                           },
-                          "authorId": {
+                          "titleLong": {
                             "type": "string",
-                            "minLength": 2,
-                            "maxLength": 100,
-                            "description": "The author of the book."
-                          },
-                          "publisherId": {
-                            "type": "string",
-                            "minLength": 2,
-                            "maxLength": 100,
-                            "description": "The publisher of the book."
-                          },
-                          "publishedYear": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 2025,
-                            "description": "The year the book was published."
+                            "nullable": true,
+                            "description": "Extended book title"
                           },
                           "isbn": {
                             "type": "string",
-                            "maxLength": 20,
-                            "pattern": "^(97(8|9))?\\d{9}(\\d|X)$",
-                            "description": "The ISBN of the book."
+                            "nullable": true,
+                            "description": "ISBN number"
                           },
-                          "genre": {
+                          "isbn13": {
                             "type": "string",
-                            "minLength": 2,
-                            "maxLength": 50,
-                            "description": "The genre of the book."
+                            "nullable": true,
+                            "description": "ISBN-13 number"
                           },
-                          "createdAt": {
+                          "deweyDecimal": {
                             "type": "string",
-                            "description": "Timestamp when the book was created."
+                            "nullable": true,
+                            "description": "Dewey decimal classification"
+                          },
+                          "binding": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book binding type"
                           },
                           "language": {
                             "type": "string",
@@ -1641,7 +2527,69 @@
                               "ar",
                               "other"
                             ],
-                            "description": "The language of the book."
+                            "default": "other",
+                            "description": "Book language"
+                          },
+                          "authorId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Author ID"
+                          },
+                          "publisherId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Publisher ID"
+                          },
+                          "subjectId": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "uuid",
+                            "description": "Subject ID"
+                          },
+                          "genre": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book genre"
+                          },
+                          "datePublished": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Publication date"
+                          },
+                          "edition": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book edition"
+                          },
+                          "pages": {
+                            "type": "integer",
+                            "nullable": true,
+                            "minimum": 0,
+                            "description": "Number of pages"
+                          },
+                          "overview": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book overview"
+                          },
+                          "image": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book cover image URL"
+                          },
+                          "excerpt": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book excerpt"
+                          },
+                          "synopsis": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Book synopsis"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was created"
                           }
                         },
                         "required": [
@@ -1649,9 +2597,9 @@
                           "title",
                           "authorId",
                           "publisherId",
-                          "createdAt",
-                          "language"
-                        ]
+                          "createdAt"
+                        ],
+                        "description": "Complete book information"
                       }
                     },
                     "statusCode": {
@@ -1911,6 +2859,1832 @@
                     "message",
                     "statusCode"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/libraries": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "responses": {
+          "200": {
+            "description": "Libraries retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique identifier (UUID)"
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "description": "Library name"
+                          },
+                          "description": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 500,
+                            "description": "Library description"
+                          },
+                          "address": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 200,
+                            "description": "Library address"
+                          },
+                          "city": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 100,
+                            "description": "Library city"
+                          },
+                          "phone": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 20,
+                            "description": "Library phone number"
+                          },
+                          "email": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "email",
+                            "description": "Library email"
+                          },
+                          "website": {
+                            "type": "string",
+                            "nullable": true,
+                            "format": "uri",
+                            "description": "Library website"
+                          },
+                          "hours": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 200,
+                            "description": "Library hours"
+                          },
+                          "image": {
+                            "type": "string",
+                            "nullable": true,
+                            "description": "Library image URL"
+                          },
+                          "rating": {
+                            "type": "number",
+                            "nullable": true,
+                            "minimum": 0,
+                            "maximum": 5,
+                            "description": "Library rating"
+                          },
+                          "ownerId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "ID of the library owner"
+                          },
+                          "location": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 200,
+                            "description": "Library location"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "description": "Timestamp when the library was created"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "description": "Timestamp when the library was last updated"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "ownerId",
+                          "createdAt",
+                          "updatedAt"
+                        ],
+                        "description": "Library entity information"
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "requestBody": {
+          "description": "Create a new library",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Library name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Library description"
+                  },
+                  "address": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Library address"
+                  },
+                  "city": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "Library city"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "description": "Library phone number"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Library email"
+                  },
+                  "website": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Library website"
+                  },
+                  "hours": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Library hours"
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Library image URL"
+                  },
+                  "location": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Library location"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "description": "Library creation data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Library created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "description": "Library name"
+                        },
+                        "description": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 500,
+                          "description": "Library description"
+                        },
+                        "address": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library address"
+                        },
+                        "city": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 100,
+                          "description": "Library city"
+                        },
+                        "phone": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 20,
+                          "description": "Library phone number"
+                        },
+                        "email": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "email",
+                          "description": "Library email"
+                        },
+                        "website": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "uri",
+                          "description": "Library website"
+                        },
+                        "hours": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library hours"
+                        },
+                        "image": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Library image URL"
+                        },
+                        "rating": {
+                          "type": "number",
+                          "nullable": true,
+                          "minimum": 0,
+                          "maximum": 5,
+                          "description": "Library rating"
+                        },
+                        "ownerId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the library owner"
+                        },
+                        "location": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library location"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the library was created"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "Timestamp when the library was last updated"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "ownerId",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "description": "Library entity information"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/libraries/{id}": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Library retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "description": "Library name"
+                        },
+                        "description": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 500,
+                          "description": "Library description"
+                        },
+                        "address": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library address"
+                        },
+                        "city": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 100,
+                          "description": "Library city"
+                        },
+                        "phone": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 20,
+                          "description": "Library phone number"
+                        },
+                        "email": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "email",
+                          "description": "Library email"
+                        },
+                        "website": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "uri",
+                          "description": "Library website"
+                        },
+                        "hours": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library hours"
+                        },
+                        "image": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Library image URL"
+                        },
+                        "rating": {
+                          "type": "number",
+                          "nullable": true,
+                          "minimum": 0,
+                          "maximum": 5,
+                          "description": "Library rating"
+                        },
+                        "ownerId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the library owner"
+                        },
+                        "location": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library location"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the library was created"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "Timestamp when the library was last updated"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "ownerId",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "description": "Library entity information"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Library"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "description": "Update library details",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "description": "Library name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Library description"
+                  },
+                  "address": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Library address"
+                  },
+                  "city": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "Library city"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "description": "Library phone number"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Library email"
+                  },
+                  "website": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Library website"
+                  },
+                  "hours": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Library hours"
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Library image URL"
+                  },
+                  "location": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Library location"
+                  }
+                },
+                "description": "Library update data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Library updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100,
+                          "description": "Library name"
+                        },
+                        "description": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 500,
+                          "description": "Library description"
+                        },
+                        "address": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library address"
+                        },
+                        "city": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 100,
+                          "description": "Library city"
+                        },
+                        "phone": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 20,
+                          "description": "Library phone number"
+                        },
+                        "email": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "email",
+                          "description": "Library email"
+                        },
+                        "website": {
+                          "type": "string",
+                          "nullable": true,
+                          "format": "uri",
+                          "description": "Library website"
+                        },
+                        "hours": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library hours"
+                        },
+                        "image": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "Library image URL"
+                        },
+                        "rating": {
+                          "type": "number",
+                          "nullable": true,
+                          "minimum": 0,
+                          "maximum": 5,
+                          "description": "Library rating"
+                        },
+                        "ownerId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the library owner"
+                        },
+                        "location": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 200,
+                          "description": "Library location"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "description": "Timestamp when the library was created"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "description": "Timestamp when the library was last updated"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "ownerId",
+                        "createdAt",
+                        "updatedAt"
+                      ],
+                      "description": "Library entity information"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Library"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Library deleted successfully"
+          },
+          "404": {
+            "description": "Library not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/library-books": {
+      "get": {
+        "tags": [
+          "Library Books"
+        ],
+        "responses": {
+          "200": {
+            "description": "All library books retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique identifier (UUID)"
+                          },
+                          "libraryId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "ID of the library"
+                          },
+                          "bookId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "ID of the book"
+                          },
+                          "shelfLocation": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 100,
+                            "description": "Location of the book on shelf"
+                          },
+                          "condition": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 50,
+                            "description": "Condition of the book"
+                          },
+                          "addedAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was added to library"
+                          },
+                          "book": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "author": {
+                                "type": "string"
+                              },
+                              "isbn": {
+                                "type": "string"
+                              },
+                              "genre": {
+                                "type": "string"
+                              },
+                              "publishedYear": {
+                                "type": "number"
+                              },
+                              "language": {
+                                "type": "string",
+                                "enum": [
+                                  "en",
+                                  "ar",
+                                  "other"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "author",
+                              "language"
+                            ],
+                            "description": "Book details"
+                          },
+                          "library": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "location": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "Library details"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "libraryId",
+                          "bookId",
+                          "addedAt",
+                          "book",
+                          "library"
+                        ],
+                        "description": "Library book entry information"
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Library Books"
+        ],
+        "requestBody": {
+          "description": "Add a book to a library",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "libraryId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "ID of the library"
+                  },
+                  "bookId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "ID of the book"
+                  },
+                  "shelfLocation": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "Location of the book on shelf"
+                  },
+                  "condition": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "description": "Condition of the book"
+                  }
+                },
+                "required": [
+                  "libraryId",
+                  "bookId"
+                ],
+                "description": "Library book creation data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Book added to library successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
+                        },
+                        "libraryId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the library"
+                        },
+                        "bookId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the book"
+                        },
+                        "shelfLocation": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 100,
+                          "description": "Location of the book on shelf"
+                        },
+                        "condition": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 50,
+                          "description": "Condition of the book"
+                        },
+                        "addedAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was added to library"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "libraryId",
+                        "bookId",
+                        "addedAt"
+                      ],
+                      "description": "Library book entry information"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Book already exists in this library",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/libraries/{libraryId}/books": {
+      "get": {
+        "tags": [
+          "Library Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "libraryId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Library books retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Unique identifier (UUID)"
+                          },
+                          "libraryId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "ID of the library"
+                          },
+                          "bookId": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "ID of the book"
+                          },
+                          "shelfLocation": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 100,
+                            "description": "Location of the book on shelf"
+                          },
+                          "condition": {
+                            "type": "string",
+                            "nullable": true,
+                            "maxLength": 50,
+                            "description": "Condition of the book"
+                          },
+                          "addedAt": {
+                            "type": "string",
+                            "description": "Timestamp when the book was added to library"
+                          },
+                          "book": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "author": {
+                                "type": "string"
+                              },
+                              "isbn": {
+                                "type": "string"
+                              },
+                              "genre": {
+                                "type": "string"
+                              },
+                              "publishedYear": {
+                                "type": "number"
+                              },
+                              "language": {
+                                "type": "string",
+                                "enum": [
+                                  "en",
+                                  "ar",
+                                  "other"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "title",
+                              "author",
+                              "language"
+                            ],
+                            "description": "Book details"
+                          },
+                          "library": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "location": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "Library details"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "libraryId",
+                          "bookId",
+                          "addedAt",
+                          "book",
+                          "library"
+                        ],
+                        "description": "Library book entry information"
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/library-books/{id}": {
+      "get": {
+        "tags": [
+          "Library Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Library book retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
+                        },
+                        "libraryId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the library"
+                        },
+                        "bookId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the book"
+                        },
+                        "shelfLocation": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 100,
+                          "description": "Location of the book on shelf"
+                        },
+                        "condition": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 50,
+                          "description": "Condition of the book"
+                        },
+                        "addedAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was added to library"
+                        },
+                        "book": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "author": {
+                              "type": "string"
+                            },
+                            "isbn": {
+                              "type": "string"
+                            },
+                            "genre": {
+                              "type": "string"
+                            },
+                            "publishedYear": {
+                              "type": "number"
+                            },
+                            "language": {
+                              "type": "string",
+                              "enum": [
+                                "en",
+                                "ar",
+                                "other"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "title",
+                            "author",
+                            "language"
+                          ],
+                          "description": "Book details"
+                        },
+                        "library": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "location": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "Library details"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "libraryId",
+                        "bookId",
+                        "addedAt",
+                        "book",
+                        "library"
+                      ],
+                      "description": "Library book entry information"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Library Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "description": "Update library book details",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "shelfLocation": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "The shelf location of the book"
+                  },
+                  "condition": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "description": "The condition of the book"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Library book updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
+                        },
+                        "libraryId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the library"
+                        },
+                        "bookId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "ID of the book"
+                        },
+                        "shelfLocation": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 100,
+                          "description": "Location of the book on shelf"
+                        },
+                        "condition": {
+                          "type": "string",
+                          "nullable": true,
+                          "maxLength": 50,
+                          "description": "Condition of the book"
+                        },
+                        "addedAt": {
+                          "type": "string",
+                          "description": "Timestamp when the book was added to library"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "libraryId",
+                        "bookId",
+                        "addedAt"
+                      ],
+                      "description": "Library book entry information"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Library Books"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Book removed from library successfully"
+          },
+          "404": {
+            "description": "Library book entry not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register a new user",
+        "requestBody": {
+          "description": "User registration data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 30,
+                    "pattern": "^[a-zA-Z0-9_-]+$",
+                    "description": "Unique username for the user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Valid email address"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "User's first or last name"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "description": "User's first or last name"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 128,
+                    "pattern": "[A-Z]",
+                    "description": "User password with security requirements"
+                  }
+                },
+                "required": [
+                  "username",
+                  "email",
+                  "firstName",
+                  "lastName",
+                  "password"
+                ],
+                "description": "User registration data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "description": "Unique identifier (UUID)"
+                        },
+                        "username": {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 30,
+                          "pattern": "^[a-zA-Z0-9_-]+$",
+                          "description": "Unique username for the user"
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email",
+                          "description": "Valid email address"
+                        },
+                        "firstName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 50,
+                          "description": "User's first or last name"
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 50,
+                          "description": "User's first or last name"
+                        },
+                        "role": {
+                          "type": "string",
+                          "description": "User role"
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "User permissions"
+                        },
+                        "isActive": {
+                          "type": "boolean",
+                          "description": "Whether the user account is active"
+                        },
+                        "isEmailVerified": {
+                          "type": "boolean",
+                          "description": "Whether the user's email is verified"
+                        },
+                        "isSuspended": {
+                          "type": "boolean",
+                          "description": "Whether the user account is suspended"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "username",
+                        "email",
+                        "firstName",
+                        "lastName",
+                        "role",
+                        "permissions",
+                        "isActive",
+                        "isEmailVerified",
+                        "isSuspended"
+                      ],
+                      "description": "User profile information"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number",
+                      "example": 400
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login user",
+        "requestBody": {
+          "description": "User login credentials",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Valid email address"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "User password for login"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "description": "User login credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "responseObject": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "description": "Unique identifier (UUID)"
+                            },
+                            "username": {
+                              "type": "string",
+                              "minLength": 3,
+                              "maxLength": 30,
+                              "pattern": "^[a-zA-Z0-9_-]+$",
+                              "description": "Unique username for the user"
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "description": "Valid email address"
+                            },
+                            "firstName": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 50,
+                              "description": "User's first or last name"
+                            },
+                            "lastName": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 50,
+                              "description": "User's first or last name"
+                            },
+                            "role": {
+                              "type": "string",
+                              "description": "User role"
+                            },
+                            "permissions": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "description": "User permissions"
+                            },
+                            "isActive": {
+                              "type": "boolean",
+                              "description": "Whether the user account is active"
+                            },
+                            "isEmailVerified": {
+                              "type": "boolean",
+                              "description": "Whether the user's email is verified"
+                            },
+                            "isSuspended": {
+                              "type": "boolean",
+                              "description": "Whether the user account is suspended"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "username",
+                            "email",
+                            "firstName",
+                            "lastName",
+                            "role",
+                            "permissions",
+                            "isActive",
+                            "isEmailVerified",
+                            "isSuspended"
+                          ],
+                          "description": "User profile information"
+                        },
+                        "tokens": {
+                          "type": "object",
+                          "properties": {
+                            "accessToken": {
+                              "type": "string",
+                              "description": "JWT access token"
+                            },
+                            "refreshToken": {
+                              "type": "string",
+                              "description": "JWT refresh token"
+                            },
+                            "expiresIn": {
+                              "type": "number",
+                              "description": "Access token expiration time in seconds"
+                            },
+                            "refreshExpiresIn": {
+                              "type": "number",
+                              "description": "Refresh token expiration time in seconds"
+                            }
+                          },
+                          "required": [
+                            "accessToken",
+                            "refreshToken",
+                            "expiresIn",
+                            "refreshExpiresIn"
+                          ],
+                          "description": "Authentication tokens"
+                        },
+                        "sessionId": {
+                          "type": "string",
+                          "description": "Session identifier"
+                        }
+                      },
+                      "required": [
+                        "user",
+                        "tokens",
+                        "sessionId"
+                      ],
+                      "description": "Successful login response"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "statusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number",
+                      "example": 401
+                    }
+                  }
                 }
               }
             }

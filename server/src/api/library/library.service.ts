@@ -2,7 +2,6 @@ import type { DrizzleClient } from "database";
 import { schema, eq } from "database";
 import type { Library, CreateLibrary, UpdateLibrary } from "./library.model.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import { logger } from "../../server.js";
 import { DatabaseError, NotFound, ValidationError, ResourceAlreadyExistsError } from "../../errors.js";
 
 export const LibraryService = {
@@ -14,7 +13,6 @@ export const LibraryService = {
       return ServiceResponse.success("Libraries found", libraries);
     } catch (err) {
       const dbError = new DatabaseError("Failed to retrieve libraries", { originalError: err });
-      logger.error(dbError.message, { error: dbError.context });
       return ServiceResponse.failure(dbError.message, null, dbError.statusCode);
     }
   },
@@ -39,7 +37,6 @@ export const LibraryService = {
         libraryId: id,
         originalError: err,
       });
-      logger.error(dbError.message, { error: dbError.context });
       return ServiceResponse.failure(dbError.message, null, dbError.statusCode);
     }
   },
@@ -47,6 +44,7 @@ export const LibraryService = {
   create: async (
     drizzle: DrizzleClient,
     libraryData: CreateLibrary,
+    ownerId: string,
   ): Promise<ServiceResponse<Library | null>> => {
     if (!libraryData.name.trim()) {
       const validationError = new ValidationError("Library name is required");
@@ -54,7 +52,6 @@ export const LibraryService = {
     }
 
     try {
-      
       const existingLibrary = await drizzle.query.library.findFirst({
         where: (libraries, { eq }) => eq(libraries.name, libraryData.name.trim()),
       });
@@ -71,13 +68,13 @@ export const LibraryService = {
         .values({
           ...libraryData,
           name: libraryData.name.trim(),
+          ownerId,
         })
         .returning();
 
       return ServiceResponse.success("Library created successfully", newLibrary, 201);
     } catch (err) {
       const dbError = new DatabaseError("Failed to create library", { libraryData, originalError: err });
-      logger.error(dbError.message, { error: dbError.context });
       return ServiceResponse.failure(dbError.message, null, dbError.statusCode);
     }
   },
@@ -139,7 +136,6 @@ export const LibraryService = {
         updateData: libraryData,
         originalError: err,
       });
-      logger.error(dbError.message, { error: dbError.context });
       return ServiceResponse.failure(dbError.message, null, dbError.statusCode);
     }
   },
@@ -179,7 +175,6 @@ export const LibraryService = {
       return ServiceResponse.success("Library deleted successfully", null, 204);
     } catch (err) {
       const dbError = new DatabaseError("Failed to delete library", { libraryId: id, originalError: err });
-      logger.error(dbError.message, { error: dbError.context });
       return ServiceResponse.failure(dbError.message, null, dbError.statusCode);
     }
   },

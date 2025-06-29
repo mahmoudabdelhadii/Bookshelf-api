@@ -31,7 +31,7 @@ describe("JWT utilities", () => {
 
       expect(token).toBeDefined();
       expect(typeof token).toBe("string");
-      expect(token.split(".")).toHaveLength(3); 
+      expect(token.split(".")).toHaveLength(3);
     });
 
     it("should include correct payload in token", () => {
@@ -49,10 +49,10 @@ describe("JWT utilities", () => {
       const token = generateAccessToken(mockPayload);
       const decoded = decodeToken(token);
 
-      expect(decoded!.iat).toBeDefined(); 
-      expect(decoded!.exp).toBeDefined(); 
-      expect(decoded!.iss).toBeDefined(); 
-      expect(decoded!.aud).toBeDefined(); 
+      expect(decoded!.iat).toBeDefined();
+      expect(decoded!.exp).toBeDefined();
+      expect(decoded!.iss).toBeDefined();
+      expect(decoded!.aud).toBeDefined();
     });
   });
 
@@ -244,7 +244,7 @@ describe("JWT utilities", () => {
       expect(id1).toBeDefined();
       expect(id2).toBeDefined();
       expect(id1).not.toBe(id2);
-      expect(id1).toHaveLength(64); 
+      expect(id1).toHaveLength(64);
     });
   });
 
@@ -252,7 +252,6 @@ describe("JWT utilities", () => {
     it("should validate correct configuration", () => {
       const result = validateJwtConfig();
 
-      
       expect(result.isValid).toBeDefined();
       expect(Array.isArray(result.errors)).toBe(true);
     });
@@ -265,7 +264,7 @@ describe("JWT utilities", () => {
       const hash2 = createTokenHash(token);
 
       expect(hash1).toBe(hash2);
-      expect(hash1).toHaveLength(64); 
+      expect(hash1).toHaveLength(64);
     });
 
     it("should create different hashes for different tokens", () => {
@@ -304,7 +303,7 @@ describe("JWT utilities", () => {
 
         expect(decoded!.userId).toBe("custom-user");
         expect(decoded!.role).toBe("admin");
-        expect(decoded!.username).toBe("testuser"); 
+        expect(decoded!.username).toBe("testuser");
       });
     });
 
@@ -337,8 +336,6 @@ describe("JWT utilities", () => {
     });
 
     it("should reject tokens with wrong issuer", () => {
-      
-      
       const token = generateAccessToken(mockPayload);
       const decoded = decodeToken(token);
 
@@ -346,7 +343,6 @@ describe("JWT utilities", () => {
     });
 
     it("should reject tokens with wrong audience", () => {
-      
       const token = generateAccessToken(mockPayload);
       const decoded = decodeToken(token);
 
@@ -357,10 +353,8 @@ describe("JWT utilities", () => {
       const sessionIds = Array.from({ length: 100 }, () => generateSessionId());
       const uniqueIds = new Set(sessionIds);
 
-      
       expect(uniqueIds.size).toBe(sessionIds.length);
 
-      
       for (const id of sessionIds) {
         expect(id).toMatch(/^[a-f0-9]+$/);
       }
@@ -372,9 +366,9 @@ describe("JWT utilities", () => {
         "only.two.parts",
         "",
         "too.many.parts.here.extra",
-        "header.payload.", 
-        ".payload.signature", 
-        "header..signature", 
+        "header.payload.",
+        ".payload.signature",
+        "header..signature",
       ];
 
       for (const token of malformedTokens) {

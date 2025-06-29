@@ -8,14 +8,17 @@ import { StatusCodes } from "http-status-codes";
 class UserController {
   public createUser: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
-    
+
     try {
-      const { id, username, email, firstName, lastName } = createUserSchema.parse(req.body);
-      const serviceResponse = await UserService.createUser(drizzle, { id, username, email, firstName, lastName });
+      const userData = createUserSchema.parse(req.body);
+      const serviceResponse = await UserService.createUser(drizzle, userData);
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create user";
-      return handleServiceResponse(ServiceResponse.failure(message, null, StatusCodes.UNPROCESSABLE_ENTITY), res);
+      return handleServiceResponse(
+        ServiceResponse.failure(message, null, StatusCodes.UNPROCESSABLE_ENTITY),
+        res,
+      );
     }
   };
 
@@ -51,7 +54,7 @@ class UserController {
   public updateUser: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { id } = req.params;
-    
+
     try {
       const updates = updateUserSchema.parse(req.body);
       const serviceResponse = await UserService.updateUser(drizzle, id, updates);

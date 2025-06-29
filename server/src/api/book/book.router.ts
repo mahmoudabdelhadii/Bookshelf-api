@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { booksController } from "./book.controller.js";
-import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
 import { bookSchema, getBookSchema, createBookSchema, updateBookSchema } from "./book.model.js";
+import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+export const booksRegistry = new OpenAPIRegistry();
 
 export const booksRouter = Router();
-export const booksRegistry = new OpenAPIRegistry();
 
 booksRegistry.register("Book", bookSchema.openapi("Book"));
 

@@ -75,7 +75,6 @@ class EmailService {
 
       this.transporter = nodemailer.createTransport(transportConfig);
 
-      
       await this.transporter.verify();
       this.isConfigured = true;
       console.log("Email service initialized successfully");
@@ -113,10 +112,9 @@ class EmailService {
       } catch (err) {
         lastError = err as Error;
         console.error(`Email attempt ${attempt} failed:`, err);
-        
+
         if (attempt < maxRetries) {
-          
-          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
         }
       }
     }
@@ -130,7 +128,7 @@ class EmailService {
    */
   async sendEmailVerification(data: EmailVerificationData): Promise<boolean> {
     const html = this.getEmailVerificationTemplate(data);
-    
+
     return this.sendEmail({
       to: data.email,
       subject: "Verify Your Email Address - Bookshelf API",
@@ -143,7 +141,7 @@ class EmailService {
    */
   async sendPasswordReset(data: PasswordResetData): Promise<boolean> {
     const html = this.getPasswordResetTemplate(data);
-    
+
     return this.sendEmail({
       to: data.email,
       subject: "Reset Your Password - Bookshelf API",
@@ -156,7 +154,7 @@ class EmailService {
    */
   async sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean> {
     const html = this.getWelcomeTemplate(data);
-    
+
     return this.sendEmail({
       to: data.email,
       subject: "Welcome to Bookshelf API!",
@@ -169,7 +167,7 @@ class EmailService {
    */
   async sendSecurityAlert(data: SecurityAlertData): Promise<boolean> {
     const html = this.getSecurityAlertTemplate(data);
-    
+
     return this.sendEmail({
       to: data.email,
       subject: `Security Alert: ${data.action} - Bookshelf API`,
@@ -447,7 +445,7 @@ class EmailService {
    */
   private htmlToText(html: string): string {
     return html
-      .replace(/<[^>]+>/g, "") 
+      .replace(/<[^>]+>/g, "")
       .replace(/&nbsp;/g, " ")
       .replace(/&amp;/g, "&")
       .replace(/&lt;/g, "<")
@@ -507,9 +505,7 @@ class EmailService {
   }
 }
 
-
 export const emailService = new EmailService();
-
 
 if (env.EMAIL_USER && env.EMAIL_PASS) {
   emailService.initialize().catch(console.error);

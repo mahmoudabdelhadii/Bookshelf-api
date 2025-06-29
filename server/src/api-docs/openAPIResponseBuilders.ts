@@ -16,8 +16,6 @@ export function createApiResponse(schema: z.ZodTypeAny, description: string, sta
   };
 }
 
-
-
 export type ApiResponseConfig = {
   schema: z.ZodTypeAny;
   description: string;

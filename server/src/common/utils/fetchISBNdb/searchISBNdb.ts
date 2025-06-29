@@ -1,5 +1,4 @@
 import { callISBNdb } from "./callISBNdb.js";
-import type { AuthorQueryResults as AuthorSearchResponse } from "../../types/shared/isbndbAPI.js";
 import type { BookSearchResponse } from "./searchBooks.js";
 import type { PublisherSearchResponse } from "./searchPublishers.js";
 
@@ -15,7 +14,7 @@ interface SearchParams {
 }
 
 type SearchResponse = {
-  data: BookSearchResponse | AuthorSearchResponse | PublisherSearchResponse;
+  data: BookSearchResponse | PublisherSearchResponse;
 };
 
 export async function searchISBNdb(
@@ -44,21 +43,21 @@ export async function searchISBNdb(
         return {
           data: {
             total: (response as BookSearchResponse).total,
-            books: (response as BookSearchResponse).books
+            books: (response as BookSearchResponse).books,
           },
         };
-      case "authors":
-        return {
-          data: {
-            total: (response as AuthorSearchResponse).total,
-            authors: (response as AuthorSearchResponse).authors
-          },
-        };
+      // case "authors":
+      //   return {
+      //     data: {
+      //       total: (response as AuthorSearchResponse).total,
+      //       authors: (response as AuthorSearchResponse).authors,
+      //     },
+      //   };
       case "publishers":
         return {
           data: {
             total: (response as PublisherSearchResponse).total,
-            publishers: (response as PublisherSearchResponse).publishers
+            publishers: (response as PublisherSearchResponse).publishers,
           },
         };
       default:
