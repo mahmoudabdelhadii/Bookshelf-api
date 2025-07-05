@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import express, { type Router } from "express";
+import { Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
@@ -13,7 +13,7 @@ import {
 } from "./borrowRequest.model.js";
 
 export const borrowRequestRegistry = new OpenAPIRegistry();
-export const borrowRequestRouter: Router = express.Router();
+export const borrowRequestRouter: Router = Router();
 
 // Register schemas
 borrowRequestRegistry.register("BorrowRequest", borrowRequestSchema);
@@ -268,4 +268,3 @@ borrowRequestRegistry.registerPath({
   responses: createApiResponse(borrowRequestSchema, "Book returned successfully"),
 });
 borrowRequestRouter.post("/:id/return", borrowRequestController.returnBook);
-

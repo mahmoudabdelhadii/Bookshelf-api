@@ -1,13 +1,13 @@
-import jwt, { SignOptions } from "jsonwebtoken";
+import { SignOptions, verify, sign, decode, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
 import crypto from "node:crypto";
 import { env } from "../utils/envConfig.js";
 
-const JWT_SECRET = env.JWT_SECRET || crypto.randomBytes(64).toString("hex");
-const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET || crypto.randomBytes(64).toString("hex");
-const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN || "15m";
-const JWT_REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN || "7d";
-const JWT_ISSUER = env.JWT_ISSUER || "bookshelf-api";
-const JWT_AUDIENCE = env.JWT_AUDIENCE || "bookshelf-users";
+const JWT_SECRET = env.JWT_SECRET ?? crypto.randomBytes(64).toString("hex");
+const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET ?? crypto.randomBytes(64).toString("hex");
+const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN ?? "15m";
+const JWT_REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN ?? "7d";
+const JWT_ISSUER = env.JWT_ISSUER ?? "bookshelf-api";
+const JWT_AUDIENCE = env.JWT_AUDIENCE ?? "bookshelf-users";
 
 export interface JwtPayload {
   userId: string;
@@ -55,7 +55,7 @@ export function generateAccessToken(
     algorithm: "HS256",
   };
 
-  return jwt.sign(tokenPayload, JWT_SECRET, options);
+  return sign(tokenPayload, JWT_SECRET, options);
 }
 
 export function generateRefreshToken(
@@ -73,7 +73,7 @@ export function generateRefreshToken(
     algorithm: "HS256",
   };
 
-  return jwt.sign(tokenPayload, JWT_REFRESH_SECRET, options);
+  return sign(tokenPayload, JWT_REFRESH_SECRET, options);
 } /**
  * Generate both access and refresh tokens
  */
@@ -99,7 +99,7 @@ export function generateTokenPair(
  */
 export function verifyAccessToken(token: string): VerificationResult {
   try {
-    const payload = jwt.verify(token, JWT_SECRET, {
+    const payload = verify(token, JWT_SECRET, {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
       algorithms: ["HS256"],
@@ -111,10 +111,10 @@ export function verifyAccessToken(token: string): VerificationResult {
 
     return { isValid: true, payload };
   } catch (err) {
-    if (err instanceof jwt.TokenExpiredError) {
+    if (err instanceof TokenExpiredError) {
       return { isValid: false, error: "Token expired", expired: true };
     }
-    if (err instanceof jwt.JsonWebTokenError) {
+    if (err instanceof JsonWebTokenError) {
       return { isValid: false, error: "Invalid token" };
     }
     return { isValid: false, error: "Token verification failed" };
@@ -126,7 +126,7 @@ export function verifyAccessToken(token: string): VerificationResult {
  */
 export function verifyRefreshToken(token: string): VerificationResult {
   try {
-    const payload = jwt.verify(token, JWT_REFRESH_SECRET, {
+    const payload = verify(token, JWT_REFRESH_SECRET, {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
       algorithms: ["HS256"],
@@ -138,10 +138,10 @@ export function verifyRefreshToken(token: string): VerificationResult {
 
     return { isValid: true, payload };
   } catch (err) {
-    if (err instanceof jwt.TokenExpiredError) {
+    if (err instanceof TokenExpiredError) {
       return { isValid: false, error: "Refresh token expired", expired: true };
     }
-    if (err instanceof jwt.JsonWebTokenError) {
+    if (err instanceof JsonWebTokenError) {
       return { isValid: false, error: "Invalid refresh token" };
     }
     return { isValid: false, error: "Refresh token verification failed" };
@@ -153,7 +153,7 @@ export function verifyRefreshToken(token: string): VerificationResult {
  */
 export function decodeToken(token: string): JwtPayload | null {
   try {
-    return jwt.decode(token) as JwtPayload;
+    return decode(token) as JwtPayload;
   } catch {
     return null;
   }
@@ -309,7 +309,7 @@ export const TokenUtils = {
       ...payload,
     };
 
-    return jwt.sign(tokenPayload, JWT_SECRET, {
+    return sign(tokenPayload, JWT_SECRET, {
       expiresIn: "-1s",
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,

@@ -7,7 +7,7 @@ export const userRoleRelations = relations(userRole, ({ one }) => ({
   user: one(user, {
     fields: [userRole.userId],
     references: [user.id],
-    relationName: "userToRole"
+    relationName: "userToRole",
   }),
   role: one(userRoleType, {
     fields: [userRole.roleId],
@@ -16,6 +16,6 @@ export const userRoleRelations = relations(userRole, ({ one }) => ({
   assignedByUser: one(user, {
     fields: [userRole.assignedBy],
     references: [user.id],
-    relationName: "assignerToRole"
+    relationName: "assignerToRole",
   }),
 }));

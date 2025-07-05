@@ -31,7 +31,7 @@ export function generateOpenAPIDocument() {
     type: "http",
     scheme: "bearer",
     bearerFormat: "JWT",
-    description: "JWT token obtained from login endpoint"
+    description: "JWT token obtained from login endpoint",
   });
 
   const generator = new OpenApiGeneratorV3(registry.definitions);

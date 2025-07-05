@@ -92,9 +92,9 @@ export function configurePassport(drizzle: DrizzleClient) {
 
             await drizzle.insert(schema.loginAttempt).values({
               email,
-              ipAddress: req.ip || "unknown",
+              ipAddress: req.ip ?? "unknown",
               isSuccessful: false,
-              userAgent: req.get("user-agent") || "unknown",
+              userAgent: req.get("user-agent") ?? "unknown",
               failureReason: "invalid_password",
             });
 
@@ -113,12 +113,12 @@ export function configurePassport(drizzle: DrizzleClient) {
 
           await drizzle.insert(schema.loginAttempt).values({
             email,
-            ipAddress: req.ip || "unknown",
+            ipAddress: req.ip ?? "unknown",
             isSuccessful: true,
-            userAgent: req.get("user-agent") || "unknown",
+            userAgent: req.get("user-agent") ?? "unknown",
           });
 
-          const permissions = userRoles.flatMap((ur) => ur.role.permissions || []);
+          const permissions = userRoles.flatMap((ur) => ur.role.permissions ?? []);
 
           const authUser: AuthUser = {
             id: user.id,
@@ -134,9 +134,10 @@ export function configurePassport(drizzle: DrizzleClient) {
           };
 
           done(null, authUser);
+          
         } catch (err) {
-          console.error("Local strategy error:", err);
           done(err);
+          
         }
       },
     ),
@@ -212,7 +213,7 @@ export function configurePassport(drizzle: DrizzleClient) {
             .set({ lastAccessedAt: new Date() })
             .where(eq(schema.userSession.id, session.id));
 
-          const permissions = userRoles.flatMap((ur) => ur.role.permissions || []);
+          const permissions = userRoles.flatMap((ur) => ur.role.permissions ?? []);
 
           const authUser: AuthUser = {
             id: user.id,
@@ -229,7 +230,6 @@ export function configurePassport(drizzle: DrizzleClient) {
 
           done(null, authUser);
         } catch (err) {
-          console.error("JWT strategy error:", err);
           done(err);
         }
       },
@@ -266,7 +266,7 @@ export function configurePassport(drizzle: DrizzleClient) {
         return;
       }
 
-      const permissions = userRoles.flatMap((ur) => ur.role.permissions || []);
+      const permissions = userRoles.flatMap((ur) => ur.role.permissions ?? []);
 
       const authUser: AuthUser = {
         id: user.id,

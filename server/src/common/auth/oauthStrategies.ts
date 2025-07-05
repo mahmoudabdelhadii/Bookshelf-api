@@ -2,10 +2,9 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as AppleStrategy } from "passport-apple";
 import type { DrizzleClient } from "database";
-import { eq, and, schema } from "database";
+import { eq, schema } from "database";
 import { env } from "../utils/envConfig.js";
 import { generateSecurePassword, hashPassword } from "../utils/password.js";
-import { generateSessionId } from "./jwt.js";
 import emailService from "../services/email.js";
 
 export interface GoogleProfile {
@@ -79,8 +78,8 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             } else {
               const newUser = await createOAuthUser(drizzle, {
                 email,
-                firstName: googleProfile.name.givenName || "User",
-                lastName: googleProfile.name.familyName || "",
+                firstName: googleProfile.name.givenName ?? "User",
+                lastName: googleProfile.name.familyName ?? "",
                 provider: "google",
                 providerId: googleProfile.id,
                 avatar: googleProfile.photos[0]?.value,
@@ -92,7 +91,6 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             const authUser = await buildAuthUser(drizzle, user, "google", googleProfile.id);
             done(null, authUser);
           } catch (err) {
-            console.error("Google OAuth error:", err);
             done(err as Error, undefined);
           }
         },
@@ -134,8 +132,8 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             } else {
               const newUser = await createOAuthUser(drizzle, {
                 email,
-                firstName: appleProfile.name?.firstName || "User",
-                lastName: appleProfile.name?.lastName || "",
+                firstName: appleProfile.name?.firstName ?? "User",
+                lastName: appleProfile.name?.lastName ?? "",
                 provider: "apple",
                 providerId: appleProfile.id,
               });
@@ -146,7 +144,6 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             const authUser = await buildAuthUser(drizzle, user, "apple", appleProfile.id);
             done(null, authUser);
           } catch (err) {
-            console.error("Apple OAuth error:", err);
             done(err as Error, undefined);
           }
         },
@@ -325,7 +322,7 @@ async function buildAuthUser(
   provider: "google" | "apple",
   providerId: string,
 ): Promise<OAuthUser> {
-  const permissions = user.userRoles?.flatMap((ur: any) => ur.role.permissions || []) || [];
+  const permissions = user.userRoles?.flatMap((ur: any) => ur.role.permissions ?? []) ?? [];
 
   await drizzle.insert(schema.securityAuditLog).values({
     userId: user.id,
@@ -346,9 +343,9 @@ async function buildAuthUser(
     lastName: user.lastName,
     role: user.role,
     permissions,
-    isActive: user.userAuth?.isActive || true,
-    isEmailVerified: user.userAuth?.isEmailVerified || true,
-    isSuspended: user.userAuth?.isSuspended || false,
+    isActive: user.userAuth?.isActive ?? true,
+    isEmailVerified: user.userAuth?.isEmailVerified ?? true,
+    isSuspended: user.userAuth?.isSuspended ?? false,
     provider,
     providerId,
   };
@@ -423,7 +420,6 @@ export class OAuthService {
 
       return true;
     } catch (err) {
-      console.error("Error linking OAuth account:", err);
       throw err;
     }
   }
@@ -455,7 +451,6 @@ export class OAuthService {
 
       return true;
     } catch (err) {
-      console.error("Error unlinking OAuth account:", err);
       throw err;
     }
   }

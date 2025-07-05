@@ -122,4 +122,3 @@ export type CreateBorrowRequest = z.infer<typeof createBorrowRequestSchema>;
 export type UpdateBorrowRequest = z.infer<typeof updateBorrowRequestSchema>;
 export type BorrowRequestWithDetails = z.infer<typeof borrowRequestWithDetailsSchema>;
 export type BorrowRequestStatus = z.infer<typeof borrowRequestSchema>["status"];
-

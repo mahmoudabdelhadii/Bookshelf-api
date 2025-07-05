@@ -6,14 +6,21 @@ import { idSchema } from "../../types.js";
 extendZodWithOpenApi(z);
 
 // Library book schema based on database schema
-export const libraryBookSchema = z.object({
-  id: idSchema,
-  libraryId: idSchema.openapi({ description: "ID of the library" }),
-  bookId: idSchema.openapi({ description: "ID of the book" }),
-  shelfLocation: z.string().max(100).nullable().optional().openapi({ description: "Location of the book on shelf" }),
-  condition: z.string().max(50).nullable().optional().openapi({ description: "Condition of the book" }),
-  addedAt: z.date().openapi({ description: "Timestamp when the book was added to library" }),
-}).openapi({ description: "Library book entry information" });
+export const libraryBookSchema = z
+  .object({
+    id: idSchema,
+    libraryId: idSchema.openapi({ description: "ID of the library" }),
+    bookId: idSchema.openapi({ description: "ID of the book" }),
+    shelfLocation: z
+      .string()
+      .max(100)
+      .nullable()
+      .optional()
+      .openapi({ description: "Location of the book on shelf" }),
+    condition: z.string().max(50).nullable().optional().openapi({ description: "Condition of the book" }),
+    addedAt: z.date().openapi({ description: "Timestamp when the book was added to library" }),
+  })
+  .openapi({ description: "Library book entry information" });
 
 export const libraryBookWithDetailsSchema = libraryBookSchema.extend({
   book: z
@@ -36,12 +43,14 @@ export const libraryBookWithDetailsSchema = libraryBookSchema.extend({
     .openapi({ description: "Library details" }),
 });
 
-export const createLibraryBookSchema = z.object({
-  libraryId: idSchema.openapi({ description: "ID of the library" }),
-  bookId: idSchema.openapi({ description: "ID of the book" }),
-  shelfLocation: z.string().max(100).optional().openapi({ description: "Location of the book on shelf" }),
-  condition: z.string().max(50).optional().openapi({ description: "Condition of the book" }),
-}).openapi({ description: "Library book creation data" });
+export const createLibraryBookSchema = z
+  .object({
+    libraryId: idSchema.openapi({ description: "ID of the library" }),
+    bookId: idSchema.openapi({ description: "ID of the book" }),
+    shelfLocation: z.string().max(100).optional().openapi({ description: "Location of the book on shelf" }),
+    condition: z.string().max(50).optional().openapi({ description: "Condition of the book" }),
+  })
+  .openapi({ description: "Library book creation data" });
 
 export const updateLibraryBookSchema = z.object({
   shelfLocation: z.string().max(100).optional().openapi({ description: "The shelf location of the book" }),

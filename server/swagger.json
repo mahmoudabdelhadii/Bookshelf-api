@@ -40,10 +40,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "user",
-              "admin"
-            ],
+            "enum": ["user", "admin"],
             "default": "user",
             "description": "User's role in the system"
           },
@@ -56,15 +53,7 @@
             "description": "Timestamp when the user was last updated"
           }
         },
-        "required": [
-          "id",
-          "username",
-          "email",
-          "firstName",
-          "lastName",
-          "createdAt",
-          "updatedAt"
-        ],
+        "required": ["id", "username", "email", "firstName", "lastName", "createdAt", "updatedAt"],
         "description": "User profile information"
       },
       "Book": {
@@ -108,11 +97,7 @@
           },
           "language": {
             "type": "string",
-            "enum": [
-              "en",
-              "ar",
-              "other"
-            ],
+            "enum": ["en", "ar", "other"],
             "default": "other",
             "description": "Book language"
           },
@@ -178,13 +163,7 @@
             "description": "Timestamp when the book was created"
           }
         },
-        "required": [
-          "id",
-          "title",
-          "authorId",
-          "publisherId",
-          "createdAt"
-        ],
+        "required": ["id", "title", "authorId", "publisherId", "createdAt"],
         "description": "Complete book information"
       },
       "Library": {
@@ -275,13 +254,7 @@
             "description": "Timestamp when the library was last updated"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "ownerId",
-          "createdAt",
-          "updatedAt"
-        ],
+        "required": ["id", "name", "ownerId", "createdAt", "updatedAt"],
         "description": "Library entity information"
       },
       "LibraryBook": {
@@ -319,12 +292,7 @@
             "description": "Timestamp when the book was added to library"
           }
         },
-        "required": [
-          "id",
-          "libraryId",
-          "bookId",
-          "addedAt"
-        ],
+        "required": ["id", "libraryId", "bookId", "addedAt"],
         "description": "Library book entry information"
       },
       "LibraryBookWithDetails": {
@@ -385,19 +353,10 @@
               },
               "language": {
                 "type": "string",
-                "enum": [
-                  "en",
-                  "ar",
-                  "other"
-                ]
+                "enum": ["en", "ar", "other"]
               }
             },
-            "required": [
-              "id",
-              "title",
-              "author",
-              "language"
-            ],
+            "required": ["id", "title", "author", "language"],
             "description": "Book details"
           },
           "library": {
@@ -414,21 +373,11 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "name"
-            ],
+            "required": ["id", "name"],
             "description": "Library details"
           }
         },
-        "required": [
-          "id",
-          "libraryId",
-          "bookId",
-          "addedAt",
-          "book",
-          "library"
-        ],
+        "required": ["id", "libraryId", "bookId", "addedAt", "book", "library"],
         "description": "Library book entry information"
       },
       "LoginResponse": {
@@ -524,12 +473,7 @@
                 "description": "Refresh token expiration time in seconds"
               }
             },
-            "required": [
-              "accessToken",
-              "refreshToken",
-              "expiresIn",
-              "refreshExpiresIn"
-            ],
+            "required": ["accessToken", "refreshToken", "expiresIn", "refreshExpiresIn"],
             "description": "Authentication tokens"
           },
           "sessionId": {
@@ -537,11 +481,7 @@
             "description": "Session identifier"
           }
         },
-        "required": [
-          "user",
-          "tokens",
-          "sessionId"
-        ],
+        "required": ["user", "tokens", "sessionId"],
         "description": "Successful login response"
       },
       "TokenResponse": {
@@ -564,12 +504,7 @@
             "description": "New refresh token expiration time in seconds"
           }
         },
-        "required": [
-          "accessToken",
-          "refreshToken",
-          "expiresIn",
-          "refreshExpiresIn"
-        ],
+        "required": ["accessToken", "refreshToken", "expiresIn", "refreshExpiresIn"],
         "description": "Refreshed authentication tokens"
       },
       "RegisterRequest": {
@@ -607,13 +542,7 @@
             "description": "User password with security requirements"
           }
         },
-        "required": [
-          "username",
-          "email",
-          "firstName",
-          "lastName",
-          "password"
-        ],
+        "required": ["username", "email", "firstName", "lastName", "password"],
         "description": "User registration data"
       },
       "LoginRequest": {
@@ -630,10 +559,7 @@
             "description": "User password for login"
           }
         },
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "description": "User login credentials"
       },
       "Author": {
@@ -682,12 +608,7 @@
             "description": "Timestamp when the author was last updated"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "createdAt",
-          "updatedAt"
-        ],
+        "required": ["id", "name", "createdAt", "updatedAt"],
         "description": "Author entity information"
       },
       "CreateAuthor": {
@@ -714,9 +635,7 @@
             "description": "Author's birth date"
           }
         },
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "description": "Author creation data"
       },
       "UpdateAuthor": {
@@ -794,12 +713,7 @@
             "description": "Timestamp when the publisher was last updated"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "createdAt",
-          "updatedAt"
-        ],
+        "required": ["id", "name", "createdAt", "updatedAt"],
         "description": "Publisher entity information"
       },
       "CreatePublisher": {
@@ -828,9 +742,7 @@
             "description": "Year the publisher was founded"
           }
         },
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "description": "Publisher creation data"
       },
       "UpdatePublisher": {
@@ -903,12 +815,7 @@
             "description": "Timestamp when the subject was last updated"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "createdAt",
-          "updatedAt"
-        ],
+        "required": ["id", "name", "createdAt", "updatedAt"],
         "description": "Subject/Category entity information"
       },
       "CreateSubject": {
@@ -931,9 +838,7 @@
             "description": "Parent subject ID for hierarchical structure"
           }
         },
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "description": "Subject creation data"
       },
       "UpdateSubject": {
@@ -1043,12 +948,7 @@
                   "description": "Timestamp when the subject was last updated"
                 }
               },
-              "required": [
-                "id",
-                "name",
-                "createdAt",
-                "updatedAt"
-              ],
+              "required": ["id", "name", "createdAt", "updatedAt"],
               "description": "Subject/Category entity information"
             },
             "description": "Child subjects (limited to one level for OpenAPI)"
@@ -1071,12 +971,7 @@
             "description": "Path from root to this subject"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "createdAt",
-          "updatedAt"
-        ],
+        "required": ["id", "name", "createdAt", "updatedAt"],
         "description": "Subject with nested children"
       },
       "BorrowRequest": {
@@ -1124,14 +1019,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "pending",
-              "approved",
-              "rejected",
-              "borrowed",
-              "returned",
-              "overdue"
-            ],
+            "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
             "default": "pending",
             "description": "Status of the borrow request"
           },
@@ -1149,14 +1037,7 @@
             "description": "Timestamp when the request was last updated"
           }
         },
-        "required": [
-          "id",
-          "userId",
-          "libraryBookId",
-          "requestDate",
-          "createdAt",
-          "updatedAt"
-        ],
+        "required": ["id", "userId", "libraryBookId", "requestDate", "createdAt", "updatedAt"],
         "description": "Borrow request entity information"
       },
       "CreateBorrowRequest": {
@@ -1172,9 +1053,7 @@
             "description": "Additional notes"
           }
         },
-        "required": [
-          "libraryBookId"
-        ],
+        "required": ["libraryBookId"],
         "description": "Borrow request creation data"
       },
       "UpdateBorrowRequest": {
@@ -1182,14 +1061,7 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "pending",
-              "approved",
-              "rejected",
-              "borrowed",
-              "returned",
-              "overdue"
-            ]
+            "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"]
           },
           "approvedBy": {
             "type": "string",
@@ -1256,14 +1128,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "pending",
-              "approved",
-              "rejected",
-              "borrowed",
-              "returned",
-              "overdue"
-            ],
+            "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
             "default": "pending",
             "description": "Status of the borrow request"
           },
@@ -1301,13 +1166,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "username",
-              "firstName",
-              "lastName",
-              "email"
-            ],
+            "required": ["id", "username", "firstName", "lastName", "email"],
             "description": "User who made the request"
           },
           "libraryBook": {
@@ -1349,21 +1208,14 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "id",
-                      "name"
-                    ]
+                    "required": ["id", "name"]
                   },
                   "isbn": {
                     "type": "string",
                     "nullable": true
                   }
                 },
-                "required": [
-                  "id",
-                  "title",
-                  "author"
-                ],
+                "required": ["id", "title", "author"],
                 "description": "Book details"
               },
               "library": {
@@ -1382,18 +1234,11 @@
                     "nullable": true
                   }
                 },
-                "required": [
-                  "id",
-                  "name"
-                ],
+                "required": ["id", "name"],
                 "description": "Library details"
               }
             },
-            "required": [
-              "id",
-              "book",
-              "library"
-            ],
+            "required": ["id", "book", "library"],
             "description": "Library book details"
           },
           "approver": {
@@ -1415,12 +1260,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "username",
-              "firstName",
-              "lastName"
-            ],
+            "required": ["id", "username", "firstName", "lastName"],
             "description": "User who approved the request"
           }
         },
@@ -1456,12 +1296,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "owner",
-              "manager",
-              "staff",
-              "member"
-            ],
+            "enum": ["owner", "manager", "staff", "member"],
             "default": "member",
             "description": "Role of the member in the library"
           },
@@ -1497,14 +1332,7 @@
             "description": "Timestamp when the membership was last updated"
           }
         },
-        "required": [
-          "id",
-          "userId",
-          "libraryId",
-          "joinDate",
-          "createdAt",
-          "updatedAt"
-        ],
+        "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt"],
         "description": "Library member entity information"
       },
       "CreateLibraryMember": {
@@ -1522,12 +1350,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "owner",
-              "manager",
-              "staff",
-              "member"
-            ],
+            "enum": ["owner", "manager", "staff", "member"],
             "default": "member",
             "description": "Role of the member in the library"
           },
@@ -1544,10 +1367,7 @@
             "description": "ID of the user who invited this member"
           }
         },
-        "required": [
-          "userId",
-          "libraryId"
-        ],
+        "required": ["userId", "libraryId"],
         "description": "Library member creation data"
       },
       "UpdateLibraryMember": {
@@ -1555,12 +1375,7 @@
         "properties": {
           "role": {
             "type": "string",
-            "enum": [
-              "owner",
-              "manager",
-              "staff",
-              "member"
-            ]
+            "enum": ["owner", "manager", "staff", "member"]
           },
           "permissions": {
             "type": "array",
@@ -1596,12 +1411,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "owner",
-              "manager",
-              "staff",
-              "member"
-            ],
+            "enum": ["owner", "manager", "staff", "member"],
             "default": "member",
             "description": "Role of the member in the library"
           },
@@ -1657,13 +1467,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "username",
-              "firstName",
-              "lastName",
-              "email"
-            ],
+            "required": ["id", "username", "firstName", "lastName", "email"],
             "description": "User details"
           },
           "library": {
@@ -1682,10 +1486,7 @@
                 "nullable": true
               }
             },
-            "required": [
-              "id",
-              "name"
-            ],
+            "required": ["id", "name"],
             "description": "Library details"
           },
           "inviter": {
@@ -1707,25 +1508,11 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "username",
-              "firstName",
-              "lastName"
-            ],
+            "required": ["id", "username", "firstName", "lastName"],
             "description": "User who invited this member"
           }
         },
-        "required": [
-          "id",
-          "userId",
-          "libraryId",
-          "joinDate",
-          "createdAt",
-          "updatedAt",
-          "user",
-          "library"
-        ],
+        "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt", "user", "library"],
         "description": "Library member with detailed information"
       },
       "LibraryMemberWithStats": {
@@ -1748,12 +1535,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "owner",
-              "manager",
-              "staff",
-              "member"
-            ],
+            "enum": ["owner", "manager", "staff", "member"],
             "default": "member",
             "description": "Role of the member in the library"
           },
@@ -1809,13 +1591,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "username",
-              "firstName",
-              "lastName",
-              "email"
-            ],
+            "required": ["id", "username", "firstName", "lastName", "email"],
             "description": "User details"
           },
           "library": {
@@ -1834,10 +1610,7 @@
                 "nullable": true
               }
             },
-            "required": [
-              "id",
-              "name"
-            ],
+            "required": ["id", "name"],
             "description": "Library details"
           },
           "inviter": {
@@ -1859,12 +1632,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "username",
-              "firstName",
-              "lastName"
-            ],
+            "required": ["id", "username", "firstName", "lastName"],
             "description": "User who invited this member"
           },
           "borrowsCount": {
@@ -1914,9 +1682,7 @@
   "paths": {
     "/health-check": {
       "get": {
-        "tags": [
-          "Health Check"
-        ],
+        "tags": ["Health Check"],
         "responses": {
           "200": {
             "description": "Success",
@@ -1938,11 +1704,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -1952,9 +1714,7 @@
     },
     "/users": {
       "get": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "responses": {
           "200": {
             "description": "Users retrieved successfully",
@@ -2000,10 +1760,7 @@
                           },
                           "role": {
                             "type": "string",
-                            "enum": [
-                              "user",
-                              "admin"
-                            ],
+                            "enum": ["user", "admin"],
                             "default": "user",
                             "description": "User's role in the system"
                           },
@@ -2032,11 +1789,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -2044,9 +1797,7 @@
         }
       },
       "post": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "requestBody": {
           "description": "Create a new user",
           "required": true,
@@ -2075,12 +1826,7 @@
                     "description": "User's last name"
                   }
                 },
-                "required": [
-                  "username",
-                  "email",
-                  "firstName",
-                  "lastName"
-                ],
+                "required": ["username", "email", "firstName", "lastName"],
                 "description": "User creation data"
               }
             }
@@ -2129,10 +1875,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "user",
-                            "admin"
-                          ],
+                          "enum": ["user", "admin"],
                           "default": "user",
                           "description": "User's role in the system"
                         },
@@ -2160,11 +1903,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -2180,9 +1919,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "message"
-                  ]
+                  "required": ["message"]
                 }
               }
             }
@@ -2192,9 +1929,7 @@
     },
     "/users/{id}": {
       "get": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "parameters": [
           {
             "schema": {
@@ -2250,10 +1985,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "user",
-                            "admin"
-                          ],
+                          "enum": ["user", "admin"],
                           "default": "user",
                           "description": "User's role in the system"
                         },
@@ -2281,11 +2013,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -2293,9 +2021,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "parameters": [
           {
             "schema": {
@@ -2388,10 +2114,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "user",
-                            "admin"
-                          ],
+                          "enum": ["user", "admin"],
                           "default": "user",
                           "description": "User's role in the system"
                         },
@@ -2419,11 +2142,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -2431,9 +2150,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "parameters": [
           {
             "schema": {
@@ -2461,9 +2178,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "message"
-                  ]
+                  "required": ["message"]
                 }
               }
             }
@@ -2473,9 +2188,7 @@
     },
     "/books": {
       "post": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "requestBody": {
           "description": "Create a new book",
           "required": true,
@@ -2522,20 +2235,11 @@
                   },
                   "language": {
                     "type": "string",
-                    "enum": [
-                      "en",
-                      "ar",
-                      "other"
-                    ],
+                    "enum": ["en", "ar", "other"],
                     "description": "The language of the book"
                   }
                 },
-                "required": [
-                  "title",
-                  "author",
-                  "publisher",
-                  "language"
-                ],
+                "required": ["title", "author", "publisher", "language"],
                 "description": "Book creation data"
               }
             }
@@ -2596,11 +2300,7 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": [
-                            "en",
-                            "ar",
-                            "other"
-                          ],
+                          "enum": ["en", "ar", "other"],
                           "default": "other",
                           "description": "Book language"
                         },
@@ -2666,24 +2366,14 @@
                           "description": "Timestamp when the book was created"
                         }
                       },
-                      "required": [
-                        "id",
-                        "title",
-                        "authorId",
-                        "publisherId",
-                        "createdAt"
-                      ],
+                      "required": ["id", "title", "authorId", "publisherId", "createdAt"],
                       "description": "Complete book information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -2691,9 +2381,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -2793,11 +2481,7 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": [
-                              "en",
-                              "ar",
-                              "other"
-                            ],
+                            "enum": ["en", "ar", "other"],
                             "default": "other",
                             "description": "Book language"
                           },
@@ -2863,13 +2547,7 @@
                             "description": "Timestamp when the book was created"
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "authorId",
-                          "publisherId",
-                          "createdAt"
-                        ],
+                        "required": ["id", "title", "authorId", "publisherId", "createdAt"],
                         "description": "Complete book information"
                       }
                     },
@@ -2877,11 +2555,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -2891,9 +2565,7 @@
     },
     "/books/bulk": {
       "post": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "requestBody": {
           "description": "Bulk create multiple books",
           "required": true,
@@ -2945,27 +2617,16 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": [
-                            "en",
-                            "ar",
-                            "other"
-                          ],
+                          "enum": ["en", "ar", "other"],
                           "description": "The language of the book"
                         }
                       },
-                      "required": [
-                        "title",
-                        "author",
-                        "publisher",
-                        "language"
-                      ],
+                      "required": ["title", "author", "publisher", "language"],
                       "description": "Book creation data"
                     }
                   }
                 },
-                "required": [
-                  "books"
-                ]
+                "required": ["books"]
               }
             }
           }
@@ -3027,11 +2688,7 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": [
-                              "en",
-                              "ar",
-                              "other"
-                            ],
+                            "enum": ["en", "ar", "other"],
                             "default": "other",
                             "description": "Book language"
                           },
@@ -3097,13 +2754,7 @@
                             "description": "Timestamp when the book was created"
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "authorId",
-                          "publisherId",
-                          "createdAt"
-                        ],
+                        "required": ["id", "title", "authorId", "publisherId", "createdAt"],
                         "description": "Complete book information"
                       }
                     },
@@ -3111,11 +2762,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -3125,9 +2772,7 @@
     },
     "/books/{id}": {
       "get": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -3195,11 +2840,7 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": [
-                            "en",
-                            "ar",
-                            "other"
-                          ],
+                          "enum": ["en", "ar", "other"],
                           "default": "other",
                           "description": "Book language"
                         },
@@ -3265,24 +2906,14 @@
                           "description": "Timestamp when the book was created"
                         }
                       },
-                      "required": [
-                        "id",
-                        "title",
-                        "authorId",
-                        "publisherId",
-                        "createdAt"
-                      ],
+                      "required": ["id", "title", "authorId", "publisherId", "createdAt"],
                       "description": "Complete book information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -3290,9 +2921,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -3351,11 +2980,7 @@
                   },
                   "language": {
                     "type": "string",
-                    "enum": [
-                      "en",
-                      "ar",
-                      "other"
-                    ],
+                    "enum": ["en", "ar", "other"],
                     "description": "The language of the book"
                   }
                 },
@@ -3419,11 +3044,7 @@
                         },
                         "language": {
                           "type": "string",
-                          "enum": [
-                            "en",
-                            "ar",
-                            "other"
-                          ],
+                          "enum": ["en", "ar", "other"],
                           "default": "other",
                           "description": "Book language"
                         },
@@ -3489,24 +3110,14 @@
                           "description": "Timestamp when the book was created"
                         }
                       },
-                      "required": [
-                        "id",
-                        "title",
-                        "authorId",
-                        "publisherId",
-                        "createdAt"
-                      ],
+                      "required": ["id", "title", "authorId", "publisherId", "createdAt"],
                       "description": "Complete book information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -3514,9 +3125,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -3544,9 +3153,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "message"
-                  ]
+                  "required": ["message"]
                 }
               }
             }
@@ -3556,9 +3163,7 @@
     },
     "/books/search": {
       "get": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -3626,11 +3231,7 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": [
-                              "en",
-                              "ar",
-                              "other"
-                            ],
+                            "enum": ["en", "ar", "other"],
                             "default": "other",
                             "description": "Book language"
                           },
@@ -3696,13 +3297,7 @@
                             "description": "Timestamp when the book was created"
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "authorId",
-                          "publisherId",
-                          "createdAt"
-                        ],
+                        "required": ["id", "title", "authorId", "publisherId", "createdAt"],
                         "description": "Complete book information"
                       }
                     },
@@ -3710,11 +3305,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -3724,9 +3315,7 @@
     },
     "/books/weighted-search": {
       "get": {
-        "tags": [
-          "Books"
-        ],
+        "tags": ["Books"],
         "parameters": [
           {
             "schema": {
@@ -3794,11 +3383,7 @@
                           },
                           "language": {
                             "type": "string",
-                            "enum": [
-                              "en",
-                              "ar",
-                              "other"
-                            ],
+                            "enum": ["en", "ar", "other"],
                             "default": "other",
                             "description": "Book language"
                           },
@@ -3864,13 +3449,7 @@
                             "description": "Timestamp when the book was created"
                           }
                         },
-                        "required": [
-                          "id",
-                          "title",
-                          "authorId",
-                          "publisherId",
-                          "createdAt"
-                        ],
+                        "required": ["id", "title", "authorId", "publisherId", "createdAt"],
                         "description": "Complete book information"
                       }
                     },
@@ -3878,11 +3457,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -3892,9 +3467,7 @@
     },
     "/author/{name}": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "schema": {
@@ -3966,23 +3539,14 @@
                           "description": "Timestamp when the author was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Author entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -3992,9 +3556,7 @@
     },
     "/authors/{query}": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "schema": {
@@ -4026,11 +3588,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -4040,9 +3598,7 @@
     },
     "/publisher/{name}": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "parameters": [
           {
             "schema": {
@@ -4117,23 +3673,14 @@
                           "description": "Timestamp when the publisher was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Publisher entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -4143,9 +3690,7 @@
     },
     "/publishers/{query}": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "parameters": [
           {
             "schema": {
@@ -4180,11 +3725,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -4194,18 +3735,12 @@
     },
     "/search/{index}": {
       "get": {
-        "tags": [
-          "Search"
-        ],
+        "tags": ["Search"],
         "parameters": [
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "books",
-                "authors",
-                "publishers"
-              ]
+              "enum": ["books", "authors", "publishers"]
             },
             "required": true,
             "name": "index",
@@ -4233,11 +3768,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -4247,9 +3778,7 @@
     },
     "/libraries": {
       "get": {
-        "tags": [
-          "Library"
-        ],
+        "tags": ["Library"],
         "responses": {
           "200": {
             "description": "Libraries retrieved successfully",
@@ -4354,13 +3883,7 @@
                             "description": "Timestamp when the library was last updated"
                           }
                         },
-                        "required": [
-                          "id",
-                          "name",
-                          "ownerId",
-                          "createdAt",
-                          "updatedAt"
-                        ],
+                        "required": ["id", "name", "ownerId", "createdAt", "updatedAt"],
                         "description": "Library entity information"
                       }
                     },
@@ -4368,11 +3891,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -4380,9 +3899,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Library"
-        ],
+        "tags": ["Library"],
         "requestBody": {
           "description": "Create a new library",
           "required": true,
@@ -4442,9 +3959,7 @@
                     "description": "Library location"
                   }
                 },
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "description": "Library creation data"
               }
             }
@@ -4552,24 +4067,14 @@
                           "description": "Timestamp when the library was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "ownerId",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "ownerId", "createdAt", "updatedAt"],
                       "description": "Library entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -4579,9 +4084,7 @@
     },
     "/libraries/{id}": {
       "get": {
-        "tags": [
-          "Library"
-        ],
+        "tags": ["Library"],
         "parameters": [
           {
             "schema": {
@@ -4695,24 +4198,14 @@
                           "description": "Timestamp when the library was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "ownerId",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "ownerId", "createdAt", "updatedAt"],
                       "description": "Library entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -4720,9 +4213,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Library"
-        ],
+        "tags": ["Library"],
         "parameters": [
           {
             "schema": {
@@ -4900,24 +4391,14 @@
                           "description": "Timestamp when the library was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "ownerId",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "ownerId", "createdAt", "updatedAt"],
                       "description": "Library entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -4925,9 +4406,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Library"
-        ],
+        "tags": ["Library"],
         "parameters": [
           {
             "schema": {
@@ -4954,9 +4433,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "message"
-                  ]
+                  "required": ["message"]
                 }
               }
             }
@@ -4966,9 +4443,7 @@
     },
     "/library-books": {
       "get": {
-        "tags": [
-          "Library Books"
-        ],
+        "tags": ["Library Books"],
         "responses": {
           "200": {
             "description": "All library books retrieved successfully",
@@ -5043,19 +4518,10 @@
                               },
                               "language": {
                                 "type": "string",
-                                "enum": [
-                                  "en",
-                                  "ar",
-                                  "other"
-                                ]
+                                "enum": ["en", "ar", "other"]
                               }
                             },
-                            "required": [
-                              "id",
-                              "title",
-                              "author",
-                              "language"
-                            ],
+                            "required": ["id", "title", "author", "language"],
                             "description": "Book details"
                           },
                           "library": {
@@ -5072,21 +4538,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "name"
-                            ],
+                            "required": ["id", "name"],
                             "description": "Library details"
                           }
                         },
-                        "required": [
-                          "id",
-                          "libraryId",
-                          "bookId",
-                          "addedAt",
-                          "book",
-                          "library"
-                        ],
+                        "required": ["id", "libraryId", "bookId", "addedAt", "book", "library"],
                         "description": "Library book entry information"
                       }
                     },
@@ -5094,11 +4550,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -5106,9 +4558,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Library Books"
-        ],
+        "tags": ["Library Books"],
         "requestBody": {
           "description": "Add a book to a library",
           "required": true,
@@ -5138,10 +4588,7 @@
                     "description": "Condition of the book"
                   }
                 },
-                "required": [
-                  "libraryId",
-                  "bookId"
-                ],
+                "required": ["libraryId", "bookId"],
                 "description": "Library book creation data"
               }
             }
@@ -5196,23 +4643,14 @@
                           "description": "Timestamp when the book was added to library"
                         }
                       },
-                      "required": [
-                        "id",
-                        "libraryId",
-                        "bookId",
-                        "addedAt"
-                      ],
+                      "required": ["id", "libraryId", "bookId", "addedAt"],
                       "description": "Library book entry information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -5228,9 +4666,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "message"
-                  ]
+                  "required": ["message"]
                 }
               }
             }
@@ -5240,9 +4676,7 @@
     },
     "/libraries/{libraryId}/books": {
       "get": {
-        "tags": [
-          "Library Books"
-        ],
+        "tags": ["Library Books"],
         "parameters": [
           {
             "schema": {
@@ -5328,19 +4762,10 @@
                               },
                               "language": {
                                 "type": "string",
-                                "enum": [
-                                  "en",
-                                  "ar",
-                                  "other"
-                                ]
+                                "enum": ["en", "ar", "other"]
                               }
                             },
-                            "required": [
-                              "id",
-                              "title",
-                              "author",
-                              "language"
-                            ],
+                            "required": ["id", "title", "author", "language"],
                             "description": "Book details"
                           },
                           "library": {
@@ -5357,21 +4782,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "name"
-                            ],
+                            "required": ["id", "name"],
                             "description": "Library details"
                           }
                         },
-                        "required": [
-                          "id",
-                          "libraryId",
-                          "bookId",
-                          "addedAt",
-                          "book",
-                          "library"
-                        ],
+                        "required": ["id", "libraryId", "bookId", "addedAt", "book", "library"],
                         "description": "Library book entry information"
                       }
                     },
@@ -5379,11 +4794,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -5393,9 +4804,7 @@
     },
     "/library-books/{id}": {
       "get": {
-        "tags": [
-          "Library Books"
-        ],
+        "tags": ["Library Books"],
         "parameters": [
           {
             "schema": {
@@ -5479,19 +4888,10 @@
                             },
                             "language": {
                               "type": "string",
-                              "enum": [
-                                "en",
-                                "ar",
-                                "other"
-                              ]
+                              "enum": ["en", "ar", "other"]
                             }
                           },
-                          "required": [
-                            "id",
-                            "title",
-                            "author",
-                            "language"
-                          ],
+                          "required": ["id", "title", "author", "language"],
                           "description": "Book details"
                         },
                         "library": {
@@ -5508,32 +4908,18 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "name"
-                          ],
+                          "required": ["id", "name"],
                           "description": "Library details"
                         }
                       },
-                      "required": [
-                        "id",
-                        "libraryId",
-                        "bookId",
-                        "addedAt",
-                        "book",
-                        "library"
-                      ],
+                      "required": ["id", "libraryId", "bookId", "addedAt", "book", "library"],
                       "description": "Library book entry information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -5541,9 +4927,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Library Books"
-        ],
+        "tags": ["Library Books"],
         "parameters": [
           {
             "schema": {
@@ -5627,23 +5011,14 @@
                           "description": "Timestamp when the book was added to library"
                         }
                       },
-                      "required": [
-                        "id",
-                        "libraryId",
-                        "bookId",
-                        "addedAt"
-                      ],
+                      "required": ["id", "libraryId", "bookId", "addedAt"],
                       "description": "Library book entry information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -5651,9 +5026,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Library Books"
-        ],
+        "tags": ["Library Books"],
         "parameters": [
           {
             "schema": {
@@ -5680,9 +5053,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "message"
-                  ]
+                  "required": ["message"]
                 }
               }
             }
@@ -5692,9 +5063,7 @@
     },
     "/auth/register": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Register a new user",
         "requestBody": {
           "description": "User registration data",
@@ -5736,13 +5105,7 @@
                     "description": "User password with security requirements"
                   }
                 },
-                "required": [
-                  "username",
-                  "email",
-                  "firstName",
-                  "lastName",
-                  "password"
-                ],
+                "required": ["username", "email", "firstName", "lastName", "password"],
                 "description": "User registration data"
               }
             }
@@ -5836,11 +5199,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -5873,9 +5232,7 @@
     },
     "/auth/login": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Login user",
         "requestBody": {
           "description": "User login credentials",
@@ -5896,10 +5253,7 @@
                     "description": "User password for login"
                   }
                 },
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "description": "User login credentials"
               }
             }
@@ -6012,12 +5366,7 @@
                               "description": "Refresh token expiration time in seconds"
                             }
                           },
-                          "required": [
-                            "accessToken",
-                            "refreshToken",
-                            "expiresIn",
-                            "refreshExpiresIn"
-                          ],
+                          "required": ["accessToken", "refreshToken", "expiresIn", "refreshExpiresIn"],
                           "description": "Authentication tokens"
                         },
                         "sessionId": {
@@ -6025,22 +5374,14 @@
                           "description": "Session identifier"
                         }
                       },
-                      "required": [
-                        "user",
-                        "tokens",
-                        "sessionId"
-                      ],
+                      "required": ["user", "tokens", "sessionId"],
                       "description": "Successful login response"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6073,9 +5414,7 @@
     },
     "/authors": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "responses": {
           "200": {
             "description": "Authors retrieved successfully",
@@ -6138,12 +5477,7 @@
                             "description": "Timestamp when the author was last updated"
                           }
                         },
-                        "required": [
-                          "id",
-                          "name",
-                          "createdAt",
-                          "updatedAt"
-                        ],
+                        "required": ["id", "name", "createdAt", "updatedAt"],
                         "description": "Author entity information"
                       },
                       "description": "Array of authors"
@@ -6152,11 +5486,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6164,9 +5494,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6194,9 +5522,7 @@
                     "description": "Author's birth date"
                   }
                 },
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "description": "Author creation data"
               }
             }
@@ -6262,23 +5588,14 @@
                           "description": "Timestamp when the author was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Author entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6288,9 +5605,7 @@
     },
     "/authors/{id}": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "schema": {
@@ -6363,23 +5678,14 @@
                           "description": "Timestamp when the author was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Author entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6387,9 +5693,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "schema": {
@@ -6494,23 +5798,14 @@
                           "description": "Timestamp when the author was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Author entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6518,9 +5813,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "schema": {
@@ -6554,11 +5847,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6568,9 +5857,7 @@
     },
     "/authors/search/{query}": {
       "get": {
-        "tags": [
-          "Author"
-        ],
+        "tags": ["Author"],
         "parameters": [
           {
             "schema": {
@@ -6665,12 +5952,7 @@
                             "description": "Timestamp when the author was last updated"
                           }
                         },
-                        "required": [
-                          "id",
-                          "name",
-                          "createdAt",
-                          "updatedAt"
-                        ],
+                        "required": ["id", "name", "createdAt", "updatedAt"],
                         "description": "Author entity information"
                       },
                       "description": "Array of authors"
@@ -6679,11 +5961,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6693,9 +5971,7 @@
     },
     "/publishers": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "responses": {
           "200": {
             "description": "Publishers retrieved successfully",
@@ -6761,12 +6037,7 @@
                             "description": "Timestamp when the publisher was last updated"
                           }
                         },
-                        "required": [
-                          "id",
-                          "name",
-                          "createdAt",
-                          "updatedAt"
-                        ],
+                        "required": ["id", "name", "createdAt", "updatedAt"],
                         "description": "Publisher entity information"
                       },
                       "description": "Array of publishers"
@@ -6775,11 +6046,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6787,9 +6054,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6819,9 +6084,7 @@
                     "description": "Year the publisher was founded"
                   }
                 },
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "description": "Publisher creation data"
               }
             }
@@ -6890,23 +6153,14 @@
                           "description": "Timestamp when the publisher was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Publisher entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -6916,9 +6170,7 @@
     },
     "/publishers/{id}": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "parameters": [
           {
             "schema": {
@@ -6994,23 +6246,14 @@
                           "description": "Timestamp when the publisher was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Publisher entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7018,9 +6261,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "parameters": [
           {
             "schema": {
@@ -7130,23 +6371,14 @@
                           "description": "Timestamp when the publisher was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Publisher entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7154,9 +6386,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "parameters": [
           {
             "schema": {
@@ -7190,11 +6420,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7204,9 +6430,7 @@
     },
     "/publishers/search/{query}": {
       "get": {
-        "tags": [
-          "Publisher"
-        ],
+        "tags": ["Publisher"],
         "parameters": [
           {
             "schema": {
@@ -7304,12 +6528,7 @@
                             "description": "Timestamp when the publisher was last updated"
                           }
                         },
-                        "required": [
-                          "id",
-                          "name",
-                          "createdAt",
-                          "updatedAt"
-                        ],
+                        "required": ["id", "name", "createdAt", "updatedAt"],
                         "description": "Publisher entity information"
                       },
                       "description": "Array of publishers"
@@ -7318,11 +6537,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7332,9 +6547,7 @@
     },
     "/subjects": {
       "get": {
-        "tags": [
-          "Subject"
-        ],
+        "tags": ["Subject"],
         "responses": {
           "200": {
             "description": "Subjects retrieved successfully",
@@ -7393,12 +6606,7 @@
                             "description": "Timestamp when the subject was last updated"
                           }
                         },
-                        "required": [
-                          "id",
-                          "name",
-                          "createdAt",
-                          "updatedAt"
-                        ],
+                        "required": ["id", "name", "createdAt", "updatedAt"],
                         "description": "Subject/Category entity information"
                       },
                       "description": "Array of subjects"
@@ -7407,11 +6615,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7419,9 +6623,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Subject"
-        ],
+        "tags": ["Subject"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -7445,9 +6647,7 @@
                     "description": "Parent subject ID for hierarchical structure"
                   }
                 },
-                "required": [
-                  "name"
-                ],
+                "required": ["name"],
                 "description": "Subject creation data"
               }
             }
@@ -7509,23 +6709,14 @@
                           "description": "Timestamp when the subject was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Subject/Category entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7535,9 +6726,7 @@
     },
     "/subjects/hierarchy": {
       "get": {
-        "tags": [
-          "Subject"
-        ],
+        "tags": ["Subject"],
         "responses": {
           "200": {
             "description": "Subject hierarchy retrieved successfully",
@@ -7639,12 +6828,7 @@
                                   "description": "Timestamp when the subject was last updated"
                                 }
                               },
-                              "required": [
-                                "id",
-                                "name",
-                                "createdAt",
-                                "updatedAt"
-                              ],
+                              "required": ["id", "name", "createdAt", "updatedAt"],
                               "description": "Subject/Category entity information"
                             },
                             "description": "Child subjects (limited to one level for OpenAPI)"
@@ -7667,12 +6851,7 @@
                             "description": "Path from root to this subject"
                           }
                         },
-                        "required": [
-                          "id",
-                          "name",
-                          "createdAt",
-                          "updatedAt"
-                        ],
+                        "required": ["id", "name", "createdAt", "updatedAt"],
                         "description": "Subject with nested children"
                       }
                     },
@@ -7680,11 +6859,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7694,9 +6869,7 @@
     },
     "/subjects/{id}": {
       "get": {
-        "tags": [
-          "Subject"
-        ],
+        "tags": ["Subject"],
         "parameters": [
           {
             "schema": {
@@ -7765,23 +6938,14 @@
                           "description": "Timestamp when the subject was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Subject/Category entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7789,9 +6953,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Subject"
-        ],
+        "tags": ["Subject"],
         "parameters": [
           {
             "schema": {
@@ -7888,23 +7050,14 @@
                           "description": "Timestamp when the subject was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "name", "createdAt", "updatedAt"],
                       "description": "Subject/Category entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7912,9 +7065,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Subject"
-        ],
+        "tags": ["Subject"],
         "parameters": [
           {
             "schema": {
@@ -7948,11 +7099,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -7962,9 +7109,7 @@
     },
     "/borrow-requests": {
       "get": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -7987,14 +7132,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "pending",
-                "approved",
-                "rejected",
-                "borrowed",
-                "returned",
-                "overdue"
-              ]
+              "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"]
             },
             "required": false,
             "name": "status",
@@ -8083,14 +7221,7 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": [
-                              "pending",
-                              "approved",
-                              "rejected",
-                              "borrowed",
-                              "returned",
-                              "overdue"
-                            ],
+                            "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                             "default": "pending",
                             "description": "Status of the borrow request"
                           },
@@ -8128,13 +7259,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName",
-                              "email"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName", "email"],
                             "description": "User who made the request"
                           },
                           "libraryBook": {
@@ -8176,21 +7301,14 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": [
-                                      "id",
-                                      "name"
-                                    ]
+                                    "required": ["id", "name"]
                                   },
                                   "isbn": {
                                     "type": "string",
                                     "nullable": true
                                   }
                                 },
-                                "required": [
-                                  "id",
-                                  "title",
-                                  "author"
-                                ],
+                                "required": ["id", "title", "author"],
                                 "description": "Book details"
                               },
                               "library": {
@@ -8209,18 +7327,11 @@
                                     "nullable": true
                                   }
                                 },
-                                "required": [
-                                  "id",
-                                  "name"
-                                ],
+                                "required": ["id", "name"],
                                 "description": "Library details"
                               }
                             },
-                            "required": [
-                              "id",
-                              "book",
-                              "library"
-                            ],
+                            "required": ["id", "book", "library"],
                             "description": "Library book details"
                           },
                           "approver": {
@@ -8242,12 +7353,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName"],
                             "description": "User who approved the request"
                           }
                         },
@@ -8269,11 +7375,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -8281,9 +7383,7 @@
         }
       },
       "post": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -8300,9 +7400,7 @@
                     "description": "Additional notes"
                   }
                 },
-                "required": [
-                  "libraryBookId"
-                ],
+                "required": ["libraryBookId"],
                 "description": "Borrow request creation data"
               }
             }
@@ -8367,14 +7465,7 @@
                         },
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "pending",
-                            "approved",
-                            "rejected",
-                            "borrowed",
-                            "returned",
-                            "overdue"
-                          ],
+                          "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                           "default": "pending",
                           "description": "Status of the borrow request"
                         },
@@ -8392,25 +7483,14 @@
                           "description": "Timestamp when the request was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryBookId",
-                        "requestDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryBookId", "requestDate", "createdAt", "updatedAt"],
                       "description": "Borrow request entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -8420,9 +7500,7 @@
     },
     "/borrow-requests/stats": {
       "get": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -8496,11 +7574,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -8510,9 +7584,7 @@
     },
     "/borrow-requests/mark-overdue": {
       "post": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "responses": {
           "200": {
             "description": "Overdue requests marked successfully",
@@ -8534,19 +7606,13 @@
                           "type": "number"
                         }
                       },
-                      "required": [
-                        "updatedCount"
-                      ]
+                      "required": ["updatedCount"]
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -8556,9 +7622,7 @@
     },
     "/borrow-requests/user/{userId}": {
       "get": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -8653,14 +7717,7 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": [
-                              "pending",
-                              "approved",
-                              "rejected",
-                              "borrowed",
-                              "returned",
-                              "overdue"
-                            ],
+                            "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                             "default": "pending",
                             "description": "Status of the borrow request"
                           },
@@ -8698,13 +7755,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName",
-                              "email"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName", "email"],
                             "description": "User who made the request"
                           },
                           "libraryBook": {
@@ -8746,21 +7797,14 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": [
-                                      "id",
-                                      "name"
-                                    ]
+                                    "required": ["id", "name"]
                                   },
                                   "isbn": {
                                     "type": "string",
                                     "nullable": true
                                   }
                                 },
-                                "required": [
-                                  "id",
-                                  "title",
-                                  "author"
-                                ],
+                                "required": ["id", "title", "author"],
                                 "description": "Book details"
                               },
                               "library": {
@@ -8779,18 +7823,11 @@
                                     "nullable": true
                                   }
                                 },
-                                "required": [
-                                  "id",
-                                  "name"
-                                ],
+                                "required": ["id", "name"],
                                 "description": "Library details"
                               }
                             },
-                            "required": [
-                              "id",
-                              "book",
-                              "library"
-                            ],
+                            "required": ["id", "book", "library"],
                             "description": "Library book details"
                           },
                           "approver": {
@@ -8812,12 +7849,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName"],
                             "description": "User who approved the request"
                           }
                         },
@@ -8839,11 +7871,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -8853,9 +7881,7 @@
     },
     "/borrow-requests/library/{libraryId}": {
       "get": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -8950,14 +7976,7 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": [
-                              "pending",
-                              "approved",
-                              "rejected",
-                              "borrowed",
-                              "returned",
-                              "overdue"
-                            ],
+                            "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                             "default": "pending",
                             "description": "Status of the borrow request"
                           },
@@ -8995,13 +8014,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName",
-                              "email"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName", "email"],
                             "description": "User who made the request"
                           },
                           "libraryBook": {
@@ -9043,21 +8056,14 @@
                                         "type": "string"
                                       }
                                     },
-                                    "required": [
-                                      "id",
-                                      "name"
-                                    ]
+                                    "required": ["id", "name"]
                                   },
                                   "isbn": {
                                     "type": "string",
                                     "nullable": true
                                   }
                                 },
-                                "required": [
-                                  "id",
-                                  "title",
-                                  "author"
-                                ],
+                                "required": ["id", "title", "author"],
                                 "description": "Book details"
                               },
                               "library": {
@@ -9076,18 +8082,11 @@
                                     "nullable": true
                                   }
                                 },
-                                "required": [
-                                  "id",
-                                  "name"
-                                ],
+                                "required": ["id", "name"],
                                 "description": "Library details"
                               }
                             },
-                            "required": [
-                              "id",
-                              "book",
-                              "library"
-                            ],
+                            "required": ["id", "book", "library"],
                             "description": "Library book details"
                           },
                           "approver": {
@@ -9109,12 +8108,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName"],
                             "description": "User who approved the request"
                           }
                         },
@@ -9136,11 +8130,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -9150,9 +8140,7 @@
     },
     "/borrow-requests/{id}": {
       "get": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -9224,14 +8212,7 @@
                         },
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "pending",
-                            "approved",
-                            "rejected",
-                            "borrowed",
-                            "returned",
-                            "overdue"
-                          ],
+                          "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                           "default": "pending",
                           "description": "Status of the borrow request"
                         },
@@ -9269,13 +8250,7 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "username",
-                            "firstName",
-                            "lastName",
-                            "email"
-                          ],
+                          "required": ["id", "username", "firstName", "lastName", "email"],
                           "description": "User who made the request"
                         },
                         "libraryBook": {
@@ -9317,21 +8292,14 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "id",
-                                    "name"
-                                  ]
+                                  "required": ["id", "name"]
                                 },
                                 "isbn": {
                                   "type": "string",
                                   "nullable": true
                                 }
                               },
-                              "required": [
-                                "id",
-                                "title",
-                                "author"
-                              ],
+                              "required": ["id", "title", "author"],
                               "description": "Book details"
                             },
                             "library": {
@@ -9350,18 +8318,11 @@
                                   "nullable": true
                                 }
                               },
-                              "required": [
-                                "id",
-                                "name"
-                              ],
+                              "required": ["id", "name"],
                               "description": "Library details"
                             }
                           },
-                          "required": [
-                            "id",
-                            "book",
-                            "library"
-                          ],
+                          "required": ["id", "book", "library"],
                           "description": "Library book details"
                         },
                         "approver": {
@@ -9383,12 +8344,7 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "username",
-                            "firstName",
-                            "lastName"
-                          ],
+                          "required": ["id", "username", "firstName", "lastName"],
                           "description": "User who approved the request"
                         }
                       },
@@ -9408,11 +8364,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -9420,9 +8372,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -9443,14 +8393,7 @@
                 "properties": {
                   "status": {
                     "type": "string",
-                    "enum": [
-                      "pending",
-                      "approved",
-                      "rejected",
-                      "borrowed",
-                      "returned",
-                      "overdue"
-                    ]
+                    "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"]
                   },
                   "approvedBy": {
                     "type": "string",
@@ -9534,14 +8477,7 @@
                         },
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "pending",
-                            "approved",
-                            "rejected",
-                            "borrowed",
-                            "returned",
-                            "overdue"
-                          ],
+                          "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                           "default": "pending",
                           "description": "Status of the borrow request"
                         },
@@ -9559,25 +8495,14 @@
                           "description": "Timestamp when the request was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryBookId",
-                        "requestDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryBookId", "requestDate", "createdAt", "updatedAt"],
                       "description": "Borrow request entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -9585,9 +8510,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -9621,11 +8544,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -9635,9 +8554,7 @@
     },
     "/borrow-requests/{id}/approve": {
       "post": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -9723,14 +8640,7 @@
                         },
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "pending",
-                            "approved",
-                            "rejected",
-                            "borrowed",
-                            "returned",
-                            "overdue"
-                          ],
+                          "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                           "default": "pending",
                           "description": "Status of the borrow request"
                         },
@@ -9748,25 +8658,14 @@
                           "description": "Timestamp when the request was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryBookId",
-                        "requestDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryBookId", "requestDate", "createdAt", "updatedAt"],
                       "description": "Borrow request entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -9776,9 +8675,7 @@
     },
     "/borrow-requests/{id}/reject": {
       "post": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -9864,14 +8761,7 @@
                         },
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "pending",
-                            "approved",
-                            "rejected",
-                            "borrowed",
-                            "returned",
-                            "overdue"
-                          ],
+                          "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                           "default": "pending",
                           "description": "Status of the borrow request"
                         },
@@ -9889,25 +8779,14 @@
                           "description": "Timestamp when the request was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryBookId",
-                        "requestDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryBookId", "requestDate", "createdAt", "updatedAt"],
                       "description": "Borrow request entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -9917,9 +8796,7 @@
     },
     "/borrow-requests/{id}/borrow": {
       "post": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -9991,14 +8868,7 @@
                         },
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "pending",
-                            "approved",
-                            "rejected",
-                            "borrowed",
-                            "returned",
-                            "overdue"
-                          ],
+                          "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                           "default": "pending",
                           "description": "Status of the borrow request"
                         },
@@ -10016,25 +8886,14 @@
                           "description": "Timestamp when the request was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryBookId",
-                        "requestDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryBookId", "requestDate", "createdAt", "updatedAt"],
                       "description": "Borrow request entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -10044,9 +8903,7 @@
     },
     "/borrow-requests/{id}/return": {
       "post": {
-        "tags": [
-          "BorrowRequest"
-        ],
+        "tags": ["BorrowRequest"],
         "parameters": [
           {
             "schema": {
@@ -10132,14 +8989,7 @@
                         },
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "pending",
-                            "approved",
-                            "rejected",
-                            "borrowed",
-                            "returned",
-                            "overdue"
-                          ],
+                          "enum": ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
                           "default": "pending",
                           "description": "Status of the borrow request"
                         },
@@ -10157,25 +9007,14 @@
                           "description": "Timestamp when the request was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryBookId",
-                        "requestDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryBookId", "requestDate", "createdAt", "updatedAt"],
                       "description": "Borrow request entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -10185,9 +9024,7 @@
     },
     "/library-members": {
       "get": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -10210,12 +9047,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "owner",
-                "manager",
-                "staff",
-                "member"
-              ]
+              "enum": ["owner", "manager", "staff", "member"]
             },
             "required": false,
             "name": "role",
@@ -10288,12 +9120,7 @@
                           },
                           "role": {
                             "type": "string",
-                            "enum": [
-                              "owner",
-                              "manager",
-                              "staff",
-                              "member"
-                            ],
+                            "enum": ["owner", "manager", "staff", "member"],
                             "default": "member",
                             "description": "Role of the member in the library"
                           },
@@ -10349,13 +9176,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName",
-                              "email"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName", "email"],
                             "description": "User details"
                           },
                           "library": {
@@ -10374,10 +9195,7 @@
                                 "nullable": true
                               }
                             },
-                            "required": [
-                              "id",
-                              "name"
-                            ],
+                            "required": ["id", "name"],
                             "description": "Library details"
                           },
                           "inviter": {
@@ -10399,12 +9217,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName"],
                             "description": "User who invited this member"
                           }
                         },
@@ -10425,11 +9238,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -10437,9 +9246,7 @@
         }
       },
       "post": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "requestBody": {
           "content": {
             "application/json": {
@@ -10458,12 +9265,7 @@
                   },
                   "role": {
                     "type": "string",
-                    "enum": [
-                      "owner",
-                      "manager",
-                      "staff",
-                      "member"
-                    ],
+                    "enum": ["owner", "manager", "staff", "member"],
                     "default": "member",
                     "description": "Role of the member in the library"
                   },
@@ -10480,10 +9282,7 @@
                     "description": "ID of the user who invited this member"
                   }
                 },
-                "required": [
-                  "userId",
-                  "libraryId"
-                ],
+                "required": ["userId", "libraryId"],
                 "description": "Library member creation data"
               }
             }
@@ -10523,12 +9322,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -10564,25 +9358,14 @@
                           "description": "Timestamp when the membership was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryId",
-                        "joinDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt"],
                       "description": "Library member entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -10592,9 +9375,7 @@
     },
     "/library-members/library/{libraryId}": {
       "get": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -10664,12 +9445,7 @@
                           },
                           "role": {
                             "type": "string",
-                            "enum": [
-                              "owner",
-                              "manager",
-                              "staff",
-                              "member"
-                            ],
+                            "enum": ["owner", "manager", "staff", "member"],
                             "default": "member",
                             "description": "Role of the member in the library"
                           },
@@ -10725,13 +9501,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName",
-                              "email"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName", "email"],
                             "description": "User details"
                           },
                           "library": {
@@ -10750,10 +9520,7 @@
                                 "nullable": true
                               }
                             },
-                            "required": [
-                              "id",
-                              "name"
-                            ],
+                            "required": ["id", "name"],
                             "description": "Library details"
                           },
                           "inviter": {
@@ -10775,12 +9542,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName"],
                             "description": "User who invited this member"
                           }
                         },
@@ -10801,11 +9563,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -10815,9 +9573,7 @@
     },
     "/library-members/library/{libraryId}/stats": {
       "get": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -10883,11 +9639,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -10897,9 +9649,7 @@
     },
     "/library-members/library/{libraryId}/invite": {
       "post": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -10925,12 +9675,7 @@
                   },
                   "role": {
                     "type": "string",
-                    "enum": [
-                      "owner",
-                      "manager",
-                      "staff",
-                      "member"
-                    ],
+                    "enum": ["owner", "manager", "staff", "member"],
                     "default": "member",
                     "description": "Role to assign"
                   },
@@ -10942,9 +9687,7 @@
                     "description": "Permissions to grant"
                   }
                 },
-                "required": [
-                  "userId"
-                ]
+                "required": ["userId"]
               }
             }
           }
@@ -10983,12 +9726,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -11024,25 +9762,14 @@
                           "description": "Timestamp when the membership was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryId",
-                        "joinDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt"],
                       "description": "Library member entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -11052,9 +9779,7 @@
     },
     "/library-members/library/{libraryId}/leave": {
       "delete": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -11088,11 +9813,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -11102,9 +9823,7 @@
     },
     "/library-members/user/{userId}": {
       "get": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -11174,12 +9893,7 @@
                           },
                           "role": {
                             "type": "string",
-                            "enum": [
-                              "owner",
-                              "manager",
-                              "staff",
-                              "member"
-                            ],
+                            "enum": ["owner", "manager", "staff", "member"],
                             "default": "member",
                             "description": "Role of the member in the library"
                           },
@@ -11235,13 +9949,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName",
-                              "email"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName", "email"],
                             "description": "User details"
                           },
                           "library": {
@@ -11260,10 +9968,7 @@
                                 "nullable": true
                               }
                             },
-                            "required": [
-                              "id",
-                              "name"
-                            ],
+                            "required": ["id", "name"],
                             "description": "Library details"
                           },
                           "inviter": {
@@ -11285,12 +9990,7 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "id",
-                              "username",
-                              "firstName",
-                              "lastName"
-                            ],
+                            "required": ["id", "username", "firstName", "lastName"],
                             "description": "User who invited this member"
                           }
                         },
@@ -11311,11 +10011,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -11325,9 +10021,7 @@
     },
     "/library-members/user/{userId}/library/{libraryId}": {
       "get": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -11384,12 +10078,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -11445,13 +10134,7 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "username",
-                            "firstName",
-                            "lastName",
-                            "email"
-                          ],
+                          "required": ["id", "username", "firstName", "lastName", "email"],
                           "description": "User details"
                         },
                         "library": {
@@ -11470,10 +10153,7 @@
                               "nullable": true
                             }
                           },
-                          "required": [
-                            "id",
-                            "name"
-                          ],
+                          "required": ["id", "name"],
                           "description": "Library details"
                         },
                         "inviter": {
@@ -11495,12 +10175,7 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "username",
-                            "firstName",
-                            "lastName"
-                          ],
+                          "required": ["id", "username", "firstName", "lastName"],
                           "description": "User who invited this member"
                         }
                       },
@@ -11520,11 +10195,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -11534,9 +10205,7 @@
     },
     "/library-members/{id}": {
       "get": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -11583,12 +10252,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -11644,13 +10308,7 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "username",
-                            "firstName",
-                            "lastName",
-                            "email"
-                          ],
+                          "required": ["id", "username", "firstName", "lastName", "email"],
                           "description": "User details"
                         },
                         "library": {
@@ -11669,10 +10327,7 @@
                               "nullable": true
                             }
                           },
-                          "required": [
-                            "id",
-                            "name"
-                          ],
+                          "required": ["id", "name"],
                           "description": "Library details"
                         },
                         "inviter": {
@@ -11694,12 +10349,7 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "username",
-                            "firstName",
-                            "lastName"
-                          ],
+                          "required": ["id", "username", "firstName", "lastName"],
                           "description": "User who invited this member"
                         }
                       },
@@ -11719,11 +10369,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -11731,9 +10377,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -11754,12 +10398,7 @@
                 "properties": {
                   "role": {
                     "type": "string",
-                    "enum": [
-                      "owner",
-                      "manager",
-                      "staff",
-                      "member"
-                    ]
+                    "enum": ["owner", "manager", "staff", "member"]
                   },
                   "permissions": {
                     "type": "array",
@@ -11812,12 +10451,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -11853,25 +10487,14 @@
                           "description": "Timestamp when the membership was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryId",
-                        "joinDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt"],
                       "description": "Library member entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -11879,9 +10502,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -11915,11 +10536,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -11929,9 +10546,7 @@
     },
     "/library-members/{id}/stats": {
       "get": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -11978,12 +10593,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -12039,13 +10649,7 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "username",
-                            "firstName",
-                            "lastName",
-                            "email"
-                          ],
+                          "required": ["id", "username", "firstName", "lastName", "email"],
                           "description": "User details"
                         },
                         "library": {
@@ -12064,10 +10668,7 @@
                               "nullable": true
                             }
                           },
-                          "required": [
-                            "id",
-                            "name"
-                          ],
+                          "required": ["id", "name"],
                           "description": "Library details"
                         },
                         "inviter": {
@@ -12089,12 +10690,7 @@
                               "type": "string"
                             }
                           },
-                          "required": [
-                            "id",
-                            "username",
-                            "firstName",
-                            "lastName"
-                          ],
+                          "required": ["id", "username", "firstName", "lastName"],
                           "description": "User who invited this member"
                         },
                         "borrowsCount": {
@@ -12142,11 +10738,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -12156,9 +10748,7 @@
     },
     "/library-members/{id}/activate": {
       "post": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -12205,12 +10795,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -12246,25 +10831,14 @@
                           "description": "Timestamp when the membership was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryId",
-                        "joinDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt"],
                       "description": "Library member entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -12274,9 +10848,7 @@
     },
     "/library-members/{id}/deactivate": {
       "post": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -12323,12 +10895,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -12364,25 +10931,14 @@
                           "description": "Timestamp when the membership was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryId",
-                        "joinDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt"],
                       "description": "Library member entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -12392,9 +10948,7 @@
     },
     "/library-members/{id}/role": {
       "patch": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -12415,18 +10969,11 @@
                 "properties": {
                   "role": {
                     "type": "string",
-                    "enum": [
-                      "owner",
-                      "manager",
-                      "staff",
-                      "member"
-                    ],
+                    "enum": ["owner", "manager", "staff", "member"],
                     "description": "New role for the member"
                   }
                 },
-                "required": [
-                  "role"
-                ]
+                "required": ["role"]
               }
             }
           }
@@ -12465,12 +11012,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -12506,25 +11048,14 @@
                           "description": "Timestamp when the membership was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryId",
-                        "joinDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt"],
                       "description": "Library member entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }
@@ -12534,9 +11065,7 @@
     },
     "/library-members/{id}/permissions": {
       "patch": {
-        "tags": [
-          "LibraryMember"
-        ],
+        "tags": ["LibraryMember"],
         "parameters": [
           {
             "schema": {
@@ -12563,9 +11092,7 @@
                     "description": "Array of permission strings"
                   }
                 },
-                "required": [
-                  "permissions"
-                ]
+                "required": ["permissions"]
               }
             }
           }
@@ -12604,12 +11131,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "owner",
-                            "manager",
-                            "staff",
-                            "member"
-                          ],
+                          "enum": ["owner", "manager", "staff", "member"],
                           "default": "member",
                           "description": "Role of the member in the library"
                         },
@@ -12645,25 +11167,14 @@
                           "description": "Timestamp when the membership was last updated"
                         }
                       },
-                      "required": [
-                        "id",
-                        "userId",
-                        "libraryId",
-                        "joinDate",
-                        "createdAt",
-                        "updatedAt"
-                      ],
+                      "required": ["id", "userId", "libraryId", "joinDate", "createdAt", "updatedAt"],
                       "description": "Library member entity information"
                     },
                     "statusCode": {
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "statusCode"
-                  ]
+                  "required": ["success", "message", "statusCode"]
                 }
               }
             }

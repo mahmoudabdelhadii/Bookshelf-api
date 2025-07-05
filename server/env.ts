@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 function required(name: string) {
   const value = process.env[name];
   if (!value) throw new Error(`Environment variable ${name} is required`);
@@ -14,7 +14,6 @@ function number(name: string, fallback?: number): number {
 }
 
 export const ENV = process.env.ENV ?? "development";
-console.log(`Running in ${ENV} mode`);
 
 export const IS_DEV = ENV === "development";
 

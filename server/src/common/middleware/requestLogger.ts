@@ -69,7 +69,7 @@ const responseBodyMiddleware: RequestHandler = (_req, res, next) => {
 };
 
 const customLogLevel = (_req: IncomingMessage, res: ServerResponse, err?: Error): LevelWithSilent => {
-  if (err || res.statusCode >= 500) return LogLevel.Error;
+  if (err ?? res.statusCode >= 500) return LogLevel.Error;
   if (res.statusCode >= 400) return LogLevel.Warn;
   if (res.statusCode >= 300) return LogLevel.Silent;
   return LogLevel.Info;

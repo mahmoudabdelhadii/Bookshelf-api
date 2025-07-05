@@ -1,8 +1,8 @@
 import type { DrizzleClient } from "database";
-import { eq, sql, schema, and, ne, gte, lte, desc, inArray } from "database";
+import { eq, sql, schema, and, lte, desc, inArray, count } from "database";
 import { NotFoundError, ConflictError, DatabaseError, ValidationError } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import type { BorrowRequest, CreateBorrowRequest, UpdateBorrowRequest } from "./borrowRequest.model.js";
+import type { CreateBorrowRequest, UpdateBorrowRequest } from "./borrowRequest.model.js";
 
 export const BorrowRequestService = {
   findAll: async (
@@ -16,11 +16,11 @@ export const BorrowRequestService = {
     },
   ) => {
     try {
-      const page = filters?.page || 1;
-      const pageSize = filters?.pageSize || 20;
+      const page = filters?.page ?? 1;
+      const pageSize = filters?.pageSize ?? 20;
       const offset = (page - 1) * pageSize;
 
-      let whereConditions = [];
+      const whereConditions = [];
       if (filters?.userId) {
         whereConditions.push(eq(schema.borrowRequest.userId, filters.userId));
       }
@@ -163,17 +163,17 @@ export const BorrowRequestService = {
       }
 
       // Calculate available quantity (total quantity - borrowed count)
-      const borrowedCount = await drizzle
-        .select({ count: sql<number>`count(*)::int` })
+      const [borrowedCount] = await drizzle
+        .select({ count: count() })
         .from(schema.borrowRequest)
         .where(
           and(
             eq(schema.borrowRequest.libraryBookId, requestData.libraryBookId),
-            inArray(schema.borrowRequest.status, ["borrowed", "overdue"])
-          )
+            inArray(schema.borrowRequest.status, ["borrowed", "overdue"]),
+          ),
         );
 
-      const availableQuantity = libraryBook.quantity - (borrowedCount[0]?.count || 0);
+      const availableQuantity = libraryBook.quantity - (borrowedCount.count ?? 0);
 
       if (availableQuantity <= 0) {
         const conflictError = new ConflictError("Library book is not available for borrowing");
@@ -328,7 +328,7 @@ export const BorrowRequestService = {
 
   getStats: async (drizzle: DrizzleClient, filters?: { userId?: string; libraryId?: string }) => {
     try {
-      let whereConditions = [];
+      const whereConditions = [];
       if (filters?.userId) {
         whereConditions.push(eq(schema.borrowRequest.userId, filters.userId));
       }
@@ -355,7 +355,7 @@ export const BorrowRequestService = {
         returnedBooks: 0,
       };
 
-      stats.forEach((stat) => {
+      for (const stat of stats) {
         statsMap.totalRequests += stat.count;
         switch (stat.status) {
           case "pending":
@@ -377,7 +377,7 @@ export const BorrowRequestService = {
             statsMap.returnedBooks = stat.count;
             break;
         }
-      });
+      }
 
       return ServiceResponse.success("Borrow request statistics retrieved successfully", statsMap);
     } catch (err) {
@@ -399,7 +399,7 @@ export const BorrowRequestService = {
         .returning();
 
       return ServiceResponse.success("Overdue requests updated successfully", {
-        updatedCount: updatedRequests?.length || 0,
+        updatedCount: updatedRequests.length ?? 0,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
@@ -408,4 +408,3 @@ export const BorrowRequestService = {
     }
   },
 };
-

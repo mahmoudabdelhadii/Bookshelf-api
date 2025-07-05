@@ -9,10 +9,10 @@ import {
   BadRequest,
 } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import { queueBookLookup, queueAuthorLookup, queuePublisherLookup } from "../../services/isbndbQueue.js";
+import { queueAuthorLookup, queuePublisherLookup } from "../../services/isbndbQueue.js";
 import { BookLookupService } from "../../services/bookLookup.js";
 import { isbnService } from "../../services/isbnService.js";
-import type { Book, CreateBookWithIds } from "./book.model.js";
+import type { CreateBookWithIds } from "./book.model.js";
 import type { Publisher } from "../../common/types/shared/isbndbAPI.js";
 
 type Language = (typeof schema.book.language.enumValues)[number];
@@ -89,10 +89,7 @@ export const BookService = {
     }
   },
 
-  createBooksBulk: async (
-    drizzle: DrizzleClient,
-    bookList: CreateBookWithIds[],
-  ) => {
+  createBooksBulk: async (drizzle: DrizzleClient, bookList: CreateBookWithIds[]) => {
     if (!Array.isArray(bookList) || bookList.length === 0) {
       throw new ValidationError("The 'books' array must contain at least one book.", { bookList });
     }
@@ -205,18 +202,18 @@ export const BookService = {
         sql`
           SELECT *,
             ts_rank_cd(
-              setweight(to_tsvector('english', title), 'A') ||
-              setweight(to_tsvector('arabic', title), 'A') ||
-              setweight(to_tsvector('english', description), 'B') ||
+              setweight(to_tsvector('english', title), 'A') ??
+              setweight(to_tsvector('arabic', title), 'A') ??
+              setweight(to_tsvector('english', description), 'B') ??
               setweight(to_tsvector('arabic', description), 'B'),
               plainto_tsquery(${searchTerm})
             ) AS rank
           FROM ${schema.book}
           WHERE
             (
-              setweight(to_tsvector('english', title), 'A') ||
-              setweight(to_tsvector('arabic', title), 'A') ||
-              setweight(to_tsvector('english', description), 'B') ||
+              setweight(to_tsvector('english', title), 'A') ??
+              setweight(to_tsvector('arabic', title), 'A') ??
+              setweight(to_tsvector('english', description), 'B') ??
               setweight(to_tsvector('arabic', description), 'B')
             ) @@ plainto_tsquery(${searchTerm})
           ORDER BY rank DESC
@@ -233,17 +230,17 @@ export const BookService = {
     try {
       // Use lookup service which handles DB lookup and ISBNDB queue automatically
       const bookData = await BookLookupService.getBookByISBN(drizzle, isbn);
-      
+
       if (!bookData) {
         throw new NotFound("Book not found");
       }
 
       return bookData;
-    } catch (error) {
-      if (error instanceof NotFound) {
-        throw error;
+    } catch (err) {
+      if (err instanceof NotFound) {
+        throw err;
       }
-      throw new DatabaseError("Failed to fetch book data", { isbn, originalError: error });
+      throw new DatabaseError("Failed to fetch book data", { isbn, originalError: err });
     }
   },
 
@@ -311,15 +308,15 @@ export const BookService = {
     }
 
     try {
-      const authorDetails = await queueAuthorLookup(name, 'high');
+      const authorDetails = await queueAuthorLookup(name, "high");
       if (!authorDetails.author) {
         throw new NotFound("Author not found");
       }
 
       await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
       return authorDetails;
-    } catch (error) {
-      throw new DatabaseError("Failed to fetch author details", { name, originalError: error });
+    } catch (err) {
+      throw new DatabaseError("Failed to fetch author details", { name, originalError: err });
     }
   },
 
@@ -352,21 +349,21 @@ export const BookService = {
     }
 
     try {
-      const publisherDetails = await queuePublisherLookup(name, 'high');
+      const publisherDetails = await queuePublisherLookup(name, "high");
       if (!publisherDetails.name) {
         throw new NotFound("Publisher not found");
       }
 
       await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
       return publisherDetails;
-    } catch (error) {
-      throw new DatabaseError("Failed to fetch publisher details", { name, originalError: error });
+    } catch (err) {
+      throw new DatabaseError("Failed to fetch publisher details", { name, originalError: err });
     }
   },
 
   searchAuthors: async (drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) => {
     try {
-      const authorsData = await queueAuthorLookup(query, 'low');
+      const authorsData = await queueAuthorLookup(query, "low");
       const authors = authorsData.authors ?? [];
       if (authors.length === 0) {
         throw new NotFound("No authors found");
@@ -376,14 +373,14 @@ export const BookService = {
         .values(authors.map((name: string) => ({ name })))
         .onConflictDoNothing();
       return authorsData;
-    } catch (error) {
-      throw new DatabaseError("Failed to search authors", { query, originalError: error });
+    } catch (err) {
+      throw new DatabaseError("Failed to search authors", { query, originalError: err });
     }
   },
 
   searchPublishers: async (drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) => {
     try {
-      const publishersData = await queuePublisherLookup(query, 'low');
+      const publishersData = await queuePublisherLookup(query, "low");
       const publishers = publishersData.publishers;
       if (publishers.length === 0) {
         throw new NotFound("No publishers found");
@@ -398,8 +395,8 @@ export const BookService = {
         )
         .onConflictDoNothing();
       return publishersData;
-    } catch (error) {
-      throw new DatabaseError("Failed to search publishers", { query, originalError: error });
+    } catch (err) {
+      throw new DatabaseError("Failed to search publishers", { query, originalError: err });
     }
   },
 
@@ -441,9 +438,9 @@ export const BookService = {
     if (filters.publisher) conditions.push(ilike(schema.publisher.name, `%${filters.publisher}%`));
 
     const finalWhereClause = and(...conditions);
-    
+
     let localResults: any = null;
-    
+
     switch (index) {
       case "books": {
         const books = await drizzle
@@ -490,16 +487,16 @@ export const BookService = {
     }
 
     // If we have local results, return them
-    const hasLocalResults = localResults && (
-      (localResults.books && localResults.books.length > 0) ||
-      (localResults.authors && localResults.authors.length > 0) ||
-      (localResults.publishers && localResults.publishers.length > 0)
-    );
+    const hasLocalResults =
+      localResults &&
+      ((localResults.books && localResults.books.length > 0) ??
+        (localResults.authors && localResults.authors.length > 0) ??
+        (localResults.publishers && localResults.publishers.length > 0));
 
     if (hasLocalResults) {
       return ServiceResponse.success("Results found in local database", {
         ...localResults,
-        source: "local"
+        source: "local",
       });
     }
 
@@ -509,26 +506,26 @@ export const BookService = {
         const isbndbResults = await isbnService.searchAll(index, {
           page,
           pageSize,
-          ...filters
+          ...filters,
         });
 
         return ServiceResponse.success("Results found via ISBNdb", {
           data: isbndbResults,
-          source: "isbndb"
+          source: "isbndb",
         });
-      } catch (error) {
-        logger.error(`ISBNdb search failed for index ${index}`, { error, filters });
+      } catch (err) {
+        logger.error({ error: err, filters }, "ISBNdb search failed for index %s", index);
         // Fall back to local results even if empty
         return ServiceResponse.success("No results found", {
           ...localResults,
-          source: "local"
+          source: "local",
         });
       }
     }
 
     return ServiceResponse.success("No results found", {
       ...localResults,
-      source: "local"
+      source: "local",
     });
   },
 };

@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import rateLimit from "express-rate-limit";
 import { body, param, validationResult } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-import { extendZodWithOpenApi, OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 
 import { AuthController } from "./auth.controller.js";
 import { OAuthController } from "./oauth.controller.js";
@@ -10,12 +10,6 @@ import { authRequired } from "../../common/middleware/auth.js";
 import {
   registerSchema,
   loginSchema,
-  refreshTokenSchema,
-  passwordResetRequestSchema,
-  passwordResetSchema,
-  emailVerificationSchema,
-  changePasswordSchema,
-  logoutSchema,
   userResponseSchema,
   loginResponseSchema,
   refreshTokenResponseSchema,
@@ -82,7 +76,7 @@ const validateRequest = (req: Request, res: Response, next: NextFunction) => {
     });
   }
   next();
-  return;
+  
 };
 
 const registerValidation = [

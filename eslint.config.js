@@ -5,6 +5,7 @@ import eslintPluginImport from "eslint-plugin-import-x";
 import eslintConfigPrettier from "eslint-config-prettier";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import eslintPluginKitab from "eslint-plugin-kitab";
+import eslintPluginUnusedImports from "eslint-plugin-unused-imports";
 
 function config(...configs) {
   return tsEslint.config(
@@ -30,6 +31,7 @@ function config(...configs) {
       ],
     },
 
+    // Base and TS rules
     eslint.configs.recommended,
     eslintPluginImport.flatConfigs.recommended,
     eslintPluginImport.flatConfigs.typescript,
@@ -37,28 +39,27 @@ function config(...configs) {
     ...tsEslint.configs.stylisticTypeChecked,
     eslintConfigPrettier,
     eslintPluginKitab.configs.recommended,
+
+    // Main ruleset
     {
       languageOptions: {
-        globals: globals.builtin,
+        ecmaVersion: 2024,
+        sourceType: "module",
+        globals: {
+          ...globals.builtin,
+          ...globals.node,
+        },
       },
       plugins: {
         unicorn: eslintPluginUnicorn,
+        "unused-imports": eslintPluginUnusedImports,
       },
       rules: {
-        "unicorn/catch-error-name": ["error", { name: "err" }],
-        "unicorn/no-array-for-each": ["error"],
-        "unicorn/no-instanceof-array": ["error"],
-        "unicorn/prefer-node-protocol": ["error"],
-      },
-    },
-    {
-      rules: {
+        // ESLint core
         "no-console": "warn",
-        "id-denylist": ["error", "idx"],
         "dot-notation": "error",
-        "spaced-comment": "error",
-        "prefer-template": "warn",
         "prefer-const": "warn",
+        "prefer-template": "warn",
         "no-var": "error",
         "no-useless-return": "error",
         "no-useless-rename": "error",
@@ -71,7 +72,12 @@ function config(...configs) {
         quotes: ["error", "double", { avoidEscape: true }],
         yoda: "error",
         eqeqeq: "error",
+
+        // TypeScript
         "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/require-await": "off",
+        "@typescript-eslint/consistent-type-definitions": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/restrict-template-expressions": [
           "error",
           {
@@ -79,8 +85,6 @@ function config(...configs) {
             allowBoolean: true,
           },
         ],
-        "@typescript-eslint/require-await": "off",
-        "@typescript-eslint/consistent-type-definitions": "off",
         "@typescript-eslint/naming-convention": [
           "error",
           {
@@ -92,21 +96,35 @@ function config(...configs) {
             format: ["StrictPascalCase"],
           },
         ],
-        "@typescript-eslint/no-unused-vars": [
+        "@typescript-eslint/no-unused-vars": "off",
+
+        // Unused imports plugin
+        "unused-imports/no-unused-imports": "error",
+        "unused-imports/no-unused-vars": [
           "warn",
-          { varsIgnorePattern: "^_.*", argsIgnorePattern: "^_.*" },
+          {
+            vars: "all",
+            varsIgnorePattern: "^_",
+            args: "after-used",
+            argsIgnorePattern: "^_",
+          },
         ],
-        "@typescript-eslint/no-non-null-assertion": "off",
-        "import-x/no-relative-packages": ["error"],
+
+        // Unicorn
+        "unicorn/catch-error-name": ["error", { name: "err" }],
+        "unicorn/no-array-for-each": "error",
+        "unicorn/no-instanceof-array": "error",
+        "unicorn/prefer-node-protocol": "error",
+
+        // Import plugin
+        "import-x/no-relative-packages": "error",
+
+        // Naming
+        "id-denylist": ["error", "idx"],
+        "spaced-comment": "error",
       },
     },
-    {
-      languageOptions: {
-        ecmaVersion: 2024,
-        sourceType: "module",
-        globals: { ...globals.node },
-      },
-    },
+
     ...configs,
   );
 }

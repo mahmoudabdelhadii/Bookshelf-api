@@ -2,7 +2,6 @@ import type { DrizzleClient } from "database";
 import { eq, schema } from "database";
 import {
   ValidationError,
-  ResourceAlreadyExistsError,
   NotFoundError,
   DatabaseError,
   ConflictError,
@@ -11,10 +10,7 @@ import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import type { User, CreateUser } from "./user.model.js";
 
 export const UserService = {
-  async createUser(
-    drizzle: DrizzleClient,
-    userData: CreateUser,
-  ) {
+  async createUser(drizzle: DrizzleClient, userData: CreateUser) {
     try {
       if (!userData.username.trim()) {
         const validationError = new ValidationError("Username is required");
@@ -30,7 +26,11 @@ export const UserService = {
       });
       if (existingByEmail) {
         const conflictError = new ConflictError("User with this email already exists");
-        return ServiceResponse.failure(conflictError.message, { email: userData.email }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { email: userData.email },
+          conflictError.statusCode,
+        );
       }
 
       const existingByUsername = await drizzle.query.user.findFirst({
@@ -38,13 +38,14 @@ export const UserService = {
       });
       if (existingByUsername) {
         const conflictError = new ConflictError("User with this username already exists");
-        return ServiceResponse.failure(conflictError.message, { username: userData.username }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { username: userData.username },
+          conflictError.statusCode,
+        );
       }
 
-      const [newUser] = await drizzle
-        .insert(schema.user)
-        .values(userData)
-        .returning();
+      const [newUser] = await drizzle.insert(schema.user).values(userData).returning();
 
       return ServiceResponse.success("User created successfully", newUser);
     } catch (err) {

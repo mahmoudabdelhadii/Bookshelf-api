@@ -27,7 +27,7 @@ class BorrowRequestController {
     const userId = req.params.userId;
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 20;
-    
+
     const serviceResponse = await BorrowRequestService.findByUser(req.drizzle, userId, page, pageSize);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -36,7 +36,7 @@ class BorrowRequestController {
     const libraryId = req.params.libraryId;
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 20;
-    
+
     const serviceResponse = await BorrowRequestService.findByLibrary(req.drizzle, libraryId, page, pageSize);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -46,7 +46,7 @@ class BorrowRequestController {
     if (!userId) {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
-    
+
     const requestData: CreateBorrowRequest = req.body;
     const serviceResponse = await BorrowRequestService.create(req.drizzle, userId, requestData);
     return handleServiceResponse(serviceResponse, res);
@@ -56,7 +56,7 @@ class BorrowRequestController {
     const id = req.params.id;
     const updatedBy = req.user?.id; // Assuming user ID comes from auth middleware
     const updateData: UpdateBorrowRequest = req.body;
-    
+
     const serviceResponse = await BorrowRequestService.update(req.drizzle, id, updateData, updatedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -70,7 +70,7 @@ class BorrowRequestController {
   public approveBorrowRequest: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const approvedBy = req.user?.id;
-    
+
     if (!approvedBy) {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
@@ -79,7 +79,7 @@ class BorrowRequestController {
       status: "approved",
       ...req.body, // Allow override of due date
     };
-    
+
     const serviceResponse = await BorrowRequestService.update(req.drizzle, id, updateData, approvedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -87,35 +87,35 @@ class BorrowRequestController {
   public rejectBorrowRequest: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const rejectedBy = req.user?.id;
-    
+
     const updateData: UpdateBorrowRequest = {
       status: "rejected",
       notes: req.body.notes, // Allow rejection reason
     };
-    
+
     const serviceResponse = await BorrowRequestService.update(req.drizzle, id, updateData, rejectedBy);
     return handleServiceResponse(serviceResponse, res);
   };
 
   public borrowBook: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
-    
+
     const updateData: UpdateBorrowRequest = {
       status: "borrowed",
     };
-    
+
     const serviceResponse = await BorrowRequestService.update(req.drizzle, id, updateData);
     return handleServiceResponse(serviceResponse, res);
   };
 
   public returnBook: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
-    
+
     const updateData: UpdateBorrowRequest = {
       status: "returned",
       notes: req.body.notes, // Allow return notes
     };
-    
+
     const serviceResponse = await BorrowRequestService.update(req.drizzle, id, updateData);
     return handleServiceResponse(serviceResponse, res);
   };

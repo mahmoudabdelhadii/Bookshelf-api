@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import express, { type Router } from "express";
+import { Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
@@ -8,15 +8,12 @@ import {
   libraryMemberSchema,
   createLibraryMemberSchema,
   updateLibraryMemberSchema,
-  getLibraryMemberSchema,
-  getLibraryMembersSchema,
-  libraryMemberArraySchema,
   libraryMemberWithDetailsSchema,
   libraryMemberWithStatsSchema,
 } from "./libraryMember.model.js";
 
 export const libraryMemberRegistry = new OpenAPIRegistry();
-export const libraryMemberRouter: Router = express.Router();
+export const libraryMemberRouter: Router = Router();
 
 // Register schemas
 libraryMemberRegistry.register("LibraryMember", libraryMemberSchema);
@@ -40,7 +37,10 @@ libraryMemberRegistry.registerPath({
       pageSize: z.coerce.number().min(1).max(100).default(20).optional(),
     }),
   },
-  responses: createApiResponse(z.array(libraryMemberWithDetailsSchema), "Library members retrieved successfully"),
+  responses: createApiResponse(
+    z.array(libraryMemberWithDetailsSchema),
+    "Library members retrieved successfully",
+  ),
 });
 libraryMemberRouter.get("/", libraryMemberController.getLibraryMembers);
 
@@ -76,7 +76,10 @@ libraryMemberRegistry.registerPath({
       pageSize: z.coerce.number().min(1).max(100).default(20).optional(),
     }),
   },
-  responses: createApiResponse(z.array(libraryMemberWithDetailsSchema), "Library members retrieved successfully"),
+  responses: createApiResponse(
+    z.array(libraryMemberWithDetailsSchema),
+    "Library members retrieved successfully",
+  ),
 });
 libraryMemberRouter.get("/library/:libraryId", libraryMemberController.getLibraryMembersByLibrary);
 
@@ -90,15 +93,18 @@ libraryMemberRegistry.registerPath({
       libraryId: z.string().uuid().openapi({ description: "Library ID" }),
     }),
   },
-  responses: createApiResponse(z.object({
-    totalMembers: z.number(),
-    activeMembers: z.number(),
-    inactiveMembers: z.number(),
-    owners: z.number(),
-    managers: z.number(),
-    staff: z.number(),
-    members: z.number(),
-  }), "Library member statistics retrieved successfully"),
+  responses: createApiResponse(
+    z.object({
+      totalMembers: z.number(),
+      activeMembers: z.number(),
+      inactiveMembers: z.number(),
+      owners: z.number(),
+      managers: z.number(),
+      staff: z.number(),
+      members: z.number(),
+    }),
+    "Library member statistics retrieved successfully",
+  ),
 });
 libraryMemberRouter.get("/library/:libraryId/stats", libraryMemberController.getLibraryMemberStats);
 
@@ -116,7 +122,10 @@ libraryMemberRegistry.registerPath({
         "application/json": {
           schema: z.object({
             userId: z.string().uuid().openapi({ description: "ID of the user to invite" }),
-            role: z.enum(["owner", "manager", "staff", "member"]).default("member").openapi({ description: "Role to assign" }),
+            role: z
+              .enum(["owner", "manager", "staff", "member"])
+              .default("member")
+              .openapi({ description: "Role to assign" }),
             permissions: z.array(z.string()).optional().openapi({ description: "Permissions to grant" }),
           }),
         },
@@ -143,7 +152,7 @@ libraryMemberRouter.delete("/library/:libraryId/leave", libraryMemberController.
 
 // GET /library-members/user/:userId - Get user's library memberships
 libraryMemberRegistry.registerPath({
-  method: "get", 
+  method: "get",
   path: "/library-members/user/{userId}",
   tags: ["LibraryMember"],
   request: {
@@ -155,7 +164,10 @@ libraryMemberRegistry.registerPath({
       pageSize: z.coerce.number().min(1).max(100).default(20).optional(),
     }),
   },
-  responses: createApiResponse(z.array(libraryMemberWithDetailsSchema), "User library memberships retrieved successfully"),
+  responses: createApiResponse(
+    z.array(libraryMemberWithDetailsSchema),
+    "User library memberships retrieved successfully",
+  ),
 });
 libraryMemberRouter.get("/user/:userId", libraryMemberController.getUserLibraryMemberships);
 
@@ -170,7 +182,10 @@ libraryMemberRegistry.registerPath({
       libraryId: z.string().uuid().openapi({ description: "Library ID" }),
     }),
   },
-  responses: createApiResponse(libraryMemberWithDetailsSchema, "User library membership retrieved successfully"),
+  responses: createApiResponse(
+    libraryMemberWithDetailsSchema,
+    "User library membership retrieved successfully",
+  ),
 });
 libraryMemberRouter.get("/user/:userId/library/:libraryId", libraryMemberController.getUserInLibrary);
 
@@ -198,7 +213,10 @@ libraryMemberRegistry.registerPath({
       id: z.string().uuid().openapi({ description: "Library member ID" }),
     }),
   },
-  responses: createApiResponse(libraryMemberWithStatsSchema, "Library member with stats retrieved successfully"),
+  responses: createApiResponse(
+    libraryMemberWithStatsSchema,
+    "Library member with stats retrieved successfully",
+  ),
 });
 libraryMemberRouter.get("/:id/stats", libraryMemberController.getLibraryMemberWithStats);
 
@@ -278,7 +296,9 @@ libraryMemberRegistry.registerPath({
       content: {
         "application/json": {
           schema: z.object({
-            role: z.enum(["owner", "manager", "staff", "member"]).openapi({ description: "New role for the member" }),
+            role: z
+              .enum(["owner", "manager", "staff", "member"])
+              .openapi({ description: "New role for the member" }),
           }),
         },
       },

@@ -2,7 +2,6 @@ import { Router } from "express";
 import { isbndbQueue } from "../../services/isbndbQueue.js";
 import { BookLookupService } from "../../services/bookLookup.js";
 import { env } from "../../common/utils/envConfig.js";
-import { schema } from "database";
 
 const router = Router();
 
@@ -28,7 +27,7 @@ router.get("/cache-stats", async (req, res) => {
       success: true,
       data: stats,
     });
-  } catch (error) {
+  } catch (err) {
     res.status(500).json({
       success: false,
       error: "Failed to get cache stats",
@@ -55,13 +54,13 @@ router.post("/lookup-book", async (req, res) => {
         success: true,
         data: book,
       });
-    } else {
+    } 
       return res.status(404).json({
         success: false,
         error: "Book not found",
       });
-    }
-  } catch (error) {
+    
+  } catch (err) {
     return res.status(500).json({
       success: false,
       error: "Failed to lookup book",
@@ -70,4 +69,3 @@ router.post("/lookup-book", async (req, res) => {
 });
 
 export { router as featureFlagsRouter };
-

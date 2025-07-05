@@ -37,13 +37,11 @@ export class OAuthController {
     passport.authenticate("google", { session: false }, async (err: any, user: OAuthUser, info: any) => {
       try {
         if (err) {
-          console.error("Google OAuth error:", err);
           res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
           return;
         }
 
         if (!user) {
-          console.error("Google OAuth failed:", info);
           res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
           return;
         }
@@ -69,7 +67,6 @@ export class OAuthController {
 
         res.redirect(`${env.FRONTEND_URL}/auth/success?provider=google`);
       } catch (err_) {
-        console.error("Google OAuth callback error:", err_);
         res.redirect(`${env.FRONTEND_URL}/auth/error?reason=server_error`);
       }
     })(req, res, next);
@@ -89,13 +86,11 @@ export class OAuthController {
     passport.authenticate("apple", { session: false }, async (err: any, user: OAuthUser, info: any) => {
       try {
         if (err) {
-          console.error("Apple OAuth error:", err);
           res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
           return;
         }
 
         if (!user) {
-          console.error("Apple OAuth failed:", info);
           res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
           return;
         }
@@ -121,7 +116,6 @@ export class OAuthController {
 
         res.redirect(`${env.FRONTEND_URL}/auth/success?provider=apple`);
       } catch (err_) {
-        console.error("Apple OAuth callback error:", err_);
         res.redirect(`${env.FRONTEND_URL}/auth/error?reason=server_error`);
       }
     })(req, res, next);
@@ -168,8 +162,6 @@ export class OAuthController {
         message: `${provider} account linked successfully`,
       });
     } catch (err: any) {
-      console.error("Link OAuth account error:", err);
-
       if (err.message.includes("already linked")) {
         return res.status(StatusCodes.CONFLICT).json({
           success: false,
@@ -217,8 +209,6 @@ export class OAuthController {
         message: `${provider} account unlinked successfully`,
       });
     } catch (err: any) {
-      console.error("Unlink OAuth account error:", err);
-
       if (err.message.includes("not found")) {
         return res.status(StatusCodes.NOT_FOUND).json({
           success: false,
@@ -256,7 +246,6 @@ export class OAuthController {
         },
       });
     } catch (err) {
-      console.error("Get connected accounts error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Failed to retrieve connected accounts",

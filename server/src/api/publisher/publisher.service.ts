@@ -1,13 +1,8 @@
 import type { DrizzleClient } from "database";
 import { eq, sql, schema, ilike, and, ne } from "database";
-import {
-  NotFoundError,
-  ConflictError,
-  DatabaseError,
-  ValidationError,
-} from "../../errors.js";
+import { NotFoundError, ConflictError, DatabaseError, ValidationError } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import type { Publisher, CreatePublisher, UpdatePublisher } from "./publisher.model.js";
+import type { CreatePublisher, UpdatePublisher } from "./publisher.model.js";
 
 export const PublisherService = {
   findAll: async (drizzle: DrizzleClient) => {
@@ -96,7 +91,11 @@ export const PublisherService = {
 
       if (existingPublisher) {
         const conflictError = new ConflictError("Publisher with this name already exists");
-        return ServiceResponse.failure(conflictError.message, { name: publisherData.name }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { name: publisherData.name },
+          conflictError.statusCode,
+        );
       }
 
       const [newPublisher] = await drizzle
@@ -111,7 +110,11 @@ export const PublisherService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to create publisher: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { publisherData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { publisherData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -127,15 +130,16 @@ export const PublisherService = {
 
       if (publisherData.name) {
         const nameConflict = await drizzle.query.publisher.findFirst({
-          where: and(
-            eq(schema.publisher.name, publisherData.name.trim()),
-            ne(schema.publisher.id, id)
-          ),
+          where: and(eq(schema.publisher.name, publisherData.name.trim()), ne(schema.publisher.id, id)),
         });
 
         if (nameConflict) {
           const conflictError = new ConflictError("Publisher with this name already exists");
-          return ServiceResponse.failure(conflictError.message, { name: publisherData.name }, conflictError.statusCode);
+          return ServiceResponse.failure(
+            conflictError.message,
+            { name: publisherData.name },
+            conflictError.statusCode,
+          );
         }
       }
 
@@ -158,7 +162,11 @@ export const PublisherService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to update publisher: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, publisherData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, publisherData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -180,7 +188,11 @@ export const PublisherService = {
 
       if (booksCount[0].count > 0) {
         const conflictError = new ConflictError("Cannot delete publisher with existing books");
-        return ServiceResponse.failure(conflictError.message, { bookCount: booksCount[0].count }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { bookCount: booksCount[0].count },
+          conflictError.statusCode,
+        );
       }
 
       await drizzle.delete(schema.publisher).where(eq(schema.publisher.id, id));
@@ -192,7 +204,11 @@ export const PublisherService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to delete publisher: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 };

@@ -8,9 +8,6 @@ import {
   publisherSchema,
   createPublisherSchema,
   updatePublisherSchema,
-  getPublisherSchema,
-  searchPublisherSchema,
-  searchPublishersSchema,
   publisherArraySchema,
 } from "./publisher.model.js";
 

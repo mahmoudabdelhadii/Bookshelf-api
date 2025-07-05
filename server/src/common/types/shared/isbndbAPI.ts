@@ -197,7 +197,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }
 
   protected toQueryString(rawQuery?: QueryParamsType): string {
-    const query = rawQuery || {};
+    const query = rawQuery ?? {};
     const keys = Object.keys(query).filter((key) => "undefined" !== typeof query[key]);
     return keys
       .map((key) =>
@@ -213,13 +213,13 @@ export class HttpClient<SecurityDataType = unknown> {
 
   private contentFormatters: Record<ContentType, (input: any) => any> = {
     [ContentType.Json]: (input: any) =>
-      input !== null && (typeof input === "object" || typeof input === "string")
+      input !== null && (typeof input === "object" ?? typeof input === "string")
         ? JSON.stringify(input)
         : input,
     [ContentType.Text]: (input: any) =>
       input !== null && typeof input !== "string" ? JSON.stringify(input) : input,
     [ContentType.FormData]: (input: any) =>
-      Object.keys(input || {}).reduce((formData, key) => {
+      Object.keys(input ?? {}).reduce((formData, key) => {
         const property = input[key];
         formData.append(
           key,
@@ -238,11 +238,11 @@ export class HttpClient<SecurityDataType = unknown> {
     return {
       ...this.baseApiParams,
       ...params1,
-      ...(params2 || {}),
+      ...(params2 ?? {}),
       headers: {
-        ...(this.baseApiParams.headers || {}),
-        ...(params1.headers || {}),
-        ...((params2 && params2.headers) || {}),
+        ...(this.baseApiParams.headers ?? {}),
+        ...(params1.headers ?? {}),
+        ...((params2 && params2.headers) ?? {}),
       },
     };
   }
@@ -284,23 +284,23 @@ export class HttpClient<SecurityDataType = unknown> {
     const secureParams =
       ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
         this.securityWorker &&
-        (await this.securityWorker(this.securityData))) ||
+        (await this.securityWorker(this.securityData))) ??
       {};
     const requestParams = this.mergeRequestParams(params, secureParams);
     const queryString = query && this.toQueryString(query);
-    const payloadFormatter = this.contentFormatters[type || ContentType.Json];
-    const responseFormat = format || requestParams.format;
+    const payloadFormatter = this.contentFormatters[type ?? ContentType.Json];
+    const responseFormat = format ?? requestParams.format;
 
     return this.customFetch(
-      `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
+      `${baseUrl ?? this.baseUrl ?? ""}${path}${queryString ? `?${queryString}` : ""}`,
       {
         ...requestParams,
         headers: {
-          ...(requestParams.headers || {}),
+          ...(requestParams.headers ?? {}),
           ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
         },
-        signal: (cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal) || null,
-        body: typeof body === "undefined" || body === null ? null : payloadFormatter(body),
+        signal: (cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal) ?? null,
+        body: typeof body === "undefined" ?? body === null ? null : payloadFormatter(body),
       },
     ).then(async (response) => {
       const r = response.clone() as HttpResponse<T, E>;

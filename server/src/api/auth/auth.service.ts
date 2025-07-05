@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { schema, eq, and, gte, lte } from "database";
+import { schema, eq, and } from "database";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import { hashPassword, verifyPassword, generateSecureToken, hashToken } from "../../common/utils/password.js";
 import { generateTokenPair, generateSessionId, verifyRefreshToken } from "../../common/auth/jwt.js";
@@ -213,8 +213,8 @@ export const AuthService = {
       if (!userWithAuth) {
         await this.logLoginAttempt(drizzle, {
           email,
-          ipAddress: ipAddress || "unknown",
-          userAgent: userAgent || "unknown",
+          ipAddress: ipAddress ?? "unknown",
+          userAgent: userAgent ?? "unknown",
           isSuccessful: false,
           failureReason: "invalid_email",
         });
@@ -264,8 +264,8 @@ export const AuthService = {
 
         await this.logLoginAttempt(drizzle, {
           email,
-          ipAddress: ipAddress || "unknown",
-          userAgent: userAgent || "unknown",
+          ipAddress: ipAddress ?? "unknown",
+          userAgent: userAgent ?? "unknown",
           isSuccessful: false,
           failureReason: "invalid_password",
         });
@@ -275,7 +275,7 @@ export const AuthService = {
       }
 
       const sessionId = generateSessionId();
-      const permissions = userRoles.flatMap((ur) => ur.role.permissions || []);
+      const permissions = userRoles.flatMap((ur) => ur.role.permissions ?? []);
 
       const tokenPayload = {
         userId: user.id,
@@ -294,8 +294,8 @@ export const AuthService = {
         userId: user.id,
         sessionToken: sessionId,
         refreshToken: tokens.refreshToken,
-        ipAddress: ipAddress || "unknown",
-        userAgent: userAgent || "unknown",
+        ipAddress: ipAddress ?? "unknown",
+        userAgent: userAgent ?? "unknown",
         expiresAt: sessionExpiresAt,
       });
 
@@ -310,8 +310,8 @@ export const AuthService = {
 
       await this.logLoginAttempt(drizzle, {
         email,
-        ipAddress: ipAddress || "unknown",
-        userAgent: userAgent || "unknown",
+        ipAddress: ipAddress ?? "unknown",
+        userAgent: userAgent ?? "unknown",
         isSuccessful: true,
       });
 
@@ -417,7 +417,7 @@ export const AuthService = {
         return ServiceResponse.failure(error.message, null, error.statusCode);
       }
 
-      const permissions = userWithRoles.userRoles.flatMap((ur) => ur.role.permissions || []);
+      const permissions = userWithRoles.userRoles.flatMap((ur) => ur.role.permissions ?? []);
       const newTokenPayload = {
         userId: userWithRoles.id,
         username: userWithRoles.username,
@@ -682,16 +682,14 @@ export const AuthService = {
   ) {
     try {
       await drizzle.insert(schema.securityAuditLog).values({
-        userId: event.userId || null,
+        userId: event.userId ?? null,
         action: event.action,
-        details: event.details || null,
-        ipAddress: event.ipAddress || null,
-        userAgent: event.userAgent || null,
-        severity: event.severity || "info",
+        details: event.details ?? null,
+        ipAddress: event.ipAddress ?? null,
+        userAgent: event.userAgent ?? null,
+        severity: event.severity ?? "info",
       });
-    } catch (err) {
-      console.error("Failed to log security event:", err);
-    }
+    } catch (err) {}
   },
 
   /**
@@ -713,10 +711,8 @@ export const AuthService = {
         ipAddress: attempt.ipAddress,
         userAgent: attempt.userAgent,
         isSuccessful: attempt.isSuccessful,
-        failureReason: attempt.failureReason || null,
+        failureReason: attempt.failureReason ?? null,
       });
-    } catch (err) {
-      console.error("Failed to log login attempt:", err);
-    }
+    } catch (err) {}
   },
 } as const;

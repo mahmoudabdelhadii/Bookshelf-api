@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { eq, and, schema } from "database";
+import { eq, schema } from "database";
 import type { LibraryBook, CreateLibraryBook, UpdateLibraryBook } from "./libraryBooks.model.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import { DatabaseError, NotFound, ValidationError, ResourceAlreadyExistsError } from "../../errors.js";
@@ -8,7 +8,7 @@ export const LibraryBooksService = {
   findByLibraryId: async (
     drizzle: DrizzleClient,
     libraryId: string,
-  ): Promise<ServiceResponse<any[] | null>> => {
+  ): Promise<ServiceResponse<LibraryBook[] | null>> => {
     if (!libraryId.trim()) {
       const validationError = new ValidationError("Library ID is required");
       return ServiceResponse.failure(validationError.message, null, validationError.statusCode);
@@ -42,7 +42,7 @@ export const LibraryBooksService = {
     }
   },
 
-  findById: async (drizzle: DrizzleClient, id: string): Promise<ServiceResponse<any | null>> => {
+  findById: async (drizzle: DrizzleClient, id: string): Promise<ServiceResponse<LibraryBook | null>> => {
     try {
       const libraryBook = await drizzle.query.libraryBooks.findFirst({
         where: (libraryBooks, { eq }) => eq(libraryBooks.id, id),
@@ -56,7 +56,6 @@ export const LibraryBooksService = {
       }
       return ServiceResponse.success("Library book found", libraryBook);
     } catch (err) {
-      const errorMessage = `Error finding library book with id ${id}: ${(err as Error).message}`;
       return ServiceResponse.failure("An error occurred while finding library book.", null, 500);
     }
   },

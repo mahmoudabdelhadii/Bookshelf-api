@@ -5,17 +5,21 @@ import { libraryBooks } from "./libraryBooks.js";
 
 export const borrowRequestStatusEnum = pgEnum("borrow_request_status", [
   "pending",
-  "approved", 
+  "approved",
   "rejected",
   "borrowed",
   "returned",
-  "overdue"
+  "overdue",
 ]);
 
 export const borrowRequest = server.table("borrow_request", {
   id: idpk("id"),
-  userId: uuid("user_id").notNull().references(() => user.id),
-  libraryBookId: uuid("library_book_id").notNull().references(() => libraryBooks.id),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => user.id),
+  libraryBookId: uuid("library_book_id")
+    .notNull()
+    .references(() => libraryBooks.id),
   requestDate: timestamp("request_date", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   approvedDate: timestamp("approved_date", { withTimezone: true, mode: "date" }),
   approvedBy: uuid("approved_by").references(() => user.id),

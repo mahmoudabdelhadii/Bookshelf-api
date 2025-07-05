@@ -145,7 +145,7 @@ describe("Password Security", () => {
         expect(result.score).toBeLessThan(70);
         expect(
           result.feedback.some(
-            (fb) => fb.toLowerCase().includes("common") || fb.toLowerCase().includes("dictionary"),
+            (fb) => fb.toLowerCase().includes("common") ?? fb.toLowerCase().includes("dictionary"),
           ),
         ).toBe(true);
       }
@@ -221,10 +221,10 @@ describe("Password Security", () => {
       expect(password).toMatch(/\d/);
       expect(password).toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/);
 
-      const lowercase = (password.match(/[a-z]/g) || []).length;
-      const uppercase = (password.match(/[A-Z]/g) || []).length;
-      const digits = (password.match(/\d/g) || []).length;
-      const special = (password.match(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/g) || []).length;
+      const lowercase = (password.match(/[a-z]/g) ?? []).length;
+      const uppercase = (password.match(/[A-Z]/g) ?? []).length;
+      const digits = (password.match(/\d/g) ?? []).length;
+      const special = (password.match(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/g) ?? []).length;
 
       expect(lowercase).toBeGreaterThan(0);
       expect(uppercase).toBeGreaterThan(0);

@@ -6,12 +6,10 @@ import type { DrizzleClient } from "database";
 import {
   type RegisterRequest,
   type LoginRequest,
-  type RefreshTokenRequest,
   type PasswordResetRequest,
   type PasswordResetData,
   type EmailVerificationData,
   type ChangePasswordRequest,
-  type LogoutRequest,
 } from "./auth.model.js";
 
 interface AuthRequest extends Request {
@@ -48,7 +46,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Registration error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during registration",
@@ -90,7 +87,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Login error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during login",
@@ -105,7 +101,7 @@ export class AuthController {
    */
   public static async refreshToken(req: AuthRequest, res: Response) {
     try {
-      const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+      const refreshToken = req.cookies.refreshToken ?? req.body.refreshToken;
 
       if (!refreshToken) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -140,7 +136,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Token refresh error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during token refresh",
@@ -164,7 +159,7 @@ export class AuthController {
         });
       }
 
-      const sessionId = req.body.sessionId || "current-session";
+      const sessionId = req.body.sessionId ?? "current-session";
 
       const serviceResponse = await AuthService.logout(req.drizzle, sessionId, req.user.id);
 
@@ -174,7 +169,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Logout error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during logout",
@@ -199,7 +193,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Password reset request error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password reset request",
@@ -225,7 +218,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Password reset error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password reset",
@@ -250,7 +242,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Email verification error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during email verification",
@@ -286,7 +277,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Change password error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password change",
@@ -317,7 +307,6 @@ export class AuthController {
         statusCode: StatusCodes.OK,
       });
     } catch (err) {
-      console.error("Get profile error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error retrieving profile",
@@ -357,7 +346,6 @@ export class AuthController {
         statusCode: StatusCodes.OK,
       });
     } catch (err) {
-      console.error("Resend verification error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error sending verification email",
@@ -400,7 +388,6 @@ export class AuthController {
         statusCode: StatusCodes.OK,
       });
     } catch (err) {
-      console.error("Get sessions error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error retrieving sessions",
@@ -439,7 +426,6 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
-      console.error("Revoke session error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error revoking session",
@@ -470,7 +456,6 @@ export class AuthController {
         statusCode: StatusCodes.OK,
       });
     } catch (err) {
-      console.error("Revoke all sessions error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error revoking sessions",

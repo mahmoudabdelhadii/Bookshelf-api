@@ -69,7 +69,6 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   try {
     return await bcrypt.compare(password, hash);
   } catch (err) {
-    console.error("Password verification error:", err);
     return false;
   }
 }
@@ -271,7 +270,6 @@ export function decryptSensitiveData(encryptedData: string, key: string): string
     throw new Error("Invalid encrypted data format");
   }
 
-  const iv = Buffer.from(parts[0], "hex");
   const authTag = Buffer.from(parts[1], "hex");
   const encrypted = parts[2];
 

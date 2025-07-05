@@ -28,7 +28,7 @@ class LibraryMemberController {
     const libraryId = req.params.libraryId;
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 20;
-    
+
     const serviceResponse = await LibraryMemberService.findByLibrary(req.drizzle, libraryId, page, pageSize);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -37,7 +37,7 @@ class LibraryMemberController {
     const userId = req.params.userId;
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 20;
-    
+
     const serviceResponse = await LibraryMemberService.findByUser(req.drizzle, userId, page, pageSize);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -51,7 +51,7 @@ class LibraryMemberController {
   public createLibraryMember: RequestHandler = async (req: Request, res: Response) => {
     const invitedBy = req.user?.id; // Assuming user ID comes from auth middleware
     const memberData: CreateLibraryMember = req.body;
-    
+
     const serviceResponse = await LibraryMemberService.create(req.drizzle, memberData, invitedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -59,7 +59,7 @@ class LibraryMemberController {
   public inviteLibraryMember: RequestHandler = async (req: Request, res: Response) => {
     const libraryId = req.params.libraryId;
     const invitedBy = req.user?.id;
-    
+
     if (!invitedBy) {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
@@ -68,7 +68,7 @@ class LibraryMemberController {
       ...req.body,
       libraryId,
     };
-    
+
     const serviceResponse = await LibraryMemberService.create(req.drizzle, memberData, invitedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -77,7 +77,7 @@ class LibraryMemberController {
     const id = req.params.id;
     const updatedBy = req.user?.id; // Assuming user ID comes from auth middleware
     const updateData: UpdateLibraryMember = req.body;
-    
+
     const serviceResponse = await LibraryMemberService.update(req.drizzle, id, updateData, updatedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -85,7 +85,7 @@ class LibraryMemberController {
   public removeLibraryMember: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const deletedBy = req.user?.id; // Assuming user ID comes from auth middleware
-    
+
     const serviceResponse = await LibraryMemberService.delete(req.drizzle, id, deletedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -93,14 +93,14 @@ class LibraryMemberController {
   public leaveLibrary: RequestHandler = async (req: Request, res: Response) => {
     const libraryId = req.params.libraryId;
     const userId = req.user?.id;
-    
+
     if (!userId) {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
 
     // Find the user's membership in this library
     const membershipResponse = await LibraryMemberService.findUserInLibrary(req.drizzle, userId, libraryId);
-    
+
     if (!membershipResponse.success || !membershipResponse.responseObject) {
       return handleServiceResponse(membershipResponse, res);
     }
@@ -125,11 +125,11 @@ class LibraryMemberController {
   public activateLibraryMember: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const updatedBy = req.user?.id;
-    
+
     const updateData: UpdateLibraryMember = {
       isActive: true,
     };
-    
+
     const serviceResponse = await LibraryMemberService.update(req.drizzle, id, updateData, updatedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -137,11 +137,11 @@ class LibraryMemberController {
   public deactivateLibraryMember: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const updatedBy = req.user?.id;
-    
+
     const updateData: UpdateLibraryMember = {
       isActive: false,
     };
-    
+
     const serviceResponse = await LibraryMemberService.update(req.drizzle, id, updateData, updatedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -149,11 +149,11 @@ class LibraryMemberController {
   public updateMemberRole: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const updatedBy = req.user?.id;
-    
+
     const updateData: UpdateLibraryMember = {
       role: req.body.role,
     };
-    
+
     const serviceResponse = await LibraryMemberService.update(req.drizzle, id, updateData, updatedBy);
     return handleServiceResponse(serviceResponse, res);
   };
@@ -161,11 +161,11 @@ class LibraryMemberController {
   public updateMemberPermissions: RequestHandler = async (req: Request, res: Response) => {
     const id = req.params.id;
     const updatedBy = req.user?.id;
-    
+
     const updateData: UpdateLibraryMember = {
       permissions: req.body.permissions,
     };
-    
+
     const serviceResponse = await LibraryMemberService.update(req.drizzle, id, updateData, updatedBy);
     return handleServiceResponse(serviceResponse, res);
   };

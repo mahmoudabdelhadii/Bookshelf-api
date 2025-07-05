@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+import { createTransport } from "nodemailer";
 import type { Transporter } from "nodemailer";
 import { env } from "../utils/envConfig.js";
 
@@ -55,7 +55,6 @@ class EmailService {
   async initialize(): Promise<void> {
     try {
       if (!env.EMAIL_USER || !env.EMAIL_PASS) {
-        console.warn("Email service not configured. EMAIL_USER and EMAIL_PASS are required.");
         return;
       }
 
@@ -73,13 +72,11 @@ class EmailService {
         },
       };
 
-      this.transporter = nodemailer.createTransport(transportConfig);
+      this.transporter = createTransport(transportConfig);
 
       await this.transporter.verify();
       this.isConfigured = true;
-      console.log("Email service initialized successfully");
     } catch (err) {
-      console.error("Failed to initialize email service:", err);
       this.isConfigured = false;
     }
   }
@@ -89,7 +86,6 @@ class EmailService {
    */
   async sendEmail(options: EmailOptions): Promise<boolean> {
     if (!this.isConfigured || !this.transporter) {
-      console.warn("Email service not configured. Email not sent:", options.subject);
       return false;
     }
 
@@ -103,15 +99,13 @@ class EmailService {
           to: options.to,
           subject: options.subject,
           html: options.html,
-          text: options.text || this.htmlToText(options.html),
+          text: options.text ?? this.htmlToText(options.html),
         };
 
         const result = await this.transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully to ${options.to}:`, result.messageId);
         return true;
       } catch (err) {
         lastError = err as Error;
-        console.error(`Email attempt ${attempt} failed:`, err);
 
         if (attempt < maxRetries) {
           await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
@@ -119,7 +113,6 @@ class EmailService {
       }
     }
 
-    console.error(`Failed to send email after ${maxRetries} attempts:`, lastError);
     return false;
   }
 
@@ -468,7 +461,6 @@ class EmailService {
       await this.transporter.verify();
       return true;
     } catch (err) {
-      console.error("Email connection test failed:", err);
       return false;
     }
   }

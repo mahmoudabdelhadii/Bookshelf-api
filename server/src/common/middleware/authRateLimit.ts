@@ -79,8 +79,8 @@ export const loginRateLimit = rateLimit({
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
   keyGenerator: (req) => {
-    const email = req.body?.email || "no-email";
-    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    const email = req.body?.email ?? "no-email";
+    const ip = req.ip ?? req.socket.remoteAddress ?? "unknown";
     return `login:${ip}:${email}`;
   },
   handler: (_req, res) => {
@@ -101,7 +101,7 @@ export const passwordResetRateLimit = rateLimit({
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
   keyGenerator: (req: Request) => {
-    const email = req.body?.email || "no-email";
+    const email = req.body?.email ?? "no-email";
     return `password-reset:${email}`;
   },
   handler: (_req: Request, res: Response) => {
@@ -130,8 +130,8 @@ export const emailVerificationRateLimit = rateLimit({
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
   keyGenerator: (req: Request) => {
-    const token = req.body?.token || "no-token";
-    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    const token = req.body?.token ?? "no-token";
+    const ip = req.ip ?? req.socket.remoteAddress ?? "unknown";
     return `email-verify:${ip}:${token.substring(0, 8)}`;
   },
   handler: (_req: Request, res: Response) => {
@@ -161,7 +161,7 @@ export const registrationRateLimit = rateLimit({
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
   keyGenerator: (req: Request) => {
-    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    const ip = req.ip ?? req.socket.remoteAddress ?? "unknown";
     return `register:${ip}`;
   },
   handler: (_req: Request, res: Response) => {
@@ -191,7 +191,7 @@ export const refreshTokenRateLimit = rateLimit({
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
   keyGenerator: (req: Request) => {
-    const ip = req.ip || req.socket.remoteAddress || "unknown";
+    const ip = req.ip ?? req.socket.remoteAddress ?? "unknown";
     return `refresh:${ip}`;
   },
   handler: (_req: Request, res: Response) => {
@@ -217,7 +217,7 @@ export const createAdaptiveRateLimit = (baseMax: number, baseWindowMs: number) =
     store: createRedisStore(),
     windowMs: baseWindowMs,
     max: (req: Request) => {
-      const userAgent = req.get("user-agent") || "";
+      const userAgent = req.get("user-agent") ?? "";
       const hasValidUserAgent = userAgent.length > 10 && !userAgent.includes("bot");
 
       const suspiciousHeaders = ["automation", "selenium", "crawler", "spider", "scraper"].some((keyword) =>
@@ -251,7 +251,7 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
     store: createRedisStore(),
     windowMs: baseWindowMs,
     max: (req: Request) => {
-      const key = req.ip || "unknown";
+      const key = req.ip ?? "unknown";
       const violation = violationStore.get(key);
 
       if (!violation) {
@@ -262,7 +262,7 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
       return Math.max(1, Math.floor(baseMax / multiplier));
     },
     message: (req: Request) => {
-      const key = req.ip || "unknown";
+      const key = req.ip ?? "unknown";
       const violation = violationStore.get(key);
       const multiplier = violation ? Math.min(violation.count, 5) : 1;
       const max = Math.max(1, Math.floor(baseMax / multiplier));
@@ -273,7 +273,7 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
         responseObject: {
           limit: max,
           windowMs: baseWindowMs,
-          violationCount: violation?.count || 0,
+          violationCount: violation?.count ?? 0,
         },
         statusCode: StatusCodes.TOO_MANY_REQUESTS,
       };
@@ -308,9 +308,7 @@ export class RateLimitUtils {
         if (keys.length > 0) {
           await redisClient.del(keys);
         }
-      } catch (err) {
-        console.error("Error resetting rate limit:", err);
-      }
+      } catch (err) {}
     }
   }
 
@@ -335,9 +333,7 @@ export class RateLimitUtils {
           resetTime,
           total: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
         };
-      } catch (err) {
-        console.error("Error getting rate limit status:", err);
-      }
+      } catch (err) {}
     }
 
     return {
@@ -358,9 +354,7 @@ export class RateLimitUtils {
         const currentCount = current ? parseInt(current, 10) : 0;
 
         return currentCount >= env.AUTH_RATE_LIMIT_MAX_REQUESTS;
-      } catch (err) {
-        console.error("Error checking rate limit status:", err);
-      }
+      } catch (err) {}
     }
 
     return false;

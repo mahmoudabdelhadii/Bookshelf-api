@@ -3,6 +3,7 @@ import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
 import type { Application } from "express";
 import { env } from "../utils/envConfig.js";
+import { DrizzleClient } from "database";
 
 export let redisClient: ReturnType<typeof createClient> | null = null;
 
@@ -12,11 +13,8 @@ export let redisClient: ReturnType<typeof createClient> | null = null;
 export async function initializeRedis(): Promise<ReturnType<typeof createClient>> {
   try {
     if (redisClient && redisClient.isOpen) {
-      console.log("Redis client already initialized and connected");
       return redisClient;
     }
-
-    console.log("Initializing Redis client with URL:", env.REDIS_URL);
 
     redisClient = createClient({
       url: env.REDIS_URL,
@@ -24,34 +22,22 @@ export async function initializeRedis(): Promise<ReturnType<typeof createClient>
         connectTimeout: 10000,
         reconnectStrategy: (retries) => {
           if (retries > 5) {
-            console.error("Redis connection failed after 5 retries");
             return false;
           }
-          console.log(`Redis reconnection attempt ${retries + 1}`);
           return Math.min(retries * 100, 3000);
         },
       },
     });
 
-    redisClient.on("error", (err) => {
-      console.error("Redis Client Error:", err.message);
-    });
+    redisClient.on("error", (err) => {});
 
-    redisClient.on("connect", () => {
-      console.log("Redis Client Connected successfully");
-    });
+    redisClient.on("connect", () => {});
 
-    redisClient.on("ready", () => {
-      console.log("Redis Client Ready for commands");
-    });
+    redisClient.on("ready", () => {});
 
-    redisClient.on("end", () => {
-      console.log("Redis Client Disconnected");
-    });
+    redisClient.on("end", () => {});
 
-    redisClient.on("reconnecting", () => {
-      console.log("Redis Client Reconnecting...");
-    });
+    redisClient.on("reconnecting", () => {});
 
     const connectTimeout = setTimeout(() => {
       if (redisClient && !redisClient.isOpen) {
@@ -64,11 +50,9 @@ export async function initializeRedis(): Promise<ReturnType<typeof createClient>
     clearTimeout(connectTimeout);
 
     await redisClient.ping();
-    console.log("Redis connection test successful");
 
     return redisClient;
   } catch (err) {
-    console.error("Failed to initialize Redis:", err);
     redisClient = null;
     throw err;
   }
@@ -82,10 +66,7 @@ export async function closeRedis(): Promise<void> {
     try {
       await redisClient.disconnect();
       redisClient = null;
-      console.log("Redis connection closed");
-    } catch (err) {
-      console.error("Error closing Redis connection:", err);
-    }
+    } catch (err) {}
   }
 }
 
@@ -125,9 +106,7 @@ export function configureSession(app: Application): void {
     }
 
     app.use(session(sessionConfig));
-    console.log("Session middleware configured successfully with Redis store");
   } catch (err) {
-    console.error("Failed to configure session middleware:", err);
     throw err;
   }
 }
@@ -160,7 +139,7 @@ export class SessionManager {
    * Get user data from session
    */
   static getUserFromSession(req: any): any | null {
-    return req.session?.user || null;
+    return req.session?.user ?? null;
   }
 
   /**
@@ -270,7 +249,6 @@ export function validateSession(req: any, res: any, next: any): void {
         });
       })
       .catch((err) => {
-        console.error("Error clearing expired session:", err);
         next(err);
       });
     return;
@@ -340,7 +318,6 @@ export class SessionCleanup {
    */
   static async cleanupExpiredSessions(): Promise<void> {
     if (!redisClient) {
-      console.warn("Redis client not available for session cleanup");
       return;
     }
 
@@ -367,11 +344,8 @@ export class SessionCleanup {
 
       if (keysToDelete.length > 0) {
         await redisClient.del(keysToDelete);
-        console.log(`Cleaned up ${keysToDelete.length} expired sessions`);
       }
-    } catch (err) {
-      console.error("Error during session cleanup:", err);
-    }
+    } catch (err) {}
   }
 
   /**
@@ -417,7 +391,6 @@ export class SessionCleanup {
 
       return { totalSessions, activeSessions, expiringSoon };
     } catch (err) {
-      console.error("Error getting session stats:", err);
       return { totalSessions: 0, activeSessions: 0, expiringSoon: 0 };
     }
   }
@@ -439,7 +412,7 @@ export function setupSessionCleanup(): NodeJS.Timeout {
  * Create session record for database tracking
  */
 export async function createSessionRecord(
-  drizzle: any,
+  drizzle: DrizzleClient,
   userId: string,
   sessionData: {
     sessionToken: string;

@@ -18,7 +18,7 @@ class LibraryController {
   public createLibrary: RequestHandler = async (req: Request, res: Response) => {
     const libraryData: CreateLibrary = req.body;
     // TODO: Get ownerId from authenticated user context (req.user.id)
-    const ownerId = "placeholder-owner-id"; 
+    const ownerId = "placeholder-owner-id";
     const serviceResponse = await LibraryService.create(req.drizzle, libraryData, ownerId);
     return handleServiceResponse(serviceResponse, res);
   };

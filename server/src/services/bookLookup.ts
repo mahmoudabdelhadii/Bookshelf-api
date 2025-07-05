@@ -1,12 +1,10 @@
 import { eq, schema, type DrizzleClient, logger, count } from "database";
-import { queueBookLookup, queueAuthorLookup, queuePublisherLookup } from "./isbndbQueue.js";
 import { isbnService } from "./isbnService.js";
-import { env } from "../common/utils/envConfig.js";
 import type { Book as ISBNdbBook } from "../common/types/shared/isbndbAPI.js";
 
 export const BookLookupService = {
   // Get book by ISBN - checks DB first, then queues ISBNDB lookup if not found
-  getBookByISBN: async (drizzle: DrizzleClient, isbn: string, forceRefresh = false): Promise<any> => {
+  getBookByISBN: async (drizzle: DrizzleClient, isbn: string, forceRefresh = false) => {
     try {
       const cleanISBN = isbn.replace(/[^0-9X]/gi, "");
 
@@ -20,13 +18,13 @@ export const BookLookupService = {
         });
 
         if (cachedBook) {
-          logger.info(`Book found in cache: ${cleanISBN}`);
+          logger.info("Book found in cache: %s", cleanISBN);
           return {
             title: cachedBook.title,
             title_long: cachedBook.title,
             isbn: cachedBook.isbn,
             isbn13: cachedBook.isbn13,
-            publisher: cachedBook.publisher?.name || "",
+            publisher: cachedBook.publisher.name,
             date_published: cachedBook.publishedYear?.toString(),
             pages: cachedBook.pages,
             overview: cachedBook.overview,
@@ -41,27 +39,27 @@ export const BookLookupService = {
       // If not in cache and ISBNDB is enabled, fetch from API
       if (isbnService.isEnabled()) {
         try {
-          logger.info(`Fetching book from ISBNDB: ${cleanISBN}`);
+          logger.info("Fetching book from ISBNDB: %s", cleanISBN);
           const isbndbData = await isbnService.getBookByISBN(cleanISBN);
 
-          if (isbndbData && isbndbData.book) {
+          if (isbndbData.book) {
             await BookLookupService.cacheBook(drizzle, isbndbData.book);
             return isbndbData.book;
           }
-        } catch (error) {
-          logger.error(`Failed to fetch book from ISBNDB: ${cleanISBN}`, { error });
+        } catch (err) {
+          logger.error({ error: err }, "Failed to fetch book from ISBNDB: %s", cleanISBN);
         }
       }
 
       return null;
-    } catch (error) {
-      logger.error(`Error in getBookByISBN: ${isbn}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Error in getBookByISBN: %s", isbn);
+      throw err;
     }
   },
 
   // Cache a book from ISBNDB data into our database
-  cacheBook: async (drizzle: DrizzleClient, isbndbBook: NonNullable<ISBNdbBook['book']>): Promise<void> => {
+  cacheBook: async (drizzle: DrizzleClient, isbndbBook: NonNullable<ISBNdbBook["book"]>): Promise<void> => {
     try {
       // First, ensure we have authors and publishers
       let authorId: string;
@@ -90,37 +88,39 @@ export const BookLookupService = {
       if (!existingBook) {
         // Insert new book
         await drizzle.insert(schema.book).values({
-          isbn: isbndbBook.isbn || null,
-          isbn13: isbndbBook.isbn13 || null,
-          title: isbndbBook.title || "Unknown Title",
-          overview: isbndbBook.overview || isbndbBook.synopsis || null,
+          isbn: isbndbBook.isbn ?? null,
+          isbn13: isbndbBook.isbn13 ?? null,
+          title: isbndbBook.title ?? "Unknown Title",
+          overview: isbndbBook.overview ?? isbndbBook.synopsis ?? null,
           publishedYear: isbndbBook.date_published ? new Date(isbndbBook.date_published).getFullYear() : null,
-          pages: isbndbBook.pages || null,
-          image: isbndbBook.image || null,
+          pages: isbndbBook.pages ?? null,
+          image: isbndbBook.image ?? null,
           authorId,
           publisherId,
         });
 
-        logger.info(`Cached book in database: ${isbndbBook.isbn}`);
+        logger.info("Cached book in database: %s", isbndbBook.isbn);
       } else if (isbndbBook.isbn) {
         // Update existing book (only if we have an ISBN)
         await drizzle
           .update(schema.book)
           .set({
-            title: isbndbBook.title || "Unknown Title",
-            overview: isbndbBook.overview || isbndbBook.synopsis || null,
-            publishedYear: isbndbBook.date_published ? new Date(isbndbBook.date_published).getFullYear() : null,
-            pages: isbndbBook.pages || null,
-            image: isbndbBook.image || null,
+            title: isbndbBook.title ?? "Unknown Title",
+            overview: isbndbBook.overview ?? isbndbBook.synopsis ?? null,
+            publishedYear: isbndbBook.date_published
+              ? new Date(isbndbBook.date_published).getFullYear()
+              : null,
+            pages: isbndbBook.pages ?? null,
+            image: isbndbBook.image ?? null,
             authorId,
             publisherId,
           })
           .where(eq(schema.book.isbn, isbndbBook.isbn));
 
-        logger.info(`Updated cached book in database: ${isbndbBook.isbn}`);
+        logger.info("Updated cached book in database: %s", isbndbBook.isbn);
       }
-    } catch (error) {
-      logger.error(`Error caching book: ${isbndbBook.isbn}`, { error });
+    } catch (err) {
+      logger.error({ error: err }, "Error caching book: %s", isbndbBook.isbn);
     }
   },
 
@@ -145,9 +145,9 @@ export const BookLookupService = {
         .returning();
 
       return newAuthor.id;
-    } catch (error) {
-      logger.error(`Error ensuring author: ${authorName}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Error ensuring author: %s", authorName);
+      throw err;
     }
   },
 
@@ -172,14 +172,14 @@ export const BookLookupService = {
         .returning();
 
       return newPublisher.id;
-    } catch (error) {
-      logger.error(`Error ensuring publisher: ${publisherName}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Error ensuring publisher: %s", publisherName);
+      throw err;
     }
   },
 
   // Search cached books with proper pagination
-  searchCachedBooks: async (drizzle: DrizzleClient, query: string, limit = 20): Promise<any[]> => {
+  searchCachedBooks: async (drizzle: DrizzleClient, query: string, limit = 20) => {
     try {
       const results = await drizzle.query.book.findMany({
         where: (b, { ilike }) => ilike(b.title, `%${query}%`),
@@ -195,7 +195,7 @@ export const BookLookupService = {
         title_long: result.title,
         isbn: result.isbn,
         isbn13: result.isbn13,
-        publisher: result.publisher?.name || "",
+        publisher: result.publisher.name,
         date_published: result.publishedYear?.toString(),
         pages: result.pages,
         overview: result.overview,
@@ -204,18 +204,21 @@ export const BookLookupService = {
         subjects: [],
         cached: true,
       }));
-    } catch (error) {
-      logger.error(`Error searching cached books: ${query}`, { error });
+    } catch (err) {
+      logger.error({ error: err }, "Error searching cached books: %s", query);
       return [];
     }
   },
 
   // Search books using ISBNdb API with proper typing
-  searchBooksViaISBNdb: async (query: string, options?: {
-    page?: number;
-    pageSize?: number;
-    column?: "title" | "author" | "date_published" | "subjects" | "";
-  }): Promise<any[]> => {
+  searchBooksViaISBNdb: async (
+    query: string,
+    options?: {
+      page?: number;
+      pageSize?: number;
+      column?: "title" | "author" | "date_published" | "subjects" | "";
+    },
+  ) => {
     try {
       if (!isbnService.isEnabled()) {
         logger.warn("ISBNdb service is not enabled");
@@ -223,7 +226,7 @@ export const BookLookupService = {
       }
 
       const searchResult = await isbnService.searchBooks(query, options);
-      
+
       if (!searchResult.books) {
         return [];
       }
@@ -231,24 +234,24 @@ export const BookLookupService = {
       return searchResult.books.map((bookWrapper) => {
         const book = bookWrapper.book;
         return {
-          title: book?.title || "",
-          title_long: book?.title_long || book?.title || "",
-          isbn: book?.isbn || "",
-          isbn13: book?.isbn13 || "",
-          publisher: book?.publisher || "",
-          date_published: book?.date_published || "",
-          pages: book?.pages || 0,
-          overview: book?.overview || "",
-          synopsis: book?.synopsis || "",
-          image: book?.image || "",
-          authors: book?.authors || [],
-          subjects: book?.subjects || [],
+          title: book?.title,
+          title_long: book?.title_long ?? book?.title,
+          isbn: book?.isbn,
+          isbn13: book?.isbn13,
+          publisher: book?.publisher,
+          date_published: book?.date_published,
+          pages: book?.pages ?? 0,
+          overview: book?.overview,
+          synopsis: book?.synopsis,
+          image: book?.image,
+          authors: book?.authors ?? [],
+          subjects: book?.subjects ?? [],
           cached: false,
-          source: "isbndb"
+          source: "isbndb",
         };
       });
-    } catch (error) {
-      logger.error(`Error searching books via ISBNdb: ${query}`, { error });
+    } catch (err) {
+      logger.error({ error: err }, "Error searching books via ISBNdb: %s", query);
       return [];
     }
   },
@@ -269,10 +272,9 @@ export const BookLookupService = {
         totalAuthors: authorCount.count,
         totalPublishers: publisherCount.count,
       };
-    } catch (error) {
-      logger.error("Error getting cache stats", { error });
+    } catch (err) {
+      logger.error({ error: err }, "Error getting cache stats");
       return { totalBooks: 0, totalAuthors: 0, totalPublishers: 0 };
     }
   },
 };
-

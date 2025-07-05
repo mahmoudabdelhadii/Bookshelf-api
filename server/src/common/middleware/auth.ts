@@ -46,7 +46,6 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
   return passport.authenticate("jwt", { session: false }, (err: any, user: AuthUser | false, info: any) => {
     if (err) {
-      console.error("JWT authentication error:", err);
       const errorResponse = ServiceResponse.failure(
         "Authentication error occurred.",
         null,
@@ -57,7 +56,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
     if (!user) {
       const errorResponse = ServiceResponse.failure(
-        info?.message || "Authentication failed.",
+        info?.message ?? "Authentication failed.",
         null,
         StatusCodes.UNAUTHORIZED,
       );
@@ -66,7 +65,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
     req.user = user;
     next();
-    return;
+    
   })(req, res, next);
 };
 
@@ -81,12 +80,14 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction): v
   if (!token) {
     next();
     return;
+    return;
   }
 
   const verification = verifyAccessToken(token);
 
   if (!verification.isValid) {
     next();
+    return;
     return;
   }
 
@@ -95,6 +96,7 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction): v
       req.user = user;
     }
     next();
+    
   })(req, res, next);
 };
 
@@ -105,7 +107,6 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction): v
 export const authenticateLocal = (req: Request, res: Response, next: NextFunction): void => {
   passport.authenticate("local", { session: false }, (err: any, user: AuthUser | false, info: any) => {
     if (err) {
-      console.error("Local authentication error:", err);
       const errorResponse = ServiceResponse.failure(
         "Authentication error occurred.",
         null,
@@ -116,7 +117,7 @@ export const authenticateLocal = (req: Request, res: Response, next: NextFunctio
 
     if (!user) {
       const errorResponse = ServiceResponse.failure(
-        info?.message || "Invalid credentials provided.",
+        info?.message ?? "Invalid credentials provided.",
         null,
         StatusCodes.UNAUTHORIZED,
       );
@@ -125,7 +126,7 @@ export const authenticateLocal = (req: Request, res: Response, next: NextFunctio
 
     req.user = user;
     next();
-    return;
+    
   })(req, res, next);
 };
 
@@ -148,7 +149,7 @@ export const requireEmailVerified = (req: Request, res: Response, next: NextFunc
   }
 
   next();
-  return;
+  
 };
 
 /**
@@ -179,7 +180,7 @@ export const requireActiveAccount = (req: Request, res: Response, next: NextFunc
   }
 
   next();
-  return;
+  
 };
 
 export const requireRoles = (...allowedRoles: string[]) => {
@@ -203,7 +204,7 @@ export const requireRoles = (...allowedRoles: string[]) => {
     }
 
     next();
-    return;
+    
   };
 };
 
@@ -230,7 +231,7 @@ export const requirePermissions = (...requiredPermissions: string[]) => {
     }
 
     next();
-    return;
+    
   };
 };
 
@@ -257,7 +258,7 @@ export const requireAnyPermission = (...requiredPermissions: string[]) => {
     }
 
     next();
-    return;
+    
   };
 };
 
@@ -278,7 +279,7 @@ export const requireOwnershipOrAdmin = (userIdField = "userId") => {
     }
 
     const hasManagementPermission = req.user.permissions.some(
-      (p) => p.includes(":manage") || p.includes("system:manage"),
+      (p) => p.includes(":manage") ?? p.includes("system:manage"),
     );
 
     if (hasManagementPermission) {
@@ -286,7 +287,7 @@ export const requireOwnershipOrAdmin = (userIdField = "userId") => {
       return;
     }
 
-    const resourceUserId = req.params[userIdField] || req.body[userIdField] || req.query[userIdField];
+    const resourceUserId = req.params[userIdField] ?? req.body[userIdField] ?? req.query[userIdField];
 
     if (!resourceUserId) {
       const errorResponse = ServiceResponse.failure(
@@ -307,7 +308,7 @@ export const requireOwnershipOrAdmin = (userIdField = "userId") => {
     }
 
     next();
-    return;
+    
   };
 };
 
@@ -332,7 +333,7 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction) =>
   }
 
   next();
-  return;
+  
 };
 
 export const developmentOnly = (_req: Request, res: Response, next: NextFunction) => {
@@ -346,7 +347,7 @@ export const developmentOnly = (_req: Request, res: Response, next: NextFunction
   }
 
   next();
-  return;
+  
 };
 
 export const combineAuthMiddleware = (
@@ -363,6 +364,7 @@ export const combineAuthMiddleware = (
 
       if (currentIndex >= middlewares.length) {
         next();
+        return;
         return;
       }
 

@@ -92,11 +92,11 @@ class CSRFProtection {
   private whitelist: Set<string>;
 
   constructor(options: CSRFOptions = {}) {
-    this.cookieName = options.cookieName || "csrf-token";
-    this.headerName = options.headerName || "x-csrf-token";
-    this.tokenLength = options.tokenLength || 32;
-    this.ignoredMethods = new Set(options.ignoredMethods || ["GET", "HEAD", "OPTIONS"]);
-    this.whitelist = new Set(options.whitelist || []);
+    this.cookieName = options.cookieName ?? "csrf-token";
+    this.headerName = options.headerName ?? "x-csrf-token";
+    this.tokenLength = options.tokenLength ?? 32;
+    this.ignoredMethods = new Set(options.ignoredMethods ?? ["GET", "HEAD", "OPTIONS"]);
+    this.whitelist = new Set(options.whitelist ?? []);
   }
 
   /**
@@ -136,7 +136,7 @@ class CSRFProtection {
    */
   verifyToken(req: Request): boolean {
     const cookieToken = req.cookies[`${this.cookieName}-secret`];
-    const headerToken = req.get(this.headerName) || req.body?._csrf;
+    const headerToken = req.get(this.headerName) ?? req.body?._csrf;
 
     if (!cookieToken || !headerToken) {
       return false;
@@ -177,7 +177,6 @@ class CSRFProtection {
       }
 
       next();
-      return;
     };
   }
 
@@ -310,15 +309,15 @@ export class IPAccessControl {
       }
 
       next();
-      return;
+      
     };
   }
 
   private getClientIP(req: Request): string {
     return (
-      req.ip ||
-      req.socket.remoteAddress ||
-      (req.headers["x-forwarded-for"] as string).split(",")[0]?.trim() ||
+      req.ip ??
+      req.socket.remoteAddress ??
+      (req.headers["x-forwarded-for"] as string).split(",")[0]?.trim() ??
       "unknown"
     );
   }
@@ -348,6 +347,7 @@ export function requestId(req: Request, res: Response, next: NextFunction) {
   req.headers["x-request-id"] = id;
   res.setHeader("X-Request-ID", id);
   next();
+  
 }
 
 /**
@@ -365,7 +365,7 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
     /eval\(/i, // Code injection
   ];
 
-  const userAgent = req.get("user-agent") || "";
+  const userAgent = req.get("user-agent") ?? "";
   const url = req.url;
   const body = JSON.stringify(req.body);
 

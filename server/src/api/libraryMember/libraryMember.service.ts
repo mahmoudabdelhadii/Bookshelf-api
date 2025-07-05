@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { eq, sql, schema, and, ne, desc, count, inArray } from "database";
+import { eq, sql, schema, and, desc, inArray } from "database";
 import {
   NotFoundError,
   ConflictError,
@@ -8,7 +8,7 @@ import {
   ForbiddenError,
 } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import type { LibraryMember, CreateLibraryMember, UpdateLibraryMember } from "./libraryMember.model.js";
+import type { CreateLibraryMember, UpdateLibraryMember } from "./libraryMember.model.js";
 
 export const LibraryMemberService = {
   findAll: async (
@@ -23,11 +23,11 @@ export const LibraryMemberService = {
     },
   ) => {
     try {
-      const page = filters?.page || 1;
-      const pageSize = filters?.pageSize || 20;
+      const page = filters?.page ?? 1;
+      const pageSize = filters?.pageSize ?? 20;
       const offset = (page - 1) * pageSize;
 
-      let whereConditions = [];
+      const whereConditions = [];
       if (filters?.libraryId) {
         whereConditions.push(eq(schema.libraryMember.libraryId, filters.libraryId));
       }
@@ -243,7 +243,7 @@ export const LibraryMemberService = {
         .insert(schema.libraryMember)
         .values({
           ...memberData,
-          invitedBy: invitedBy || memberData.invitedBy,
+          invitedBy: invitedBy ?? memberData.invitedBy,
         })
         .returning();
 
@@ -384,7 +384,7 @@ export const LibraryMemberService = {
 
       return ServiceResponse.success("Library member removed successfully", null);
     } catch (err) {
-      if (err instanceof NotFoundError || err instanceof ConflictError || err instanceof ForbiddenError) {
+      if ((err instanceof NotFoundError || err instanceof ConflictError) ?? err instanceof ForbiddenError) {
         return ServiceResponse.failure(err.message, null, err.statusCode);
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
@@ -446,7 +446,7 @@ export const LibraryMemberService = {
       let activeBorrows = 0;
       let overdueBorrows = 0;
 
-      borrowStats.forEach((stat) => {
+      for (const stat of borrowStats) {
         borrowsCount += stat.count;
         if (["approved", "borrowed"].includes(stat.status)) {
           activeBorrows += stat.count;
@@ -454,7 +454,7 @@ export const LibraryMemberService = {
         if (stat.status === "overdue") {
           overdueBorrows += stat.count;
         }
-      });
+      }
 
       // Get last activity (latest borrow request)
       const lastActivityResult = await drizzle
@@ -469,7 +469,7 @@ export const LibraryMemberService = {
         borrowsCount,
         activeBorrows,
         overdueBorrows,
-        lastActivity: lastActivityResult[0]?.lastActivity || null,
+        lastActivity: lastActivityResult[0]?.lastActivity ?? null,
       };
 
       return ServiceResponse.success("Library member with stats retrieved successfully", memberWithStats);
@@ -506,7 +506,7 @@ export const LibraryMemberService = {
         members: 0,
       };
 
-      memberStats.forEach((stat) => {
+      for (const stat of memberStats) {
         stats.totalMembers += stat.count;
         if (stat.isActive) {
           stats.activeMembers += stat.count;
@@ -528,7 +528,7 @@ export const LibraryMemberService = {
             stats.members += stat.count;
             break;
         }
-      });
+      }
 
       return ServiceResponse.success("Library member statistics retrieved successfully", stats);
     } catch (err) {
@@ -538,4 +538,3 @@ export const LibraryMemberService = {
     }
   },
 };
-

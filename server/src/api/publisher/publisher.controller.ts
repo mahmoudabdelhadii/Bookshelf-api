@@ -23,8 +23,8 @@ class PublisherController {
 
   public searchPublishers: RequestHandler = async (req: Request, res: Response) => {
     const query = req.params.query;
-    const page = parseInt(req.query.page as string) || 1;
-    const pageSize = parseInt(req.query.pageSize as string) || 20;
+    const page = parseInt(req.query.page as string) ?? 1;
+    const pageSize = parseInt(req.query.pageSize as string) ?? 20;
     const serviceResponse = await PublisherService.search(req.drizzle, query, page, pageSize);
     return handleServiceResponse(serviceResponse, res);
   };

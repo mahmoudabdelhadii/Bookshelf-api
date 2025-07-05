@@ -212,17 +212,17 @@ booksRegistry.registerPath({
   method: "post",
   path: "/books/queue/{isbn}",
   tags: ["Books", "Queue"],
-  request: { 
+  request: {
     params: z.object({ isbn: z.string() }),
     body: {
       content: {
         "application/json": {
           schema: z.object({
-            priority: z.enum(["high", "low"]).optional().default("low")
-          })
-        }
-      }
-    }
+            priority: z.enum(["high", "low"]).optional().default("low"),
+          }),
+        },
+      },
+    },
   },
   responses: createApiResponse(z.any(), "Book lookup queued successfully"),
 });
@@ -232,17 +232,20 @@ booksRegistry.registerPath({
   method: "get",
   path: "/books/queue/status",
   tags: ["Books", "Queue"],
-  responses: createApiResponse(z.object({
-    queue: z.object({
-      length: z.number(),
-      processing: z.boolean()
+  responses: createApiResponse(
+    z.object({
+      queue: z.object({
+        length: z.number(),
+        processing: z.boolean(),
+      }),
+      cache: z.object({
+        totalBooks: z.number(),
+        totalAuthors: z.number(),
+        totalPublishers: z.number(),
+      }),
     }),
-    cache: z.object({
-      totalBooks: z.number(),
-      totalAuthors: z.number(),
-      totalPublishers: z.number()
-    })
-  }), "Queue status retrieved"),
+    "Queue status retrieved",
+  ),
 });
 booksRouter.get("/queue/status", booksController.getQueueStatus);
 
@@ -250,12 +253,12 @@ booksRegistry.registerPath({
   method: "get",
   path: "/books/search-cached/{query}",
   tags: ["Books", "Search", "Cache"],
-  request: { 
+  request: {
     params: z.object({ query: z.string() }),
     query: z.object({
       useQueue: z.string().optional().default("true"),
-      priority: z.enum(["high", "low"]).optional().default("low")
-    })
+      priority: z.enum(["high", "low"]).optional().default("low"),
+    }),
   },
   responses: createApiResponse(z.any(), "Search results with cache"),
 });
@@ -266,17 +269,20 @@ booksRegistry.registerPath({
   method: "get",
   path: "/books/service/status",
   tags: ["Books", "Service"],
-  responses: createApiResponse(z.object({
-    service: z.object({
-      enabled: z.boolean(),
-      hasApiKey: z.boolean(),
-      baseUrl: z.string()
+  responses: createApiResponse(
+    z.object({
+      service: z.object({
+        enabled: z.boolean(),
+        hasApiKey: z.boolean(),
+        baseUrl: z.string(),
+      }),
+      queue: z.object({
+        length: z.number(),
+        processing: z.boolean(),
+      }),
     }),
-    queue: z.object({
-      length: z.number(),
-      processing: z.boolean()
-    })
-  }), "ISBN service status"),
+    "ISBN service status",
+  ),
 });
 booksRouter.get("/service/status", booksController.getISBNServiceStatus);
 
@@ -284,11 +290,11 @@ booksRegistry.registerPath({
   method: "get",
   path: "/books/isbn-direct/{isbn}",
   tags: ["Books", "ISBN"],
-  request: { 
+  request: {
     params: z.object({ isbn: z.string() }),
     query: z.object({
-      withPrices: z.string().optional().default("false")
-    })
+      withPrices: z.string().optional().default("false"),
+    }),
   },
   responses: createApiResponse(z.any(), "Book found via direct ISBN lookup"),
 });

@@ -1,4 +1,5 @@
 import { isbnService } from "./isbnService.js";
+import { Author, Publisher, Book } from "@/common/types/shared/isbndbAPI.js";
 
 interface QueueItem {
   id: string;
@@ -61,8 +62,8 @@ class SimpleISBNDBQueue {
 
       try {
         await this.processItem(item);
-      } catch (error) {
-        await this.handleFailedItem(item, error as Error);
+      } catch (err) {
+        await this.handleFailedItem(item, err as Error);
       }
     }
   }
@@ -79,28 +80,24 @@ class SimpleISBNDBQueue {
 
     this.lastApiCall = Date.now();
 
-    try {
-      let result;
+    let result;
 
-      switch (item.type) {
-        case "book":
-          result = await this.fetchBookData(item.data);
-          break;
-        case "author":
-          result = await this.fetchAuthorData(item.data);
-          break;
-        case "publisher":
-          result = await this.fetchPublisherData(item.data);
-          break;
-        default:
-          throw new Error(`Unknown queue item type: ${item.type}`);
-      }
+    switch (item.type) {
+      case "book":
+        result = await this.fetchBookData(item.data);
+        break;
+      case "author":
+        result = await this.fetchAuthorData(item.data);
+        break;
+      case "publisher":
+        result = await this.fetchPublisherData(item.data);
+        break;
+      default:
+        throw new Error(`Unknown queue item type: ${item.type}`);
+    }
 
-      if (item.callback) {
-        item.callback(null, result);
-      }
-    } catch (error) {
-      throw error;
+    if (item.callback) {
+      item.callback(null, result);
     }
   }
 
@@ -112,22 +109,20 @@ class SimpleISBNDBQueue {
       setTimeout(() => {
         this.queue.unshift(item); // Add back to front for retry
       }, this.RETRY_DELAY_MS);
-    } else {
-      if (item.callback) {
-        item.callback(error);
-      }
+    } else if (item.callback) {
+      item.callback(error);
     }
   }
 
-  private async fetchBookData(data: { isbn: string }): Promise<any> {
+  private async fetchBookData(data: { isbn: string }): Promise<Book> {
     return isbnService.getBookByISBN(data.isbn);
   }
 
-  private async fetchAuthorData(data: { name: string }): Promise<any> {
+  private async fetchAuthorData(data: { name: string }): Promise<Author> {
     return isbnService.getAuthorDetails(data.name);
   }
 
-  private async fetchPublisherData(data: { name: string }): Promise<any> {
+  private async fetchPublisherData(data: { name: string }): Promise<Publisher> {
     return isbnService.getPublisherDetails(data.name);
   }
 
@@ -151,7 +146,7 @@ class SimpleISBNDBQueue {
 export const isbndbQueue = new SimpleISBNDBQueue();
 
 // Helper function to queue book lookup with promise
-export function queueBookLookup(isbn: string, priority: "high" | "low" = "low"): Promise<any> {
+export function queueBookLookup(isbn: string, priority: "high" | "low" = "low"): Promise<Book> {
   return new Promise((resolve, reject) => {
     isbndbQueue.addToQueue("book", { isbn }, priority, (error, result) => {
       if (error) {
@@ -164,7 +159,7 @@ export function queueBookLookup(isbn: string, priority: "high" | "low" = "low"):
 }
 
 // Helper function to queue author lookup with promise
-export function queueAuthorLookup(name: string, priority: "high" | "low" = "low"): Promise<any> {
+export function queueAuthorLookup(name: string, priority: "high" | "low" = "low"): Promise<Author> {
   return new Promise((resolve, reject) => {
     isbndbQueue.addToQueue("author", { name }, priority, (error, result) => {
       if (error) {
@@ -177,7 +172,7 @@ export function queueAuthorLookup(name: string, priority: "high" | "low" = "low"
 }
 
 // Helper function to queue publisher lookup with promise
-export function queuePublisherLookup(name: string, priority: "high" | "low" = "low"): Promise<any> {
+export function queuePublisherLookup(name: string, priority: "high" | "low" = "low"): Promise<Publisher> {
   return new Promise((resolve, reject) => {
     isbndbQueue.addToQueue("publisher", { name }, priority, (error, result) => {
       if (error) {
@@ -188,4 +183,3 @@ export function queuePublisherLookup(name: string, priority: "high" | "low" = "l
     });
   });
 }
-

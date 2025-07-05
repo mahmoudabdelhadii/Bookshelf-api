@@ -8,7 +8,6 @@ import {
   subjectSchema,
   createSubjectSchema,
   updateSubjectSchema,
-  getSubjectSchema,
   subjectArraySchema,
   subjectWithChildrenSchema,
 } from "./subject.model.js";
@@ -36,7 +35,10 @@ subjectRegistry.registerPath({
   method: "get",
   path: "/subjects/hierarchy",
   tags: ["Subject"],
-  responses: createApiResponse(z.array(subjectWithChildrenSchema), "Subject hierarchy retrieved successfully"),
+  responses: createApiResponse(
+    z.array(subjectWithChildrenSchema),
+    "Subject hierarchy retrieved successfully",
+  ),
 });
 subjectRouter.get("/hierarchy", subjectController.getSubjectHierarchy);
 

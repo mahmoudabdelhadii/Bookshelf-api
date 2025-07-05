@@ -1,14 +1,11 @@
 import type { DrizzleClient } from "database";
 import { eq, sql, schema, and, ne, isNull } from "database";
-import {
-  NotFoundError,
-  ConflictError,
-  DatabaseError,
-  ValidationError,
-} from "../../errors.js";
+import { NotFoundError, ConflictError, DatabaseError, ValidationError } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import type { Subject, CreateSubject, UpdateSubject } from "./subject.model.js";
-
+import type { CreateSubject, Subject, UpdateSubject } from "./subject.model.js";
+type SubjectWithChildren = Subject & {
+  children: SubjectWithChildren[];
+};
 export const SubjectService = {
   findAll: async (drizzle: DrizzleClient) => {
     try {
@@ -46,34 +43,37 @@ export const SubjectService = {
 
   getHierarchy: async (drizzle: DrizzleClient) => {
     try {
-      // Get all root subjects (no parent)
       const rootSubjects = await drizzle.query.subject.findMany({
         where: isNull(schema.subject.parent),
         orderBy: [schema.subject.name],
       });
 
-      // Build hierarchy recursively
-      const buildHierarchy = async (parentId: string): Promise<any[]> => {
+      // 🛠 Recursive builder now returns Promise<SubjectWithChildren[]>
+      const buildHierarchy = async (parentId: string): Promise<SubjectWithChildren[]> => {
         const children = await drizzle.query.subject.findMany({
           where: eq(schema.subject.parent, parentId),
           orderBy: [schema.subject.name],
         });
 
-        const childrenWithSubChildren = await Promise.all(
-          children.map(async (child) => ({
-            ...child,
-            children: await buildHierarchy(child.id),
-          }))
+        const childrenWithSubChildren: SubjectWithChildren[] = await Promise.all(
+          children.map(
+            async (child): Promise<SubjectWithChildren> => ({
+              ...child,
+              children: await buildHierarchy(child.id),
+            }),
+          ),
         );
 
         return childrenWithSubChildren;
       };
 
-      const hierarchy = await Promise.all(
-        rootSubjects.map(async (root) => ({
-          ...root,
-          children: await buildHierarchy(root.id),
-        }))
+      const hierarchy: SubjectWithChildren[] = await Promise.all(
+        rootSubjects.map(
+          async (root): Promise<SubjectWithChildren> => ({
+            ...root,
+            children: await buildHierarchy(root.id),
+          }),
+        ),
       );
 
       return ServiceResponse.success("Subject hierarchy retrieved successfully", hierarchy);
@@ -97,7 +97,11 @@ export const SubjectService = {
 
       if (existingSubject) {
         const conflictError = new ConflictError("Subject with this name already exists");
-        return ServiceResponse.failure(conflictError.message, { name: subjectData.name }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { name: subjectData.name },
+          conflictError.statusCode,
+        );
       }
 
       // Validate parent exists if provided
@@ -108,7 +112,11 @@ export const SubjectService = {
 
         if (!parentSubject) {
           const validationError = new ValidationError("Parent subject not found");
-          return ServiceResponse.failure(validationError.message, { parentId: subjectData.parent }, validationError.statusCode);
+          return ServiceResponse.failure(
+            validationError.message,
+            { parentId: subjectData.parent },
+            validationError.statusCode,
+          );
         }
       }
 
@@ -124,7 +132,11 @@ export const SubjectService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to create subject: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { subjectData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { subjectData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -140,15 +152,16 @@ export const SubjectService = {
 
       if (subjectData.name) {
         const nameConflict = await drizzle.query.subject.findFirst({
-          where: and(
-            eq(schema.subject.name, subjectData.name.trim()),
-            ne(schema.subject.id, id)
-          ),
+          where: and(eq(schema.subject.name, subjectData.name.trim()), ne(schema.subject.id, id)),
         });
 
         if (nameConflict) {
           const conflictError = new ConflictError("Subject with this name already exists");
-          return ServiceResponse.failure(conflictError.message, { name: subjectData.name }, conflictError.statusCode);
+          return ServiceResponse.failure(
+            conflictError.message,
+            { name: subjectData.name },
+            conflictError.statusCode,
+          );
         }
       }
 
@@ -156,7 +169,11 @@ export const SubjectService = {
       if (subjectData.parent) {
         if (subjectData.parent === id) {
           const validationError = new ValidationError("Subject cannot be its own parent");
-          return ServiceResponse.failure(validationError.message, { parentId: subjectData.parent }, validationError.statusCode);
+          return ServiceResponse.failure(
+            validationError.message,
+            { parentId: subjectData.parent },
+            validationError.statusCode,
+          );
         }
 
         const parentSubject = await drizzle.query.subject.findFirst({
@@ -165,7 +182,11 @@ export const SubjectService = {
 
         if (!parentSubject) {
           const validationError = new ValidationError("Parent subject not found");
-          return ServiceResponse.failure(validationError.message, { parentId: subjectData.parent }, validationError.statusCode);
+          return ServiceResponse.failure(
+            validationError.message,
+            { parentId: subjectData.parent },
+            validationError.statusCode,
+          );
         }
       }
 
@@ -188,7 +209,11 @@ export const SubjectService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to update subject: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, subjectData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, subjectData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -210,7 +235,11 @@ export const SubjectService = {
 
       if (booksCount[0].count > 0) {
         const conflictError = new ConflictError("Cannot delete subject with existing books");
-        return ServiceResponse.failure(conflictError.message, { bookCount: booksCount[0].count }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { bookCount: booksCount[0].count },
+          conflictError.statusCode,
+        );
       }
 
       // Check if subject has child subjects
@@ -221,7 +250,11 @@ export const SubjectService = {
 
       if (childrenCount[0].count > 0) {
         const conflictError = new ConflictError("Cannot delete subject with child subjects");
-        return ServiceResponse.failure(conflictError.message, { childrenCount: childrenCount[0].count }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { childrenCount: childrenCount[0].count },
+          conflictError.statusCode,
+        );
       }
 
       await drizzle.delete(schema.subject).where(eq(schema.subject.id, id));
@@ -233,7 +266,11 @@ export const SubjectService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to delete subject: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 };

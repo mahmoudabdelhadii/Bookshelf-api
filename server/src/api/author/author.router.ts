@@ -1,21 +1,13 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import express, { type Router } from "express";
+import { Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
 import { authorController } from "./author.controller.js";
-import {
-  authorSchema,
-  createAuthorSchema,
-  updateAuthorSchema,
-  getAuthorSchema,
-  searchAuthorSchema,
-  searchAuthorsSchema,
-  authorArraySchema,
-} from "./author.model.js";
+import { authorSchema, createAuthorSchema, updateAuthorSchema, authorArraySchema } from "./author.model.js";
 
 export const authorRegistry = new OpenAPIRegistry();
-export const authorRouter: Router = express.Router();
+export const authorRouter: Router = Router();
 
 // Register schemas
 authorRegistry.register("Author", authorSchema);

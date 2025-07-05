@@ -2,7 +2,7 @@ import type { DrizzleClient } from "database";
 import { eq, sql, schema, ilike, and, ne } from "database";
 import { NotFoundError, ConflictError, DatabaseError, ValidationError } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import type { Author, CreateAuthor, UpdateAuthor } from "./author.model.js";
+import type { CreateAuthor, UpdateAuthor } from "./author.model.js";
 
 export const AuthorService = {
   findAll: async (drizzle: DrizzleClient) => {
@@ -210,4 +210,3 @@ export const AuthorService = {
     }
   },
 };
-

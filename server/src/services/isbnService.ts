@@ -1,12 +1,6 @@
 import { env } from "../common/utils/envConfig.js";
 import { logger } from "database";
-import type { 
-  Book, 
-  Author, 
-  Publisher, 
-  AuthorQueryResults,
-  Api 
-} from "../common/types/shared/isbndbAPI.js";
+import type { Book, Author, Publisher, AuthorQueryResults } from "../common/types/shared/isbndbAPI.js";
 
 export interface ISBNSearchOptions {
   page?: number;
@@ -47,7 +41,7 @@ class ISBNService {
   private readonly enabled: boolean;
 
   constructor() {
-    this.apiKey = env.ISBNDB_API_KEY || "";
+    this.apiKey = env.ISBNDB_API_KEY ?? "";
     this.baseUrl = "https://api2.isbndb.com";
     this.enabled = env.ISBNDB_ENABLED && this.apiKey.length > 0;
   }
@@ -58,7 +52,7 @@ class ISBNService {
     }
 
     const url = `${this.baseUrl}${path}`;
-    logger.debug(`Making ISBNdb request to: ${url}`);
+    logger.debug("Making ISBNdb request to: %s", url);
 
     const response = await fetch(url, {
       ...options,
@@ -71,18 +65,18 @@ class ISBNService {
 
     if (!response.ok) {
       const errorMessage = `ISBNdb API error: ${response.status} ${response.statusText}`;
-      logger.error(errorMessage, { url, status: response.status });
-      
+      logger.error({ url, status: response.status, errorMessage }, "ISBNdb API error");
+
       if (response.status === 404) {
         throw new Error("Not found");
       }
-      
+
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    logger.debug(`ISBNdb response received`, { url, dataType: typeof data });
-    
+    logger.debug({ url, dataType: typeof data }, "ISBNdb response received");
+
     return data as T;
   }
 
@@ -92,14 +86,14 @@ class ISBNService {
   async getBookByISBN(isbn: string, withPrices?: boolean): Promise<Book> {
     const cleanISBN = isbn.replace(/[^0-9X]/gi, "");
     const path = `/book/${cleanISBN}${withPrices ? "?with_prices=1" : ""}`;
-    
+
     try {
       const response = await this.makeRequest<Book>(path);
-      logger.info(`Book found via ISBNdb: ${cleanISBN}`);
+      logger.info("Book found via ISBNdb: %s", cleanISBN);
       return response;
-    } catch (error) {
-      logger.error(`Failed to fetch book by ISBN: ${cleanISBN}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Failed to fetch book by ISBN: %s", cleanISBN);
+      throw err;
     }
   }
 
@@ -118,17 +112,21 @@ class ISBNService {
     });
 
     const path = `/books/${encodeURIComponent(query)}?${params.toString()}`;
-    
+
     try {
       const response = await this.makeRequest<BookSearchResult>(path);
-      logger.info(`Books search completed for query: ${query}`, { 
-        total: response.total,
-        resultsCount: response.books?.length || 0 
-      });
+      logger.info(
+        {
+          total: response.total,
+          resultsCount: response.books?.length ?? 0,
+        },
+        "Books search completed for query: %s",
+        query,
+      );
       return response;
-    } catch (error) {
-      logger.error(`Failed to search books: ${query}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Failed to search books: %s", query);
+      throw err;
     }
   }
 
@@ -143,40 +141,43 @@ class ISBNService {
     });
 
     const path = `/author/${encodeURIComponent(name)}?${params.toString()}`;
-    
+
     try {
       const response = await this.makeRequest<Author>(path);
-      logger.info(`Author details found: ${name}`, { 
-        booksCount: response.books?.length || 0 
-      });
+      logger.info({
+        booksCount: response.books?.length ?? 0,
+      }, "Author details found: %s", name);
       return response;
-    } catch (error) {
-      logger.error(`Failed to fetch author details: ${name}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Failed to fetch author details: %s", name);
+      throw err;
     }
   }
 
   /**
    * Search authors
    */
-  async searchAuthors(query: string, options: { page?: number; pageSize?: number } = {}): Promise<AuthorQueryResults> {
+  async searchAuthors(
+    query: string,
+    options: { page?: number; pageSize?: number } = {},
+  ): Promise<AuthorQueryResults> {
     const params = new URLSearchParams({
       page: options.page?.toString() ?? "1",
       pageSize: options.pageSize?.toString() ?? "20",
     });
 
     const path = `/authors/${encodeURIComponent(query)}?${params.toString()}`;
-    
+
     try {
       const response = await this.makeRequest<AuthorQueryResults>(path);
-      logger.info(`Authors search completed for query: ${query}`, { 
+      logger.info({
         total: response.total,
-        resultsCount: response.authors?.length || 0 
-      });
+        resultsCount: response.authors?.length ?? 0,
+      }, "Authors search completed for query: %s", query);
       return response;
-    } catch (error) {
-      logger.error(`Failed to search authors: ${query}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Failed to search authors: %s", query);
+      throw err;
     }
   }
 
@@ -191,39 +192,50 @@ class ISBNService {
     });
 
     const path = `/publisher/${encodeURIComponent(name)}?${params.toString()}`;
-    
+
     try {
       const response = await this.makeRequest<Publisher>(path);
-      logger.info(`Publisher details found: ${name}`, { 
-        booksCount: response.books?.length || 0 
-      });
+      logger.info(
+        {
+          booksCount: response.books?.length ?? 0,
+        },
+        "Publisher details found: %s",
+        name,
+      );
       return response;
-    } catch (error) {
-      logger.error(`Failed to fetch publisher details: ${name}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Failed to fetch publisher details: %s", name);
+      throw err;
     }
   }
 
   /**
    * Search publishers
    */
-  async searchPublishers(query: string, options: { page?: number; pageSize?: number } = {}): Promise<{ publishers?: Publisher[] }> {
+  async searchPublishers(
+    query: string,
+    options: { page?: number; pageSize?: number } = {},
+  ): Promise<{ publishers?: Publisher[] }> {
     const params = new URLSearchParams({
       page: options.page?.toString() ?? "1",
       pageSize: options.pageSize?.toString() ?? "20",
     });
 
     const path = `/publishers/${encodeURIComponent(query)}?${params.toString()}`;
-    
+
     try {
       const response = await this.makeRequest<{ publishers?: Publisher[] }>(path);
-      logger.info(`Publishers search completed for query: ${query}`, { 
-        resultsCount: response.publishers?.length || 0 
-      });
+      logger.info(
+        {
+          resultsCount: response.publishers?.length ?? 0,
+        },
+        "Publishers search completed for query: %s",
+        query,
+      );
       return response;
-    } catch (error) {
-      logger.error(`Failed to search publishers: ${query}`, { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Failed to search publishers: %s", query);
+      throw err;
     }
   }
 
@@ -241,7 +253,7 @@ class ISBNService {
       text?: string;
       subject?: string;
       publisher?: string;
-    } = {}
+    } = {},
   ): Promise<unknown> {
     const params = new URLSearchParams({
       page: filters.page?.toString() ?? "1",
@@ -255,14 +267,14 @@ class ISBNService {
     });
 
     const path = `/search/${index}?${params.toString()}`;
-    
+
     try {
       const response = await this.makeRequest<unknown>(path);
-      logger.info(`Search all completed for index: ${index}`, { filters });
+      logger.info({ filters }, "Search all completed for index: %s", index);
       return response;
-    } catch (error) {
-      logger.error(`Failed to search all for index: ${index}`, { error, filters });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err, filters }, "Failed to search all for index: %s", index);
+      throw err;
     }
   }
 
@@ -271,14 +283,14 @@ class ISBNService {
    */
   async getStats(): Promise<unknown> {
     const path = "/stats";
-    
+
     try {
       const response = await this.makeRequest<unknown>(path);
       logger.info("ISBNdb stats retrieved");
       return response;
-    } catch (error) {
-      logger.error("Failed to get ISBNdb stats", { error });
-      throw error;
+    } catch (err) {
+      logger.error({ error: err }, "Failed to get ISBNdb stats");
+      throw err;
     }
   }
 

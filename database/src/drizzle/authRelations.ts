@@ -28,10 +28,10 @@ export const userRelations = relations(user, ({ one, many }) => ({
   passwordResetTokens: many(passwordResetToken),
   emailVerificationTokens: many(emailVerificationToken),
   userRoles: many(userRole, {
-    relationName: "userToRole"
+    relationName: "userToRole",
   }),
   assignedRoles: many(userRole, {
-    relationName: "assignerToRole"
+    relationName: "assignerToRole",
   }),
   auditLogs: many(securityAuditLog),
   accountLockouts: many(accountLockout),

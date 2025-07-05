@@ -51,7 +51,7 @@ async function initializeServer() {
     configureSession(app);
     logger.info("Session middleware configured");
   } catch (err) {
-    logger.error("Failed to initialize Redis or session middleware:", err);
+    logger.error({ error: err }, "Failed to initialize Redis or session middleware");
     logger.warn("Falling back to memory session store");
 
     app.use(
@@ -84,7 +84,7 @@ app.use(helmet());
 app.use(rateLimiter);
 
 initializeServer().catch((err: unknown) => {
-  logger.error("Server initialization failed:", err);
+  logger.error({ error: err }, "Server initialization failed");
 });
 
 app.use(requestLogger);
