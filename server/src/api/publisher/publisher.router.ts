@@ -98,7 +98,7 @@ publisherRouter.delete("/:id", publisherController.deletePublisher);
 
 publisherRegistry.registerPath({
   method: "get",
-  path: "/publisher/{name}",
+  path: "/publishers/by-name/{name}",
   tags: ["Publisher"],
   request: {
     params: z.object({

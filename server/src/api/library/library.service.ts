@@ -12,6 +12,7 @@ export const LibraryService = {
       });
       return ServiceResponse.success("Libraries found", libraries);
     } catch (err) {
+      console.log(err);
       const dbError = new DatabaseError("Failed to retrieve libraries", { originalError: err });
       return ServiceResponse.failure(dbError.message, null, dbError.statusCode);
     }

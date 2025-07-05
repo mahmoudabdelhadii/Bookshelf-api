@@ -93,7 +93,7 @@ authorRouter.delete("/:id", authorController.deleteAuthor);
 
 authorRegistry.registerPath({
   method: "get",
-  path: "/author/{name}",
+  path: "/authors/by-name/{name}",
   tags: ["Author"],
   request: {
     params: z.object({

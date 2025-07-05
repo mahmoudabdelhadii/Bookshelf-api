@@ -228,7 +228,6 @@ export const BookService = {
 
   getBookByISBN: async (drizzle: DrizzleClient, isbn: string) => {
     try {
-
       const bookData = await BookLookupService.getBookByISBN(drizzle, isbn);
 
       if (!bookData) {
@@ -364,14 +363,11 @@ export const BookService = {
   searchAuthors: async (drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) => {
     try {
       const authorsData = await queueAuthorLookup(query, "low");
-      const authors = authorsData.authors ?? [];
-      if (authors.length === 0) {
+      const author = authorsData.author;
+      if (!author) {
         throw new NotFound("No authors found");
       }
-      await drizzle
-        .insert(schema.author)
-        .values(authors.map((name: string) => ({ name })))
-        .onConflictDoNothing();
+      await drizzle.insert(schema.author).values({ name: author }).onConflictDoNothing();
       return authorsData;
     } catch (err) {
       throw new DatabaseError("Failed to search authors", { query, originalError: err });
@@ -381,18 +377,15 @@ export const BookService = {
   searchPublishers: async (drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) => {
     try {
       const publishersData = await queuePublisherLookup(query, "low");
-      const publishers = publishersData.publishers;
-      if (publishers.length === 0) {
+      const publisher = publishersData.name;
+      if (!publisher) {
         throw new NotFound("No publishers found");
       }
       await drizzle
         .insert(schema.publisher)
-        .values(
-          publishers
-            .map((p: Publisher) => p.name)
-            .filter((n: string | undefined): n is string => Boolean(n))
-            .map((name: string) => ({ name })),
-        )
+        .values({
+          name: publisher,
+        })
         .onConflictDoNothing();
       return publishersData;
     } catch (err) {
@@ -414,7 +407,6 @@ export const BookService = {
       publisher?: string;
     } = {},
   ) => {
-
     const offset = (page - 1) * pageSize;
     const conditions = [sql`TRUE`];
 
@@ -486,7 +478,6 @@ export const BookService = {
         throw new BadRequest("Invalid search index");
     }
 
-
     const hasLocalResults =
       localResults &&
       ((localResults.books && localResults.books.length > 0) ??
@@ -499,7 +490,6 @@ export const BookService = {
         source: "local",
       });
     }
-
 
     if (isbnService.isEnabled()) {
       try {

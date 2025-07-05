@@ -11,6 +11,23 @@ export interface ISBNSearchOptions {
   language?: string;
   shouldMatchAll?: boolean;
 }
+function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
+  if (!headers) return {};
+
+  if (headers instanceof Headers) {
+    const obj: Record<string, string> = {};
+    headers.forEach((value, key) => {
+      obj[key] = value;
+    });
+    return obj;
+  }
+
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+
+  return headers;
+}
 
 export interface AuthorSearchOptions {
   page?: number;
@@ -41,7 +58,7 @@ class ISBNService {
   private readonly enabled: boolean;
 
   constructor() {
-    this.apiKey = env.ISBNDB_API_KEY ?? "";
+    this.apiKey = env.ISBNDB_API_KEY;
     this.baseUrl = "https://api2.isbndb.com";
     this.enabled = env.ISBNDB_ENABLED && this.apiKey.length > 0;
   }
@@ -59,7 +76,7 @@ class ISBNService {
       headers: {
         "Content-Type": "application/json",
         Authorization: this.apiKey,
-        ...options?.headers,
+        ...normalizeHeaders(options?.headers),
       },
     });
 
@@ -80,7 +97,6 @@ class ISBNService {
     return data as T;
   }
 
-  
   async getBookByISBN(isbn: string, withPrices?: boolean): Promise<Book> {
     const cleanISBN = isbn.replace(/[^0-9X]/gi, "");
     const path = `/book/${cleanISBN}${withPrices ? "?with_prices=1" : ""}`;
@@ -95,7 +111,6 @@ class ISBNService {
     }
   }
 
-  
   async searchBooks(query: string, options: ISBNSearchOptions = {}): Promise<BookSearchResult> {
     const params = new URLSearchParams({
       page: options.page?.toString() ?? "1",
@@ -126,7 +141,6 @@ class ISBNService {
     }
   }
 
-  
   async getAuthorDetails(name: string, options: AuthorSearchOptions = {}): Promise<Author> {
     const params = new URLSearchParams({
       page: options.page?.toString() ?? "1",
@@ -138,9 +152,13 @@ class ISBNService {
 
     try {
       const response = await this.makeRequest<Author>(path);
-      logger.info({
-        booksCount: response.books?.length ?? 0,
-      }, "Author details found: %s", name);
+      logger.info(
+        {
+          booksCount: response.books?.length ?? 0,
+        },
+        "Author details found: %s",
+        name,
+      );
       return response;
     } catch (err) {
       logger.error({ error: err }, "Failed to fetch author details: %s", name);
@@ -148,7 +166,6 @@ class ISBNService {
     }
   }
 
-  
   async searchAuthors(
     query: string,
     options: { page?: number; pageSize?: number } = {},
@@ -162,10 +179,14 @@ class ISBNService {
 
     try {
       const response = await this.makeRequest<AuthorQueryResults>(path);
-      logger.info({
-        total: response.total,
-        resultsCount: response.authors?.length ?? 0,
-      }, "Authors search completed for query: %s", query);
+      logger.info(
+        {
+          total: response.total,
+          resultsCount: response.authors?.length ?? 0,
+        },
+        "Authors search completed for query: %s",
+        query,
+      );
       return response;
     } catch (err) {
       logger.error({ error: err }, "Failed to search authors: %s", query);
@@ -173,7 +194,6 @@ class ISBNService {
     }
   }
 
-  
   async getPublisherDetails(name: string, options: PublisherSearchOptions = {}): Promise<Publisher> {
     const params = new URLSearchParams({
       page: options.page?.toString() ?? "1",
@@ -199,7 +219,6 @@ class ISBNService {
     }
   }
 
-  
   async searchPublishers(
     query: string,
     options: { page?: number; pageSize?: number } = {},
@@ -227,7 +246,6 @@ class ISBNService {
     }
   }
 
-  
   async searchAll(
     index: "books" | "authors" | "publishers" | "subjects",
     filters: {
@@ -264,7 +282,6 @@ class ISBNService {
     }
   }
 
-  
   async getStats(): Promise<unknown> {
     const path = "/stats";
 
@@ -278,12 +295,10 @@ class ISBNService {
     }
   }
 
-  
   isEnabled(): boolean {
     return this.enabled;
   }
 
-  
   getConfig(): { enabled: boolean; hasApiKey: boolean; baseUrl: string } {
     return {
       enabled: this.enabled,

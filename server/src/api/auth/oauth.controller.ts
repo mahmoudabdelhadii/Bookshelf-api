@@ -48,94 +48,99 @@ export namespace OAuthController {
 
   export function googleCallback(req: Request, res: Response, next: NextFunction): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    passport.authenticate("google", { session: false }, async (err: Error | null, user: OAuthUser, _info: unknown) => {
-      try {
-        if (err) {
-          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
-          return;
+    passport.authenticate(
+      "google",
+      { session: false },
+      async (err: Error | null, user: OAuthUser, _info: unknown) => {
+        try {
+          if (err) {
+            res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
+            return;
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          if (!user) {
+            res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
+            return;
+          }
+
+          const tokenPair = generateTokenPair({
+            userId: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            permissions: user.permissions,
+            sessionId: user.id,
+          });
+
+          await createSessionRecord((req as OAuthRequest).drizzle, user.id, {
+            sessionToken: tokenPair.accessToken,
+            refreshToken: tokenPair.refreshToken,
+            ipAddress: req.ip,
+            userAgent: req.get("User-Agent"),
+            expiresAt: new Date(Date.now() + tokenPair.refreshExpiresIn * 1000),
+          });
+
+          setAuthCookies(res, tokenPair);
+
+          res.redirect(`${env.FRONTEND_URL}/auth/success?provider=google`);
+        } catch {
+          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=server_error`);
         }
-
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!user) {
-          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
-          return;
-        }
-
-        const tokenPair = generateTokenPair({
-          userId: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          permissions: user.permissions,
-          sessionId: user.id,
-        });
-
-        await createSessionRecord((req as OAuthRequest).drizzle, user.id, {
-          sessionToken: tokenPair.accessToken,
-          refreshToken: tokenPair.refreshToken,
-          ipAddress: req.ip,
-          userAgent: req.get("User-Agent"),
-          expiresAt: new Date(Date.now() + tokenPair.refreshExpiresIn * 1000),
-        });
-
-        setAuthCookies(res, tokenPair);
-
-        res.redirect(`${env.FRONTEND_URL}/auth/success?provider=google`);
-      } catch {
-        res.redirect(`${env.FRONTEND_URL}/auth/error?reason=server_error`);
-      }
-    })(req, res, next);
+      },
+    )(req, res, next);
   }
 
-  
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   export const appleAuth = passport.authenticate("apple", {
     scope: ["name", "email"],
   });
 
-  
   export function appleCallback(req: Request, res: Response, next: NextFunction): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    passport.authenticate("apple", { session: false }, async (err: Error | null, user: OAuthUser, _info: unknown) => {
-      try {
-        if (err) {
-          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
-          return;
+    passport.authenticate(
+      "apple",
+      { session: false },
+      async (err: Error | null, user: OAuthUser, _info: unknown) => {
+        try {
+          if (err) {
+            res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
+            return;
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          if (!user) {
+            res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
+            return;
+          }
+
+          const tokenPair = generateTokenPair({
+            userId: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            permissions: user.permissions,
+            sessionId: user.id,
+          });
+
+          await createSessionRecord((req as OAuthRequest).drizzle, user.id, {
+            sessionToken: tokenPair.accessToken,
+            refreshToken: tokenPair.refreshToken,
+            ipAddress: req.ip,
+            userAgent: req.get("User-Agent"),
+            expiresAt: new Date(Date.now() + tokenPair.refreshExpiresIn * 1000),
+          });
+
+          setAuthCookies(res, tokenPair);
+
+          res.redirect(`${env.FRONTEND_URL}/auth/success?provider=apple`);
+        } catch {
+          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=server_error`);
         }
-
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!user) {
-          res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
-          return;
-        }
-
-        const tokenPair = generateTokenPair({
-          userId: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          permissions: user.permissions,
-          sessionId: user.id,
-        });
-
-        await createSessionRecord((req as OAuthRequest).drizzle, user.id, {
-          sessionToken: tokenPair.accessToken,
-          refreshToken: tokenPair.refreshToken,
-          ipAddress: req.ip,
-          userAgent: req.get("User-Agent"),
-          expiresAt: new Date(Date.now() + tokenPair.refreshExpiresIn * 1000),
-        });
-
-        setAuthCookies(res, tokenPair);
-
-        res.redirect(`${env.FRONTEND_URL}/auth/success?provider=apple`);
-      } catch {
-        res.redirect(`${env.FRONTEND_URL}/auth/error?reason=server_error`);
-      }
-    })(req, res, next);
+      },
+    )(req, res, next);
   }
 
-  
   export async function linkOAuthAccount(req: Request, res: Response): Promise<Response> {
     try {
       const body = req.body as { provider?: string; oauthData?: OAuthData };
@@ -163,7 +168,7 @@ export namespace OAuthController {
         });
       }
 
-      await OAuthService.linkOAuthAccount((req as OAuthRequest).drizzle, userId, {
+      await OAuthService.linkOAuthAccount(req.drizzle, userId, {
         provider: provider as "google" | "apple",
         providerId: oauthData.providerId,
         email: oauthData.email,
@@ -190,7 +195,6 @@ export namespace OAuthController {
     }
   }
 
-  
   export async function unlinkOAuthAccount(req: Request, res: Response): Promise<Response> {
     try {
       const { provider } = req.params;
@@ -236,7 +240,6 @@ export namespace OAuthController {
     }
   }
 
-  
   export async function getConnectedAccounts(req: Request, res: Response): Promise<Response> {
     try {
       const userId = req.user?.id;
@@ -264,7 +267,6 @@ export namespace OAuthController {
     }
   }
 
-  
   function setAuthCookies(res: Response, tokenPair: TokenPair): void {
     const isProduction = env.isProduction;
 
@@ -285,3 +287,4 @@ export namespace OAuthController {
     });
   }
 }
+

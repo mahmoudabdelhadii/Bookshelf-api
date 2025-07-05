@@ -18,8 +18,6 @@ declare global {
   }
 }
 
-
-
 const rateLimitResponse = (limit: number, windowMs: number) => ({
   success: false,
   message: `Too many requests. You have exceeded the limit of ${limit} requests per ${Math.floor(windowMs / 60000)} minutes. Please try again later.`,
@@ -31,7 +29,6 @@ const rateLimitResponse = (limit: number, windowMs: number) => ({
   statusCode: StatusCodes.TOO_MANY_REQUESTS,
 });
 
-
 function createRedisStore() {
   if (redisClient) {
     return new RedisStore({
@@ -41,7 +38,6 @@ function createRedisStore() {
   }
   return undefined;
 }
-
 
 export const authRateLimit = rateLimit({
   store: createRedisStore(),
@@ -80,7 +76,6 @@ export const loginRateLimit = rateLimit({
   },
 });
 
-
 export const passwordResetRateLimit = rateLimit({
   store: createRedisStore(),
   windowMs: 60 * 60 * 1000,
@@ -106,7 +101,6 @@ export const passwordResetRateLimit = rateLimit({
     });
   },
 });
-
 
 export const emailVerificationRateLimit = rateLimit({
   store: createRedisStore(),
@@ -135,7 +129,6 @@ export const emailVerificationRateLimit = rateLimit({
   },
 });
 
-
 export const registrationRateLimit = rateLimit({
   store: createRedisStore(),
   windowMs: 60 * 60 * 1000,
@@ -162,7 +155,6 @@ export const registrationRateLimit = rateLimit({
   },
 });
 
-
 export const refreshTokenRateLimit = rateLimit({
   store: createRedisStore(),
   windowMs: 15 * 60 * 1000,
@@ -188,7 +180,6 @@ export const refreshTokenRateLimit = rateLimit({
     });
   },
 });
-
 
 export const createAdaptiveRateLimit = (baseMax: number, baseWindowMs: number) => {
   return rateLimit({
@@ -217,7 +208,6 @@ export const createAdaptiveRateLimit = (baseMax: number, baseWindowMs: number) =
     skip: (_req: Request) => process.env.NODE_ENV === "test",
   });
 };
-
 
 export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number) => {
   const violationStore = new Map<string, { count: number; firstViolation: number }>();
@@ -259,16 +249,13 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
   });
 };
 
-
 export const authSecurityRateLimit = [
   authRateLimit,
 
   createAdaptiveRateLimit(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
 ];
 
-
 export class RateLimitUtils {
-  
   static async resetRateLimit(key: string): Promise<void> {
     if (redisClient) {
       try {
@@ -277,11 +264,12 @@ export class RateLimitUtils {
         if (keys.length > 0) {
           await redisClient.del(keys);
         }
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 
-  
   static async getRateLimitStatus(key: string): Promise<{
     remaining: number;
     resetTime: Date | null;
@@ -300,7 +288,9 @@ export class RateLimitUtils {
           resetTime,
           total: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
         };
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     return {
@@ -310,7 +300,6 @@ export class RateLimitUtils {
     };
   }
 
-  
   static async isRateLimited(ip: string, limitType = "auth"): Promise<boolean> {
     if (redisClient) {
       try {
@@ -319,7 +308,9 @@ export class RateLimitUtils {
         const currentCount = current ? parseInt(current, 10) : 0;
 
         return currentCount >= env.AUTH_RATE_LIMIT_MAX_REQUESTS;
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     return false;

@@ -9,6 +9,11 @@ import { userRouter } from "./api/user/user.router.js";
 import { booksRouter } from "./api/book/book.router.js";
 import { libraryRouter } from "./api/library/library.router.js";
 import { libraryBooksRouter } from "./api/libraryBooks/libraryBooks.router.js";
+import { libraryMemberRouter } from "./api/libraryMember/libraryMember.router.js";
+import { publisherRouter } from "./api/publisher/publisher.router.js";
+import { authorRouter } from "./api/author/author.router.js";
+import { subjectRouter } from "./api/subject/subject.router.js";
+import { borrowRequestRouter } from "./api/borrowRequest/borrowRequest.router.js";
 import { authRouter } from "./api/auth/auth.router.js";
 import errorHandler from "./common/middleware/errorHandler.js";
 import rateLimiter from "./common/middleware/rateLimiter.js";
@@ -24,6 +29,7 @@ import { LOG_LEVEL } from "../env.js";
 import { connect } from "database";
 import type { DrizzleClient } from "database";
 import { pinoHttp } from "pino-http";
+import { featureFlagsRouter } from "./api/admin/featureFlags.router.js";
 
 const { drizzle } = connect("server");
 declare global {
@@ -105,6 +111,12 @@ app.use("/users", userRouter);
 app.use("/books", booksRouter);
 app.use("/libraries", libraryRouter);
 app.use("/library-books", libraryBooksRouter);
+app.use("/library-members", libraryMemberRouter);
+app.use("/publishers", publisherRouter);
+app.use("/authors", authorRouter);
+app.use("/subjects", subjectRouter);
+app.use("/borrow-requests", borrowRequestRouter);
+app.use("/feature-flags", featureFlagsRouter);
 
 app.use("/docs", openAPIRouter);
 

@@ -22,7 +22,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
     };
 
     logger?.error({ err, ...errorContext }, "Error occurred in request");
-
+    console.error(err);
     if (err instanceof ApiError) {
       const response = ServiceResponse.failure(err.message, err.context, err.statusCode);
       return res.status(err.statusCode).send(response);
