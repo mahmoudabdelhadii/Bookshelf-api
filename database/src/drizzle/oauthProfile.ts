@@ -1,4 +1,4 @@
-import { text, timestamp, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { text, timestamp, uniqueIndex, index, uuid } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 
@@ -6,9 +6,9 @@ export const oauthProfile = server.table(
   "oauth_profile",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     provider: text("provider").notNull(),
     providerId: text("provider_id").notNull(),
     email: text("email").notNull(),

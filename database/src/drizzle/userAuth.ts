@@ -1,11 +1,11 @@
-import { text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
-import { server } from "./_common.js";
+import { text, timestamp, boolean, integer, uuid } from "drizzle-orm/pg-core";
+import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 
 export const userAuth = server.table("user_auth", {
-  userId: text("user_id")
+  userId: uuid("user_id")
     .primaryKey()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   passwordHash: text("password_hash").notNull(),
   isEmailVerified: boolean("is_email_verified").default(false).notNull(),
   emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true, mode: "date" }),
@@ -14,7 +14,7 @@ export const userAuth = server.table("user_auth", {
   isActive: boolean("is_active").default(true).notNull(),
   isSuspended: boolean("is_suspended").default(false).notNull(),
   suspendedAt: timestamp("suspended_at", { withTimezone: true, mode: "date" }),
-  suspendedBy: text("suspended_by").references(() => user.id),
+  suspendedBy: uuid("suspended_by").references(() => user.id, { onDelete: "set null", onUpdate: "cascade" }),
   suspensionReason: text("suspension_reason"),
   twoFactorEnabled: boolean("two_factor_enabled").default(false).notNull(),
   twoFactorSecret: text("two_factor_secret"),

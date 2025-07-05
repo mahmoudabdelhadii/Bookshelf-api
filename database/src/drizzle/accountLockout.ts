@@ -1,4 +1,4 @@
-import { text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
+import { text, timestamp, boolean, integer, index, uuid } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 
@@ -6,9 +6,9 @@ export const accountLockout = server.table(
   "account_lockout",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     lockedAt: timestamp("locked_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     lockedUntil: timestamp("locked_until", { withTimezone: true, mode: "date" }).notNull(),
     reason: text("reason").notNull(),

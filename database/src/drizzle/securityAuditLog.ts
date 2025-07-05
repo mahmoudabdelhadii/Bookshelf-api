@@ -1,4 +1,4 @@
-import { text, timestamp, index } from "drizzle-orm/pg-core";
+import { text, timestamp, index, uuid } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 
@@ -6,7 +6,7 @@ export const securityAuditLog = server.table(
   "security_audit_log",
   {
     id: idpk("id"),
-    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    userId: uuid("user_id").references(() => user.id, { onDelete: "set null", onUpdate: "cascade" }),
     action: text("action").notNull(),
     details: text("details"),
     ipAddress: text("ip_address"),

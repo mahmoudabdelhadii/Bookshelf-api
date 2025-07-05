@@ -5,7 +5,7 @@ import { author } from "./author.js";
 import { publisher } from "./publisher.js";
 import { subject } from "./subject.js";
 
-const languageEnum = server.enum("language", ["en", "ar", "other"]);
+export const languageEnum = server.enum("language", ["en", "ar", "other"]);
 
 export const book = server.table(
   "book",
@@ -21,14 +21,15 @@ export const book = server.table(
 
     authorId: uuid("author_id")
       .notNull()
-      .references(() => author.id, { onDelete: "cascade" }),
+      .references(() => author.id, { onDelete: "restrict", onUpdate: "cascade" }),
 
     publisherId: uuid("publisher_id")
       .notNull()
-      .references(() => publisher.id, { onDelete: "cascade" }),
+      .references(() => publisher.id, { onDelete: "restrict", onUpdate: "cascade" }),
 
     subjectId: uuid("subject_id").references(() => subject.id, {
       onDelete: "set null",
+      onUpdate: "cascade",
     }),
 
     genre: text("genre"),

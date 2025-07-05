@@ -1,4 +1,4 @@
-import { text, timestamp, boolean, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { text, timestamp, boolean, uniqueIndex, index, uuid } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 
@@ -6,9 +6,9 @@ export const userSession = server.table(
   "user_session",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     sessionToken: text("session_token").notNull(),
     refreshToken: text("refresh_token"),
     ipAddress: text("ip_address"),
@@ -19,6 +19,7 @@ export const userSession = server.table(
     lastAccessedAt: timestamp("last_accessed_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
   (table) => [
     uniqueIndex("unique_session_token").on(table.sessionToken),

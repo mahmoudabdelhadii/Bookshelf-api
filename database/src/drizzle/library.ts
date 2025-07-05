@@ -16,7 +16,7 @@ export const library = server.table("library", {
   rating: real("rating"),
   ownerId: uuid("owner_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "restrict", onUpdate: "cascade" }),
   location: text("location"), // keeping for backward compatibility
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),

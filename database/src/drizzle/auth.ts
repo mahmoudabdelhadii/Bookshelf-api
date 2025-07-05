@@ -1,4 +1,4 @@
-import { text, timestamp, boolean, integer, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { text, timestamp, boolean, integer, uniqueIndex, index, uuid } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 
@@ -6,9 +6,9 @@ export const userSession = server.table(
   "user_session",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     sessionToken: text("session_token").notNull(),
     refreshToken: text("refresh_token"),
     ipAddress: text("ip_address"),
@@ -32,9 +32,9 @@ export const passwordResetToken = server.table(
   "password_reset_token",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     token: text("token").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
     isUsed: boolean("is_used").default(false).notNull(),
@@ -51,9 +51,9 @@ export const emailVerificationToken = server.table(
   "email_verification_token",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     token: text("token").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
     isUsed: boolean("is_used").default(false).notNull(),
@@ -101,14 +101,14 @@ export const userRole = server.table(
   "user_role",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    roleId: text("role_id")
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    roleId: uuid("role_id")
       .notNull()
-      .references(() => role.id, { onDelete: "cascade" }),
+      .references(() => role.id, { onDelete: "restrict", onUpdate: "cascade" }),
     assignedAt: timestamp("assigned_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    assignedBy: text("assigned_by").references(() => user.id),
+    assignedBy: uuid("assigned_by").references(() => user.id, { onDelete: "set null", onUpdate: "cascade" }),
   },
   (table) => [
     uniqueIndex("unique_user_role").on(table.userId, table.roleId),
@@ -121,7 +121,7 @@ export const securityAuditLog = server.table(
   "security_audit_log",
   {
     id: idpk("id"),
-    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    userId: uuid("user_id").references(() => user.id, { onDelete: "set null" }),
     action: text("action").notNull(),
     details: text("details"),
     ipAddress: text("ip_address"),
@@ -141,9 +141,9 @@ export const accountLockout = server.table(
   "account_lockout",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     lockedAt: timestamp("locked_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     lockedUntil: timestamp("locked_until", { withTimezone: true, mode: "date" }).notNull(),
     reason: text("reason").notNull(),
@@ -160,9 +160,9 @@ export const oauthProfile = server.table(
   "oauth_profile",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     provider: text("provider").notNull(),
     providerId: text("provider_id").notNull(),
     email: text("email").notNull(),

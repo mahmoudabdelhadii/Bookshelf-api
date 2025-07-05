@@ -1,4 +1,4 @@
-import { text, timestamp, uniqueIndex, index } from "drizzle-orm/pg-core";
+import { text, timestamp, uniqueIndex, index, uuid } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 import { userRoleType } from "./role.js";
@@ -7,14 +7,15 @@ export const userRole = server.table(
   "user_role",
   {
     id: idpk("id"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    roleId: text("role_id")
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    roleId: uuid("role_id")
       .notNull()
-      .references(() => userRoleType.id, { onDelete: "cascade" }),
+      .references(() => userRoleType.id, { onDelete: "restrict", onUpdate: "cascade" }),
     assignedAt: timestamp("assigned_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    assignedBy: text("assigned_by").references(() => user.id),
+    assignedBy: uuid("assigned_by").references(() => user.id, { onDelete: "set null", onUpdate: "cascade" }),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
   (table) => [
     uniqueIndex("unique_user_role").on(table.userId, table.roleId),
