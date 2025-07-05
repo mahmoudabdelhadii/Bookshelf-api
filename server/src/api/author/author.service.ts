@@ -1,11 +1,6 @@
 import type { DrizzleClient } from "database";
 import { eq, sql, schema, ilike, and, ne } from "database";
-import {
-  NotFoundError,
-  ConflictError,
-  DatabaseError,
-  ValidationError,
-} from "../../errors.js";
+import { NotFoundError, ConflictError, DatabaseError, ValidationError } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import type { Author, CreateAuthor, UpdateAuthor } from "./author.model.js";
 
@@ -96,13 +91,16 @@ export const AuthorService = {
 
       if (existingAuthor) {
         const conflictError = new ConflictError("Author with this name already exists");
-        return ServiceResponse.failure(conflictError.message, { name: authorData.name }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { name: authorData.name },
+          conflictError.statusCode,
+        );
       }
 
       const [newAuthor] = await drizzle
         .insert(schema.author)
         .values({
-          ...authorData,
           name: authorData.name.trim(),
         })
         .returning();
@@ -111,7 +109,11 @@ export const AuthorService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to create author: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { authorData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { authorData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -127,27 +129,27 @@ export const AuthorService = {
 
       if (authorData.name) {
         const nameConflict = await drizzle.query.author.findFirst({
-          where: and(
-            eq(schema.author.name, authorData.name.trim()),
-            ne(schema.author.id, id)
-          ),
+          where: and(eq(schema.author.name, authorData.name.trim()), ne(schema.author.id, id)),
         });
 
         if (nameConflict) {
           const conflictError = new ConflictError("Author with this name already exists");
-          return ServiceResponse.failure(conflictError.message, { name: authorData.name }, conflictError.statusCode);
+          return ServiceResponse.failure(
+            conflictError.message,
+            { name: authorData.name },
+            conflictError.statusCode,
+          );
         }
       }
 
       const updateData = {
         ...authorData,
         ...(authorData.name && { name: authorData.name.trim() }),
-        updatedAt: new Date(),
       };
 
       const [updatedAuthor] = await drizzle
         .update(schema.author)
-        .set(updateData)
+        .set({ name: updateData.name })
         .where(eq(schema.author.id, id))
         .returning();
 
@@ -158,7 +160,11 @@ export const AuthorService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to update author: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, authorData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, authorData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -180,7 +186,11 @@ export const AuthorService = {
 
       if (booksCount[0].count > 0) {
         const conflictError = new ConflictError("Cannot delete author with existing books");
-        return ServiceResponse.failure(conflictError.message, { bookCount: booksCount[0].count }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { bookCount: booksCount[0].count },
+          conflictError.statusCode,
+        );
       }
 
       await drizzle.delete(schema.author).where(eq(schema.author.id, id));
@@ -192,7 +202,12 @@ export const AuthorService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to delete author: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 };
+

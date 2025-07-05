@@ -1,22 +1,20 @@
 import type { DrizzleClient } from "database";
-import { eq, sql, schema, and, ne, gte, lte, desc } from "database";
-import {
-  NotFoundError,
-  ConflictError,
-  DatabaseError,
-  ValidationError,
-} from "../../errors.js";
+import { eq, sql, schema, and, ne, gte, lte, desc, inArray } from "database";
+import { NotFoundError, ConflictError, DatabaseError, ValidationError } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import type { BorrowRequest, CreateBorrowRequest, UpdateBorrowRequest } from "./borrowRequest.model.js";
 
 export const BorrowRequestService = {
-  findAll: async (drizzle: DrizzleClient, filters?: { 
-    userId?: string; 
-    libraryId?: string; 
-    status?: string; 
-    page?: number; 
-    pageSize?: number; 
-  }) => {
+  findAll: async (
+    drizzle: DrizzleClient,
+    filters?: {
+      userId?: string;
+      libraryId?: string;
+      status?: string;
+      page?: number;
+      pageSize?: number;
+    },
+  ) => {
     try {
       const page = filters?.page || 1;
       const pageSize = filters?.pageSize || 20;
@@ -44,7 +42,7 @@ export const BorrowRequestService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
             },
           },
           libraryBook: {
@@ -69,14 +67,14 @@ export const BorrowRequestService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
             },
           },
         },
       });
 
       const borrowRequests = await borrowRequestsQuery;
-      
+
       return ServiceResponse.success("Borrow requests retrieved successfully", borrowRequests);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
@@ -94,7 +92,7 @@ export const BorrowRequestService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
             },
           },
           libraryBook: {
@@ -119,7 +117,7 @@ export const BorrowRequestService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
             },
           },
         },
@@ -157,12 +155,33 @@ export const BorrowRequestService = {
 
       if (!libraryBook) {
         const validationError = new ValidationError("Library book not found");
-        return ServiceResponse.failure(validationError.message, { libraryBookId: requestData.libraryBookId }, validationError.statusCode);
+        return ServiceResponse.failure(
+          validationError.message,
+          { libraryBookId: requestData.libraryBookId },
+          validationError.statusCode,
+        );
       }
 
-      if (libraryBook.availableQuantity <= 0) {
+      // Calculate available quantity (total quantity - borrowed count)
+      const borrowedCount = await drizzle
+        .select({ count: sql<number>`count(*)::int` })
+        .from(schema.borrowRequest)
+        .where(
+          and(
+            eq(schema.borrowRequest.libraryBookId, requestData.libraryBookId),
+            inArray(schema.borrowRequest.status, ["borrowed", "overdue"])
+          )
+        );
+
+      const availableQuantity = libraryBook.quantity - (borrowedCount[0]?.count || 0);
+
+      if (availableQuantity <= 0) {
         const conflictError = new ConflictError("Library book is not available for borrowing");
-        return ServiceResponse.failure(conflictError.message, { availableQuantity: libraryBook.availableQuantity }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { availableQuantity },
+          conflictError.statusCode,
+        );
       }
 
       // Check if user already has a pending/approved request for this book
@@ -170,13 +189,17 @@ export const BorrowRequestService = {
         where: and(
           eq(schema.borrowRequest.userId, userId),
           eq(schema.borrowRequest.libraryBookId, requestData.libraryBookId),
-          schema.borrowRequest.status.in(["pending", "approved", "borrowed"])
+          inArray(schema.borrowRequest.status, ["pending", "approved", "borrowed"]),
         ),
       });
 
       if (existingRequest) {
         const conflictError = new ConflictError("You already have an active request for this book");
-        return ServiceResponse.failure(conflictError.message, { existingRequestId: existingRequest.id }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { existingRequestId: existingRequest.id },
+          conflictError.statusCode,
+        );
       }
 
       const [newBorrowRequest] = await drizzle
@@ -193,7 +216,11 @@ export const BorrowRequestService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to create borrow request: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { requestData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { requestData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -229,27 +256,11 @@ export const BorrowRequestService = {
             }
             break;
           case "borrowed":
-            // Decrease available quantity
-            if (existingRequest.status === "approved") {
-              await drizzle
-                .update(schema.libraryBooks)
-                .set({
-                  availableQuantity: sql`${schema.libraryBooks.availableQuantity} - 1`,
-                })
-                .where(eq(schema.libraryBooks.id, existingRequest.libraryBookId));
-            }
+            // No database update needed - availability is calculated dynamically
             break;
           case "returned":
             updateFields.returnDate = new Date();
-            // Increase available quantity back
-            if (existingRequest.status === "borrowed" || existingRequest.status === "overdue") {
-              await drizzle
-                .update(schema.libraryBooks)
-                .set({
-                  availableQuantity: sql`${schema.libraryBooks.availableQuantity} + 1`,
-                })
-                .where(eq(schema.libraryBooks.id, existingRequest.libraryBookId));
-            }
+            // No database update needed - availability is calculated dynamically
             break;
           case "rejected":
             // No additional actions needed
@@ -270,7 +281,11 @@ export const BorrowRequestService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to update borrow request: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, updateData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, updateData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -287,7 +302,11 @@ export const BorrowRequestService = {
       // Only allow deletion of pending or rejected requests
       if (!["pending", "rejected"].includes(existingRequest.status)) {
         const conflictError = new ConflictError("Cannot delete active borrow request");
-        return ServiceResponse.failure(conflictError.message, { status: existingRequest.status }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { status: existingRequest.status },
+          conflictError.statusCode,
+        );
       }
 
       await drizzle.delete(schema.borrowRequest).where(eq(schema.borrowRequest.id, id));
@@ -299,7 +318,11 @@ export const BorrowRequestService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to delete borrow request: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -332,7 +355,7 @@ export const BorrowRequestService = {
         returnedBooks: 0,
       };
 
-      stats.forEach(stat => {
+      stats.forEach((stat) => {
         statsMap.totalRequests += stat.count;
         switch (stat.status) {
           case "pending":
@@ -367,21 +390,17 @@ export const BorrowRequestService = {
   markOverdue: async (drizzle: DrizzleClient) => {
     try {
       const now = new Date();
-      const [updatedRequests] = await drizzle
+      const updatedRequests = await drizzle
         .update(schema.borrowRequest)
         .set({
           status: "overdue",
-          updatedAt: now,
         })
-        .where(
-          and(
-            eq(schema.borrowRequest.status, "borrowed"),
-            lte(schema.borrowRequest.dueDate, now)
-          )
-        )
+        .where(and(eq(schema.borrowRequest.status, "borrowed"), lte(schema.borrowRequest.dueDate, now)))
         .returning();
 
-      return ServiceResponse.success("Overdue requests updated successfully", { updatedCount: updatedRequests?.length || 0 });
+      return ServiceResponse.success("Overdue requests updated successfully", {
+        updatedCount: updatedRequests?.length || 0,
+      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to mark overdue requests: ${errorMessage}`);
@@ -389,3 +408,4 @@ export const BorrowRequestService = {
     }
   },
 };
+

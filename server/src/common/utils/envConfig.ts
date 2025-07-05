@@ -11,6 +11,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
 
   ISBNDB_API_KEY: z.string().default(""),
+  ISBNDB_ENABLED: z.coerce.boolean().default(true),
 
   CORS_ORIGIN: z.string().url().default("http://localhost:3000"),
 

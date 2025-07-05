@@ -161,6 +161,7 @@ authRegistry.registerPath({
   path: "/auth/register",
   tags: ["Authentication"],
   summary: "Register a new user",
+  security: [], // No authentication required for registration
   request: {
     body: {
       description: "User registration data",
@@ -197,6 +198,7 @@ authRegistry.registerPath({
   path: "/auth/login",
   tags: ["Authentication"],
   summary: "Login user",
+  security: [], // No authentication required for login
   request: {
     body: {
       description: "User login credentials",
@@ -219,6 +221,73 @@ authRegistry.registerPath({
             properties: {
               success: { type: "boolean", example: false },
               message: { type: "string" },
+              statusCode: { type: "number", example: 401 },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+// Add OpenAPI documentation for protected routes
+authRegistry.registerPath({
+  method: "get",
+  path: "/auth/profile",
+  tags: ["Authentication"],
+  summary: "Get user profile",
+  security: [{ bearerAuth: [] }], // Requires JWT authentication
+  responses: {
+    ...createApiResponse(userResponseSchema, "User profile retrieved successfully"),
+    401: {
+      description: "Unauthorized - Invalid or missing token",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              message: { type: "string", example: "Unauthorized" },
+              statusCode: { type: "number", example: 401 },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+authRegistry.registerPath({
+  method: "post",
+  path: "/auth/logout",
+  tags: ["Authentication"],
+  summary: "Logout user",
+  security: [{ bearerAuth: [] }], // Requires JWT authentication
+  responses: {
+    200: {
+      description: "Logout successful",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: true },
+              message: { type: "string", example: "Logout successful" },
+              statusCode: { type: "number", example: 200 },
+            },
+          },
+        },
+      },
+    },
+    401: {
+      description: "Unauthorized - Invalid or missing token",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              message: { type: "string", example: "Unauthorized" },
               statusCode: { type: "number", example: 401 },
             },
           },

@@ -1,7 +1,7 @@
 import { text, timestamp, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
-import { role } from "./role.js";
+import { userRoleType } from "./role.js";
 
 export const userRole = server.table(
   "user_role",
@@ -12,7 +12,7 @@ export const userRole = server.table(
       .references(() => user.id, { onDelete: "cascade" }),
     roleId: text("role_id")
       .notNull()
-      .references(() => role.id, { onDelete: "cascade" }),
+      .references(() => userRoleType.id, { onDelete: "cascade" }),
     assignedAt: timestamp("assigned_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     assignedBy: text("assigned_by").references(() => user.id),
   },

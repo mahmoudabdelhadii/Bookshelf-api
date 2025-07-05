@@ -11,7 +11,6 @@ async function main() {
     console.log("OpenAPI document generated successfully at:", outputPath);
   } catch (error) {
     console.error("Error generating OpenAPI document:", error);
-    console.error("Stack trace:", error.stack);
     process.exit(1);
   }
 }

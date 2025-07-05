@@ -3,7 +3,7 @@ export { userSessionRelations } from "./userSessionRelations.js";
 export { passwordResetTokenRelations } from "./passwordResetTokenRelations.js";
 export { emailVerificationTokenRelations } from "./emailVerificationTokenRelations.js";
 export { userRoleRelations } from "./userRoleRelations.js";
-export { roleRelations } from "./roleRelations.js";
+export { userRoleTypeRelations } from "./roleRelations.js";
 export { securityAuditLogRelations } from "./securityAuditLogRelations.js";
 export { accountLockoutRelations } from "./accountLockoutRelations.js";
 export { oauthProfileRelations } from "./oauthProfileRelations.js";
@@ -27,8 +27,12 @@ export const userRelations = relations(user, ({ one, many }) => ({
   sessions: many(userSession),
   passwordResetTokens: many(passwordResetToken),
   emailVerificationTokens: many(emailVerificationToken),
-  userRoles: many(userRole),
-  assignedRoles: many(userRole),
+  userRoles: many(userRole, {
+    relationName: "userToRole"
+  }),
+  assignedRoles: many(userRole, {
+    relationName: "assignerToRole"
+  }),
   auditLogs: many(securityAuditLog),
   accountLockouts: many(accountLockout),
   oauthProfiles: many(oauthProfile),

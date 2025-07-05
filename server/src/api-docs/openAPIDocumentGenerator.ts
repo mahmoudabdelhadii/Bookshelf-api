@@ -25,6 +25,15 @@ export function generateOpenAPIDocument() {
     borrowRequestRegistry,
     libraryMemberRegistry,
   ]);
+
+  // Register security scheme
+  registry.registerComponent("securitySchemes", "bearerAuth", {
+    type: "http",
+    scheme: "bearer",
+    bearerFormat: "JWT",
+    description: "JWT token obtained from login endpoint"
+  });
+
   const generator = new OpenApiGeneratorV3(registry.definitions);
 
   return generator.generateDocument({
@@ -38,5 +47,10 @@ export function generateOpenAPIDocument() {
       description: "View the raw OpenAPI Specification in JSON format",
       url: "/swagger.json",
     },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   });
 }

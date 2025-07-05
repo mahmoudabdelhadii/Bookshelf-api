@@ -4,6 +4,9 @@ import { BookService } from "./book.service.js";
 import { createBookSchema, updateBookSchema, createBooksBulkSchema } from "./book.model.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import { handleServiceResponse } from "../../common/utils/httpHandlers.js";
+import { isbndbQueue } from "../../services/isbndbQueue.js";
+import { BookLookupService } from "../../services/bookLookup.js";
+import { isbnService } from "../../services/isbnService.js";
 
 class BooksController {
   public createBook: RequestHandler = async (req, res) => {
@@ -278,6 +281,178 @@ class BooksController {
       return handleServiceResponse(
         ServiceResponse.failure("Search failed", _err, StatusCodes.INTERNAL_SERVER_ERROR),
         res,
+      );
+    }
+  };
+
+  // Queue a book lookup with priority
+  public queueBookLookup: RequestHandler = async (req, res) => {
+    const drizzle = req.drizzle;
+    const { isbn } = req.params;
+    const { priority = 'low' } = req.body;
+
+    if (!isbn) {
+      return handleServiceResponse(
+        ServiceResponse.failure("ISBN is required", null, StatusCodes.BAD_REQUEST),
+        res
+      );
+    }
+
+    try {
+      // Queue the book lookup with specified priority
+      const result = await BookLookupService.getBookByISBN(drizzle, isbn, false);
+      
+      return handleServiceResponse(
+        ServiceResponse.success("Book lookup completed", {
+          book: result,
+          queueStats: isbndbQueue.getQueueStats()
+        }),
+        res
+      );
+    } catch (_err) {
+      return handleServiceResponse(
+        ServiceResponse.failure("Failed to queue book lookup", _err, StatusCodes.INTERNAL_SERVER_ERROR),
+        res
+      );
+    }
+  };
+
+  // Get queue status and cache statistics
+  public getQueueStatus: RequestHandler = async (req, res) => {
+    const drizzle = req.drizzle;
+    
+    try {
+      const queueStats = isbndbQueue.getQueueStats();
+      const cacheStats = await BookLookupService.getCacheStats(drizzle);
+      
+      return handleServiceResponse(
+        ServiceResponse.success("Queue status retrieved", {
+          queue: queueStats,
+          cache: cacheStats
+        }),
+        res
+      );
+    } catch (_err) {
+      return handleServiceResponse(
+        ServiceResponse.failure("Failed to get queue status", _err, StatusCodes.INTERNAL_SERVER_ERROR),
+        res
+      );
+    }
+  };
+
+  // Enhanced search with cache-first approach
+  public searchBooksWithCache: RequestHandler = async (req, res) => {
+    const drizzle = req.drizzle;
+    const { query } = req.params;
+    const { useQueue = "true", priority = "low" } = req.query;
+
+    if (!query) {
+      return handleServiceResponse(
+        ServiceResponse.failure("Search query is required", null, StatusCodes.BAD_REQUEST),
+        res
+      );
+    }
+
+    try {
+      // First search local cache
+      const cachedResults = await BookLookupService.searchCachedBooks(drizzle, query);
+      
+      if (cachedResults.length > 0) {
+        return handleServiceResponse(
+          ServiceResponse.success("Results found in cache", {
+            books: cachedResults,
+            source: "cache",
+            total: cachedResults.length
+          }),
+          res
+        );
+      }
+
+      // If no cached results and queue is enabled, search via ISBNDB
+      if (useQueue === "true") {
+        const serviceResponse = await BookService.searchAll(drizzle, "books", 1, 20, {
+          text: query,
+          isbn: "",
+          isbn13: "",
+          author: "",
+          subject: "",
+          publisher: ""
+        });
+        
+        if (serviceResponse.success) {
+          return handleServiceResponse(
+            ServiceResponse.success("Results found via ISBNDB", {
+              ...serviceResponse.responseObject,
+              source: "isbndb"
+            }),
+            res
+          );
+        }
+      }
+
+      return handleServiceResponse(
+        ServiceResponse.success("No results found", {
+          books: [],
+          source: "none",
+          total: 0
+        }),
+        res
+      );
+    } catch (_err) {
+      return handleServiceResponse(
+        ServiceResponse.failure("Search failed", _err, StatusCodes.INTERNAL_SERVER_ERROR),
+        res
+      );
+    }
+  };
+
+  // Get ISBN service status and configuration
+  public getISBNServiceStatus: RequestHandler = async (req, res) => {
+    try {
+      const config = isbnService.getConfig();
+      const queueStats = isbndbQueue.getQueueStats();
+      
+      return handleServiceResponse(
+        ServiceResponse.success("ISBN service status", {
+          service: config,
+          queue: queueStats
+        }),
+        res
+      );
+    } catch (_err) {
+      return handleServiceResponse(
+        ServiceResponse.failure("Failed to get service status", _err, StatusCodes.INTERNAL_SERVER_ERROR),
+        res
+      );
+    }
+  };
+
+  // Direct ISBN book lookup (bypasses queue)
+  public getBookByISBNDirect: RequestHandler = async (req, res) => {
+    const { isbn } = req.params;
+    const { withPrices = "false" } = req.query;
+
+    if (!isbn) {
+      return handleServiceResponse(
+        ServiceResponse.failure("ISBN is required", null, StatusCodes.BAD_REQUEST),
+        res
+      );
+    }
+
+    try {
+      const book = await isbnService.getBookByISBN(isbn, withPrices === "true");
+      
+      return handleServiceResponse(
+        ServiceResponse.success("Book found via direct ISBN lookup", {
+          book: book.book,
+          source: "isbndb-direct"
+        }),
+        res
+      );
+    } catch (_err) {
+      return handleServiceResponse(
+        ServiceResponse.failure("Book not found", _err, StatusCodes.NOT_FOUND),
+        res
       );
     }
   };

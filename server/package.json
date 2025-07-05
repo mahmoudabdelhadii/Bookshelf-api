@@ -17,7 +17,7 @@
     "check": "tsc --noEmit",
     "clean": "tsc --build --clean",
     "generate-swagger": "NODE_ENV=test tsx -r dotenv/config src/api-docs/exportOpenApi.ts",
-    "generate-types": "npx swagger-typescript-api generate --path ./swagger.json --output src/common/types/shared/ --name isbndbApi.ts",
+    "generate-types": "npx swagger-typescript-api generate --path ./src/isbndbSwagger.json --output src/common/types/shared/ --name isbndbApi.ts",
     "build": "tsc --build .",
     "start": "node build/src/index.js",
     "test": "vitest run",

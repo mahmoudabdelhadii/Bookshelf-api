@@ -139,8 +139,8 @@ export const AuthService = {
           failedLoginAttempts: 0,
         });
 
-        const readerRole = await tx.query.role.findFirst({
-          where: (role, { eq }) => eq(role.name, "Reader"),
+        const readerRole = await tx.query.userRoleType.findFirst({
+          where: (userRoleType, { eq }) => eq(userRoleType.name, "Reader"),
         });
 
         if (readerRole) {

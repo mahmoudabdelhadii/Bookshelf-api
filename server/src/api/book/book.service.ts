@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { eq, sql, schema, ilike, and, or } from "database";
+import { eq, sql, schema, ilike, and, or, logger } from "database";
 import {
   NotFoundError,
   ConflictError,
@@ -9,8 +9,11 @@ import {
   BadRequest,
 } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
-import * as isbndb from "../../common/utils/fetchISBNdb/index.js";
+import { queueBookLookup, queueAuthorLookup, queuePublisherLookup } from "../../services/isbndbQueue.js";
+import { BookLookupService } from "../../services/bookLookup.js";
+import { isbnService } from "../../services/isbnService.js";
 import type { Book, CreateBookWithIds } from "./book.model.js";
+import type { Publisher } from "../../common/types/shared/isbndbAPI.js";
 
 type Language = (typeof schema.book.language.enumValues)[number];
 
@@ -227,29 +230,21 @@ export const BookService = {
   },
 
   getBookByISBN: async (drizzle: DrizzleClient, isbn: string) => {
-    const localBook = await drizzle.query.book.findFirst({
-      where: (b, { eq }) => eq(b.isbn, isbn),
-    });
+    try {
+      // Use lookup service which handles DB lookup and ISBNDB queue automatically
+      const bookData = await BookLookupService.getBookByISBN(drizzle, isbn);
+      
+      if (!bookData) {
+        throw new NotFound("Book not found");
+      }
 
-    if (localBook) {
-      return localBook;
+      return bookData;
+    } catch (error) {
+      if (error instanceof NotFound) {
+        throw error;
+      }
+      throw new DatabaseError("Failed to fetch book data", { isbn, originalError: error });
     }
-
-    const bookInfo = await isbndb.fetchBookDetails(isbn);
-    if (!bookInfo) {
-      throw new NotFound("Book not found");
-    }
-
-    const createdBook = await BookService.createBook(drizzle, {
-      title: bookInfo.title ?? "",
-      author: "Unknown Author",
-      publisher: "Unknown Publisher",
-      isbn: bookInfo.isbn,
-      genre: undefined,
-      publishedYear: undefined,
-      language: "other" as Language,
-    });
-    return createdBook;
   },
 
   getBooks: async (
@@ -315,13 +310,17 @@ export const BookService = {
       return { author: localAuthor.name, books };
     }
 
-    const authorDetails = await isbndb.fetchAuthorDetails(name, { page, pageSize, language });
-    if (!authorDetails.author) {
-      throw new NotFound("Author not found");
-    }
+    try {
+      const authorDetails = await queueAuthorLookup(name, 'high');
+      if (!authorDetails.author) {
+        throw new NotFound("Author not found");
+      }
 
-    await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
-    return authorDetails;
+      await drizzle.insert(schema.author).values({ name: authorDetails.author }).onConflictDoNothing();
+      return authorDetails;
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch author details", { name, originalError: error });
+    }
   },
 
   getPublisherDetails: async (
@@ -352,44 +351,56 @@ export const BookService = {
       return { publisher: localPublisher.name, books };
     }
 
-    const publisherDetails = await isbndb.fetchPublisherDetails(name, { page, pageSize, language });
-    if (!publisherDetails.name) {
-      throw new NotFound("Publisher not found");
-    }
+    try {
+      const publisherDetails = await queuePublisherLookup(name, 'high');
+      if (!publisherDetails.name) {
+        throw new NotFound("Publisher not found");
+      }
 
-    await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
-    return publisherDetails;
+      await drizzle.insert(schema.publisher).values({ name: publisherDetails.name }).onConflictDoNothing();
+      return publisherDetails;
+    } catch (error) {
+      throw new DatabaseError("Failed to fetch publisher details", { name, originalError: error });
+    }
   },
 
   searchAuthors: async (drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) => {
-    const authorsData = await isbndb.searchAuthors(query, { page, pageSize });
-    const authors = authorsData.authors ?? [];
-    if (authors.length === 0) {
-      throw new NotFound("No authors found");
+    try {
+      const authorsData = await queueAuthorLookup(query, 'low');
+      const authors = authorsData.authors ?? [];
+      if (authors.length === 0) {
+        throw new NotFound("No authors found");
+      }
+      await drizzle
+        .insert(schema.author)
+        .values(authors.map((name: string) => ({ name })))
+        .onConflictDoNothing();
+      return authorsData;
+    } catch (error) {
+      throw new DatabaseError("Failed to search authors", { query, originalError: error });
     }
-    await drizzle
-      .insert(schema.author)
-      .values(authors.map((name: string) => ({ name })))
-      .onConflictDoNothing();
-    return authorsData;
   },
 
   searchPublishers: async (drizzle: DrizzleClient, query: string, page = 1, pageSize = 20) => {
-    const publishersData = await isbndb.searchPublishers(query, { page, pageSize });
-    const publishers = publishersData.publishers;
-    if (publishers.length === 0) {
-      throw new NotFound("No publishers found");
+    try {
+      const publishersData = await queuePublisherLookup(query, 'low');
+      const publishers = publishersData.publishers;
+      if (publishers.length === 0) {
+        throw new NotFound("No publishers found");
+      }
+      await drizzle
+        .insert(schema.publisher)
+        .values(
+          publishers
+            .map((p: Publisher) => p.name)
+            .filter((n: string | undefined): n is string => Boolean(n))
+            .map((name: string) => ({ name })),
+        )
+        .onConflictDoNothing();
+      return publishersData;
+    } catch (error) {
+      throw new DatabaseError("Failed to search publishers", { query, originalError: error });
     }
-    await drizzle
-      .insert(schema.publisher)
-      .values(
-        publishers
-          .map((p) => p.name)
-          .filter((n): n is string => Boolean(n))
-          .map((name) => ({ name })),
-      )
-      .onConflictDoNothing();
-    return publishersData;
   },
 
   searchAll: async (
@@ -406,6 +417,7 @@ export const BookService = {
       publisher?: string;
     } = {},
   ) => {
+    // First try local database search
     const offset = (page - 1) * pageSize;
     const conditions = [sql`TRUE`];
 
@@ -429,6 +441,9 @@ export const BookService = {
     if (filters.publisher) conditions.push(ilike(schema.publisher.name, `%${filters.publisher}%`));
 
     const finalWhereClause = and(...conditions);
+    
+    let localResults: any = null;
+    
     switch (index) {
       case "books": {
         const books = await drizzle
@@ -446,7 +461,8 @@ export const BookService = {
           .limit(pageSize)
           .offset(offset);
 
-        return { books };
+        localResults = { books };
+        break;
       }
 
       case "authors": {
@@ -455,7 +471,8 @@ export const BookService = {
           limit: pageSize,
           offset,
         });
-        return { authors };
+        localResults = { authors };
+        break;
       }
 
       case "publishers": {
@@ -464,11 +481,54 @@ export const BookService = {
           limit: pageSize,
           offset,
         });
-        return { publishers };
+        localResults = { publishers };
+        break;
       }
 
       default:
         throw new BadRequest("Invalid search index");
     }
+
+    // If we have local results, return them
+    const hasLocalResults = localResults && (
+      (localResults.books && localResults.books.length > 0) ||
+      (localResults.authors && localResults.authors.length > 0) ||
+      (localResults.publishers && localResults.publishers.length > 0)
+    );
+
+    if (hasLocalResults) {
+      return ServiceResponse.success("Results found in local database", {
+        ...localResults,
+        source: "local"
+      });
+    }
+
+    // If no local results and ISBNdb is enabled, search via ISBNdb
+    if (isbnService.isEnabled()) {
+      try {
+        const isbndbResults = await isbnService.searchAll(index, {
+          page,
+          pageSize,
+          ...filters
+        });
+
+        return ServiceResponse.success("Results found via ISBNdb", {
+          data: isbndbResults,
+          source: "isbndb"
+        });
+      } catch (error) {
+        logger.error(`ISBNdb search failed for index ${index}`, { error, filters });
+        // Fall back to local results even if empty
+        return ServiceResponse.success("No results found", {
+          ...localResults,
+          source: "local"
+        });
+      }
+    }
+
+    return ServiceResponse.success("No results found", {
+      ...localResults,
+      source: "local"
+    });
   },
 };

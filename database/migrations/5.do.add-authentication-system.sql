@@ -118,8 +118,8 @@ CREATE INDEX "idx_login_attempts_email" ON server."login_attempt"(email);
 CREATE INDEX "idx_login_attempts_ip" ON server."login_attempt"(ip_address);
 CREATE INDEX "idx_login_attempts_attempted_at" ON server."login_attempt"(attempted_at);
 
--- Create role table for RBAC
-CREATE TABLE server."role" (
+-- Create user_role_type table for RBAC (avoid conflict with existing role enum)
+CREATE TABLE server."user_role_type" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     description TEXT,
@@ -129,13 +129,13 @@ CREATE TABLE server."role" (
 );
 
 -- Create unique index for role name
-CREATE UNIQUE INDEX "unique_role_name" ON server."role"(name);
+CREATE UNIQUE INDEX "unique_user_role_type_name" ON server."user_role_type"(name);
 
 -- Create user_role table for many-to-many relationship
 CREATE TABLE server."user_role" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES server."user"(id) ON DELETE CASCADE,
-    role_id UUID NOT NULL REFERENCES server."role"(id) ON DELETE CASCADE,
+    role_id UUID NOT NULL REFERENCES server."user_role_type"(id) ON DELETE CASCADE,
     assigned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     assigned_by UUID REFERENCES server."user"(id)
 );
@@ -179,7 +179,7 @@ CREATE INDEX "idx_account_lockout_user_id" ON server."account_lockout"(user_id);
 CREATE INDEX "idx_account_lockout_locked_until" ON server."account_lockout"(locked_until);
 
 -- Insert default roles
-INSERT INTO server."role" (name, description, permissions) VALUES 
+INSERT INTO server."user_role_type" (name, description, permissions) VALUES 
 (
     'Super Administrator',
     'Full system access with all permissions',
@@ -256,8 +256,8 @@ CREATE TRIGGER update_user_auth_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION server.update_updated_at_column();
 
-CREATE TRIGGER update_role_updated_at
-    BEFORE UPDATE ON server."role"
+CREATE TRIGGER update_user_role_type_updated_at
+    BEFORE UPDATE ON server."user_role_type"
     FOR EACH ROW
     EXECUTE FUNCTION server.update_updated_at_column();
 
@@ -315,7 +315,7 @@ COMMENT ON TABLE server."user_session" IS 'Active user sessions for authenticati
 COMMENT ON TABLE server."password_reset_token" IS 'Tokens for password reset functionality';
 COMMENT ON TABLE server."email_verification_token" IS 'Tokens for email verification';
 COMMENT ON TABLE server."login_attempt" IS 'Log of all login attempts for security monitoring';
-COMMENT ON TABLE server."role" IS 'System roles with associated permissions';
+COMMENT ON TABLE server."user_role_type" IS 'System roles with associated permissions';
 COMMENT ON TABLE server."user_role" IS 'Assignment of roles to users';
 COMMENT ON TABLE server."security_audit_log" IS 'Comprehensive security event logging';
 COMMENT ON TABLE server."account_lockout" IS 'Account lockout tracking for security';

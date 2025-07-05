@@ -1,5 +1,5 @@
 import type { DrizzleClient } from "database";
-import { eq, sql, schema, and, ne, desc, count } from "database";
+import { eq, sql, schema, and, ne, desc, count, inArray } from "database";
 import {
   NotFoundError,
   ConflictError,
@@ -11,14 +11,17 @@ import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import type { LibraryMember, CreateLibraryMember, UpdateLibraryMember } from "./libraryMember.model.js";
 
 export const LibraryMemberService = {
-  findAll: async (drizzle: DrizzleClient, filters?: {
-    libraryId?: string;
-    userId?: string;
-    role?: string;
-    isActive?: boolean;
-    page?: number;
-    pageSize?: number;
-  }) => {
+  findAll: async (
+    drizzle: DrizzleClient,
+    filters?: {
+      libraryId?: string;
+      userId?: string;
+      role?: string;
+      isActive?: boolean;
+      page?: number;
+      pageSize?: number;
+    },
+  ) => {
     try {
       const page = filters?.page || 1;
       const pageSize = filters?.pageSize || 20;
@@ -48,7 +51,8 @@ export const LibraryMemberService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
+              lastName: true,
             },
           },
           library: {
@@ -62,7 +66,8 @@ export const LibraryMemberService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
+              lastName: true,
             },
           },
         },
@@ -85,7 +90,8 @@ export const LibraryMemberService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
+              lastName: true,
             },
           },
           library: {
@@ -99,7 +105,8 @@ export const LibraryMemberService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
+              lastName: true,
             },
           },
         },
@@ -131,16 +138,14 @@ export const LibraryMemberService = {
   findUserInLibrary: async (drizzle: DrizzleClient, userId: string, libraryId: string) => {
     try {
       const member = await drizzle.query.libraryMember.findFirst({
-        where: and(
-          eq(schema.libraryMember.userId, userId),
-          eq(schema.libraryMember.libraryId, libraryId)
-        ),
+        where: and(eq(schema.libraryMember.userId, userId), eq(schema.libraryMember.libraryId, libraryId)),
         with: {
           user: {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
+              lastName: true,
             },
           },
           library: {
@@ -177,7 +182,11 @@ export const LibraryMemberService = {
 
       if (!user) {
         const validationError = new ValidationError("User not found");
-        return ServiceResponse.failure(validationError.message, { userId: memberData.userId }, validationError.statusCode);
+        return ServiceResponse.failure(
+          validationError.message,
+          { userId: memberData.userId },
+          validationError.statusCode,
+        );
       }
 
       // Check if library exists
@@ -187,20 +196,28 @@ export const LibraryMemberService = {
 
       if (!library) {
         const validationError = new ValidationError("Library not found");
-        return ServiceResponse.failure(validationError.message, { libraryId: memberData.libraryId }, validationError.statusCode);
+        return ServiceResponse.failure(
+          validationError.message,
+          { libraryId: memberData.libraryId },
+          validationError.statusCode,
+        );
       }
 
       // Check if user is already a member of this library
       const existingMember = await drizzle.query.libraryMember.findFirst({
         where: and(
           eq(schema.libraryMember.userId, memberData.userId),
-          eq(schema.libraryMember.libraryId, memberData.libraryId)
+          eq(schema.libraryMember.libraryId, memberData.libraryId),
         ),
       });
 
       if (existingMember) {
         const conflictError = new ConflictError("User is already a member of this library");
-        return ServiceResponse.failure(conflictError.message, { existingMemberId: existingMember.id }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { existingMemberId: existingMember.id },
+          conflictError.statusCode,
+        );
       }
 
       // Validate role permissions if inviter specified
@@ -208,13 +225,17 @@ export const LibraryMemberService = {
         const inviterMembership = await drizzle.query.libraryMember.findFirst({
           where: and(
             eq(schema.libraryMember.userId, invitedBy),
-            eq(schema.libraryMember.libraryId, memberData.libraryId)
+            eq(schema.libraryMember.libraryId, memberData.libraryId),
           ),
         });
 
         if (!inviterMembership || !["owner", "manager"].includes(inviterMembership.role)) {
           const forbiddenError = new ForbiddenError("Insufficient permissions to assign this role");
-          return ServiceResponse.failure(forbiddenError.message, { requiredRole: ["owner", "manager"] }, forbiddenError.statusCode);
+          return ServiceResponse.failure(
+            forbiddenError.message,
+            { requiredRole: ["owner", "manager"] },
+            forbiddenError.statusCode,
+          );
         }
       }
 
@@ -230,7 +251,11 @@ export const LibraryMemberService = {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to create library member: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { memberData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { memberData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -249,13 +274,17 @@ export const LibraryMemberService = {
         const updaterMembership = await drizzle.query.libraryMember.findFirst({
           where: and(
             eq(schema.libraryMember.userId, updatedBy),
-            eq(schema.libraryMember.libraryId, existingMember.libraryId)
+            eq(schema.libraryMember.libraryId, existingMember.libraryId),
           ),
         });
 
         if (!updaterMembership || !["owner", "manager"].includes(updaterMembership.role)) {
           const forbiddenError = new ForbiddenError("Insufficient permissions to update member role");
-          return ServiceResponse.failure(forbiddenError.message, { requiredRole: ["owner", "manager"] }, forbiddenError.statusCode);
+          return ServiceResponse.failure(
+            forbiddenError.message,
+            { requiredRole: ["owner", "manager"] },
+            forbiddenError.statusCode,
+          );
         }
 
         // Prevent non-owners from creating/demoting owners
@@ -288,7 +317,11 @@ export const LibraryMemberService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to update library member: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, updateData, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, updateData, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -307,13 +340,17 @@ export const LibraryMemberService = {
         const deleterMembership = await drizzle.query.libraryMember.findFirst({
           where: and(
             eq(schema.libraryMember.userId, deletedBy),
-            eq(schema.libraryMember.libraryId, existingMember.libraryId)
+            eq(schema.libraryMember.libraryId, existingMember.libraryId),
           ),
         });
 
         if (!deleterMembership || !["owner", "manager"].includes(deleterMembership.role)) {
           const forbiddenError = new ForbiddenError("Insufficient permissions to remove member");
-          return ServiceResponse.failure(forbiddenError.message, { requiredRole: ["owner", "manager"] }, forbiddenError.statusCode);
+          return ServiceResponse.failure(
+            forbiddenError.message,
+            { requiredRole: ["owner", "manager"] },
+            forbiddenError.statusCode,
+          );
         }
 
         // Prevent non-owners from removing owners
@@ -327,14 +364,20 @@ export const LibraryMemberService = {
       const activeBorrows = await drizzle
         .select({ count: sql<number>`count(*)` })
         .from(schema.borrowRequest)
-        .where(and(
-          eq(schema.borrowRequest.userId, existingMember.userId),
-          schema.borrowRequest.status.in(["pending", "approved", "borrowed", "overdue"])
-        ));
+        .where(
+          and(
+            eq(schema.borrowRequest.userId, existingMember.userId),
+            inArray(schema.borrowRequest.status, ["pending", "approved", "borrowed", "overdue"]),
+          ),
+        );
 
       if (activeBorrows[0].count > 0) {
         const conflictError = new ConflictError("Cannot remove member with active borrow requests");
-        return ServiceResponse.failure(conflictError.message, { activeBorrows: activeBorrows[0].count }, conflictError.statusCode);
+        return ServiceResponse.failure(
+          conflictError.message,
+          { activeBorrows: activeBorrows[0].count },
+          conflictError.statusCode,
+        );
       }
 
       await drizzle.delete(schema.libraryMember).where(eq(schema.libraryMember.id, id));
@@ -346,7 +389,11 @@ export const LibraryMemberService = {
       }
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to remove library member: ${errorMessage}`);
-      return ServiceResponse.failure(dbError.message, { id, originalError: errorMessage }, dbError.statusCode);
+      return ServiceResponse.failure(
+        dbError.message,
+        { id, originalError: errorMessage },
+        dbError.statusCode,
+      );
     }
   },
 
@@ -359,7 +406,8 @@ export const LibraryMemberService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
+              lastName: true,
             },
           },
           library: {
@@ -373,7 +421,8 @@ export const LibraryMemberService = {
             columns: {
               id: true,
               email: true,
-              displayName: true,
+              firstName: true,
+              lastName: true,
             },
           },
         },
@@ -397,7 +446,7 @@ export const LibraryMemberService = {
       let activeBorrows = 0;
       let overdueBorrows = 0;
 
-      borrowStats.forEach(stat => {
+      borrowStats.forEach((stat) => {
         borrowsCount += stat.count;
         if (["approved", "borrowed"].includes(stat.status)) {
           activeBorrows += stat.count;
@@ -457,7 +506,7 @@ export const LibraryMemberService = {
         members: 0,
       };
 
-      memberStats.forEach(stat => {
+      memberStats.forEach((stat) => {
         stats.totalMembers += stat.count;
         if (stat.isActive) {
           stats.activeMembers += stat.count;
@@ -489,3 +538,4 @@ export const LibraryMemberService = {
     }
   },
 };
+

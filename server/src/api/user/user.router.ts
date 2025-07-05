@@ -15,7 +15,25 @@ userRegistry.registerPath({
   method: "get",
   path: "/users",
   tags: ["User"],
-  responses: createApiResponse(z.array(userSchema), "Users retrieved successfully"),
+  security: [{ bearerAuth: [] }], // Requires JWT authentication
+  responses: {
+    ...createApiResponse(z.array(userSchema), "Users retrieved successfully"),
+    401: {
+      description: "Unauthorized - Invalid or missing token",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: { type: "boolean", example: false },
+              message: { type: "string", example: "Unauthorized" },
+              statusCode: { type: "number", example: 401 },
+            },
+          },
+        },
+      },
+    },
+  },
 });
 userRouter.get("/", userController.getUsers);
 
