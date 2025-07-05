@@ -1,10 +1,7 @@
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 
-/**
- * Password hashing and validation utilities using bcrypt
- * Production-grade security with configurable salt rounds
- */
+
 
 const SALT_ROUNDS = 12;
 const MIN_PASSWORD_LENGTH = 8;
@@ -33,9 +30,7 @@ export interface PasswordStrengthResult {
   };
 }
 
-/**
- * Hash a password using bcrypt with salt
- */
+
 export async function hashPassword(password: string): Promise<string> {
   if (!password || typeof password !== "string") {
     throw new Error("Password must be a non-empty string");
@@ -58,9 +53,7 @@ export async function hashPassword(password: string): Promise<string> {
   }
 }
 
-/**
- * Verify a password against its hash
- */
+
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   if (!password || !hash) {
     return false;
@@ -69,25 +62,24 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   try {
     return await bcrypt.compare(password, hash);
   } catch (err) {
+    console.error(err);
     return false;
   }
 }
 
-/**
- * Check if a password needs to be rehashed (e.g., salt rounds changed)
- */
+
 export function needsRehash(hash: string): boolean {
   try {
     const rounds = bcrypt.getRounds(hash);
     return rounds < SALT_ROUNDS;
   } catch (err) {
+    console.error(err);
+
     return true;
   }
 }
 
-/**
- * Evaluate password strength and provide feedback
- */
+
 export function evaluatePasswordStrength(password: string): PasswordStrengthResult {
   const feedback: string[] = [];
   let score = 0;
@@ -180,9 +172,7 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
   };
 }
 
-/**
- * Generate a secure random password
- */
+
 export function generateSecurePassword(length = 16): string {
   if (length < MIN_PASSWORD_LENGTH || length > MAX_PASSWORD_LENGTH) {
     throw new Error(`Password length must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH}`);
@@ -210,31 +200,23 @@ export function generateSecurePassword(length = 16): string {
     .join("");
 }
 
-/**
- * Generate a secure token for password reset, email verification, etc.
- */
+
 export function generateSecureToken(length = 32): string {
   return crypto.randomBytes(length).toString("hex");
 }
 
-/**
- * Create a hash for storing tokens (one-way hash)
- */
+
 export function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-/**
- * Verify a token against its hash
- */
+
 export function verifyToken(token: string, hash: string): boolean {
   const tokenHash = hashToken(token);
   return crypto.timingSafeEqual(Buffer.from(tokenHash), Buffer.from(hash));
 }
 
-/**
- * Generate backup codes for 2FA
- */
+
 export function generateBackupCodes(count = 10): string[] {
   const codes: string[] = [];
   for (let i = 0; i < count; i++) {
@@ -243,9 +225,7 @@ export function generateBackupCodes(count = 10): string[] {
   return codes;
 }
 
-/**
- * Encrypt sensitive data (like 2FA secrets, backup codes)
- */
+
 export function encryptSensitiveData(data: string, key: string): string {
   const algorithm = "aes-256-gcm";
   const iv = crypto.randomBytes(16);
@@ -259,9 +239,7 @@ export function encryptSensitiveData(data: string, key: string): string {
   return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted}`;
 }
 
-/**
- * Decrypt sensitive data
- */
+
 export function decryptSensitiveData(encryptedData: string, key: string): string {
   const algorithm = "aes-256-gcm";
   const parts = encryptedData.split(":");

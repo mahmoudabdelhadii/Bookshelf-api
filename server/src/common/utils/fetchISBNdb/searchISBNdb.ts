@@ -46,13 +46,13 @@ export async function searchISBNdb(
             books: (response as BookSearchResponse).books,
           },
         };
-      // case "authors":
-      //   return {
-      //     data: {
-      //       total: (response as AuthorSearchResponse).total,
-      //       authors: (response as AuthorSearchResponse).authors,
-      //     },
-      //   };
+
+
+
+
+
+
+
       case "publishers":
         return {
           data: {

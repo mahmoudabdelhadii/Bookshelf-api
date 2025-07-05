@@ -1,4 +1,24 @@
 import { Router, Request, Response, NextFunction } from "express";
+import type { DrizzleClient } from "database";
+
+interface AuthRequest extends Request {
+  drizzle: DrizzleClient;
+  user?: {
+    id: string;
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    permissions: string[];
+    isActive: boolean;
+    isEmailVerified: boolean;
+    isSuspended: boolean;
+  };
+}
+
+type AuthResponse = Response;
+// eslint-disable-next-line import-x/no-named-as-default
 import rateLimit from "express-rate-limit";
 import { body, param, validationResult } from "express-validator";
 import { StatusCodes } from "http-status-codes";
@@ -76,7 +96,6 @@ const validateRequest = (req: Request, res: Response, next: NextFunction) => {
     });
   }
   next();
-  
 };
 
 const registerValidation = [
@@ -97,7 +116,7 @@ const registerValidation = [
   body("password")
     .isLength({ min: 8, max: 128 })
     .withMessage("Password must be between 8 and 128 characters")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?])/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{}|;:,.<>?])/)
     .withMessage(
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
     ),
@@ -121,7 +140,7 @@ const passwordResetValidation = [
   body("newPassword")
     .isLength({ min: 8, max: 128 })
     .withMessage("Password must be between 8 and 128 characters")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?])/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{}|;:,.<>?])/)
     .withMessage(
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
     ),
@@ -134,7 +153,7 @@ const changePasswordValidation = [
   body("newPassword")
     .isLength({ min: 8, max: 128 })
     .withMessage("Password must be between 8 and 128 characters")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?])/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{}|;:,.<>?])/)
     .withMessage(
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
     ),
@@ -142,14 +161,14 @@ const changePasswordValidation = [
 
 const sessionIdValidation = [param("sessionId").notEmpty().withMessage("Session ID is required")];
 
-// Register OpenAPI schemas
+
 authRegistry.register("User", userResponseSchema);
 authRegistry.register("LoginResponse", loginResponseSchema);
 authRegistry.register("TokenResponse", refreshTokenResponseSchema);
 authRegistry.register("RegisterRequest", registerSchema);
 authRegistry.register("LoginRequest", loginSchema);
 
-// Register auth routes with OpenAPI
+
 authRegistry.registerPath({
   method: "post",
   path: "/auth/register",
@@ -224,7 +243,7 @@ authRegistry.registerPath({
   },
 });
 
-// Add OpenAPI documentation for protected routes
+
 authRegistry.registerPath({
   method: "get",
   path: "/auth/profile",
@@ -291,82 +310,161 @@ authRegistry.registerPath({
   },
 });
 
-authRouter.post("/register", authRateLimit, registerValidation, validateRequest, AuthController.register);
+authRouter.post(
+  "/register",
+  authRateLimit,
+  registerValidation,
+  validateRequest,
+  (req: Request, res: Response) => {
+    void AuthController.register(req, res);
+  },
+);
 
-authRouter.post("/login", authRateLimit, loginValidation, validateRequest, AuthController.login);
+authRouter.post("/login", authRateLimit, loginValidation, validateRequest, (req: Request, res: Response) => {
+  void AuthController.login(req, res);
+});
 
-authRouter.post("/refresh", refreshTokenValidation, validateRequest, AuthController.refreshToken);
+authRouter.post("/refresh", refreshTokenValidation, validateRequest, (req: Request, res: Response) => {
+  void AuthController.refreshToken(req, res);
+});
 
 authRouter.post(
   "/password/reset-request",
   passwordResetRateLimit,
   passwordResetRequestValidation,
   validateRequest,
-  AuthController.requestPasswordReset,
+  (req: Request, res: Response) => {
+    void AuthController.requestPasswordReset(req, res);
+  },
 );
 
-authRouter.post("/password/reset", passwordResetValidation, validateRequest, AuthController.resetPassword);
+authRouter.post(
+  "/password/reset",
+  passwordResetValidation,
+  validateRequest,
+  (req: Request, res: Response) => {
+    void AuthController.resetPassword(req, res);
+  },
+);
 
 authRouter.post(
   "/email/verify",
   emailVerificationRateLimit,
   emailVerificationValidation,
   validateRequest,
-  AuthController.verifyEmail,
+  (req: Request, res: Response) => {
+    void AuthController.verifyEmail(req, res);
+  },
 );
 
 authRouter.post(
   "/email/resend-verification",
   emailVerificationRateLimit,
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   authRequired,
-  AuthController.resendEmailVerification,
+  (req, res) => {
+    void AuthController.resendEmailVerification(req, res);
+  },
 );
 
-authRouter.post("/logout", authRequired, AuthController.logout);
+authRouter.post(
+  "/logout",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  authRequired,
+  (req, res) => {
+    void AuthController.logout(req, res);
+  },
+);
 
 authRouter.post(
   "/password/change",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   authRequired,
   changePasswordValidation,
   validateRequest,
-  AuthController.changePassword,
+  (req: Request, res: Response) => {
+    void AuthController.changePassword(req, res);
+  },
 );
 
-authRouter.get("/profile", authRequired, AuthController.getProfile);
+authRouter.get(
+  "/profile",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  authRequired,
+  (req: Request, res: Response) => {
+    void AuthController.getProfile(req, res);
+  },
+);
 
-authRouter.get("/sessions", authRequired, AuthController.getUserSessions);
+authRouter.get(
+  "/sessions",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  authRequired,
+  (req: Request, res: Response) => {
+    void AuthController.getUserSessions(req, res);
+  },
+);
 
 authRouter.delete(
   "/sessions/:sessionId",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   authRequired,
   sessionIdValidation,
   validateRequest,
-  AuthController.revokeSession,
+  (req: Request, res: Response) => {
+    void AuthController.revokeSession(req, res);
+  },
 );
 
-authRouter.delete("/sessions", authRequired, AuthController.revokeAllSessions);
+authRouter.delete(
+  "/sessions",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  authRequired,
+  (req: Request, res: Response) => {
+    void AuthController.revokeAllSessions(req, res);
+  },
+);
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 authRouter.get("/google", OAuthController.googleAuth);
 
 authRouter.get("/google/callback", OAuthController.googleCallback);
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 authRouter.get("/apple", OAuthController.appleAuth);
 
 authRouter.get("/apple/callback", OAuthController.appleCallback);
 
-authRouter.post("/oauth/link", authRequired, OAuthController.linkOAuthAccount);
+authRouter.post(
+  "/oauth/link",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  authRequired,
+  (req: Request, res: Response) => {
+    void OAuthController.linkOAuthAccount(req, res);
+  },
+);
 
 authRouter.delete(
   "/oauth/:provider",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   authRequired,
   param("provider").isIn(["google", "apple"]).withMessage("Invalid OAuth provider"),
   validateRequest,
-  OAuthController.unlinkOAuthAccount,
+  (req: Request, res: Response) => {
+    void OAuthController.unlinkOAuthAccount(req, res);
+  },
 );
 
-authRouter.get("/oauth/accounts", authRequired, OAuthController.getConnectedAccounts);
+authRouter.get(
+  "/oauth/accounts",
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  authRequired,
+  (req: Request, res: Response) => {
+    void OAuthController.getConnectedAccounts(req, res);
+  },
+);
 
-authRouter.get("/health", (req, res) => {
+authRouter.get("/health", (_req: Request, res: Response) => {
   res.status(StatusCodes.OK).json({
     success: true,
     message: "Authentication service is healthy",

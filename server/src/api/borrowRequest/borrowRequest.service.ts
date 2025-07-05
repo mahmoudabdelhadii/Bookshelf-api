@@ -28,7 +28,7 @@ export const BorrowRequestService = {
         whereConditions.push(eq(schema.borrowRequest.status, filters.status as any));
       }
       if (filters?.libraryId) {
-        // Join with libraryBooks to filter by library
+
         whereConditions.push(eq(schema.libraryBooks.libraryId, filters.libraryId));
       }
 
@@ -148,7 +148,7 @@ export const BorrowRequestService = {
 
   create: async (drizzle: DrizzleClient, userId: string, requestData: CreateBorrowRequest) => {
     try {
-      // Validate library book exists and is available
+
       const libraryBook = await drizzle.query.libraryBooks.findFirst({
         where: eq(schema.libraryBooks.id, requestData.libraryBookId),
       });
@@ -162,7 +162,7 @@ export const BorrowRequestService = {
         );
       }
 
-      // Calculate available quantity (total quantity - borrowed count)
+
       const [borrowedCount] = await drizzle
         .select({ count: count() })
         .from(schema.borrowRequest)
@@ -184,7 +184,7 @@ export const BorrowRequestService = {
         );
       }
 
-      // Check if user already has a pending/approved request for this book
+
       const existingRequest = await drizzle.query.borrowRequest.findFirst({
         where: and(
           eq(schema.borrowRequest.userId, userId),
@@ -237,7 +237,7 @@ export const BorrowRequestService = {
         throw new NotFoundError("Borrow request not found");
       }
 
-      // Handle status transitions
+
       const updateFields: any = {
         ...updateData,
         updatedAt: new Date(),
@@ -248,7 +248,7 @@ export const BorrowRequestService = {
           case "approved":
             updateFields.approvedDate = new Date();
             updateFields.approvedBy = updatedBy;
-            // Set due date to 2 weeks from approval if not specified
+
             if (!updateData.dueDate) {
               const dueDate = new Date();
               dueDate.setDate(dueDate.getDate() + 14);
@@ -256,14 +256,14 @@ export const BorrowRequestService = {
             }
             break;
           case "borrowed":
-            // No database update needed - availability is calculated dynamically
+
             break;
           case "returned":
             updateFields.returnDate = new Date();
-            // No database update needed - availability is calculated dynamically
+
             break;
           case "rejected":
-            // No additional actions needed
+
             break;
         }
       }
@@ -299,7 +299,7 @@ export const BorrowRequestService = {
         throw new NotFoundError("Borrow request not found");
       }
 
-      // Only allow deletion of pending or rejected requests
+
       if (!["pending", "rejected"].includes(existingRequest.status)) {
         const conflictError = new ConflictError("Cannot delete active borrow request");
         return ServiceResponse.failure(
@@ -333,7 +333,7 @@ export const BorrowRequestService = {
         whereConditions.push(eq(schema.borrowRequest.userId, filters.userId));
       }
       if (filters?.libraryId) {
-        // This would require a join - simplified for now
+
       }
 
       const stats = await drizzle

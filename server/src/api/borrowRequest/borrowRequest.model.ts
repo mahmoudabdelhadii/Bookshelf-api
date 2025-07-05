@@ -4,7 +4,7 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-// Borrow request schema based on database schema
+
 export const borrowRequestSchema = z
   .object({
     id: idSchema,
@@ -49,7 +49,7 @@ export const updateBorrowRequestSchema = z
   })
   .openapi({ description: "Borrow request update data" });
 
-// API-specific schemas for requests
+
 export const getBorrowRequestSchema = z
   .object({
     params: z.object({
@@ -58,12 +58,12 @@ export const getBorrowRequestSchema = z
   })
   .openapi({ description: "Get borrow request by ID parameters" });
 
-// Response schemas
+
 export const borrowRequestArraySchema = z
   .array(borrowRequestSchema)
   .openapi({ description: "Array of borrow requests" });
 
-// Borrow request with detailed information (business logic layer)
+
 export const borrowRequestWithDetailsSchema = borrowRequestSchema
   .extend({
     user: z
@@ -116,7 +116,7 @@ export const borrowRequestWithDetailsArraySchema = z
   .array(borrowRequestWithDetailsSchema)
   .openapi({ description: "Array of borrow requests with details" });
 
-// TypeScript types derived from schemas
+
 export type BorrowRequest = z.infer<typeof borrowRequestSchema>;
 export type CreateBorrowRequest = z.infer<typeof createBorrowRequestSchema>;
 export type UpdateBorrowRequest = z.infer<typeof updateBorrowRequestSchema>;

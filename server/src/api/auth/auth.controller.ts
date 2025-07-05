@@ -28,13 +28,12 @@ interface AuthRequest extends Request {
   };
 }
 
-export class AuthController {
-  /**
-   * Register a new user
-   */
-  public static async register(req: AuthRequest, res: Response) {
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace AuthController {
+  
+  export async function register(req: AuthRequest, res: Response) {
     try {
-      const userData: RegisterRequest = req.body;
+      const userData = req.body as RegisterRequest;
 
       const serviceResponse = await AuthService.registerUser(req.drizzle, {
         username: userData.username,
@@ -46,6 +45,8 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during registration",
@@ -55,12 +56,10 @@ export class AuthController {
     }
   }
 
-  /**
-   * Authenticate user and return tokens
-   */
-  public static async login(req: AuthRequest, res: Response) {
+  
+  export async function login(req: AuthRequest, res: Response) {
     try {
-      const credentials: LoginRequest = req.body;
+      const credentials = req.body as LoginRequest;
 
       const serviceResponse = await AuthService.login(req.drizzle, {
         email: credentials.email,
@@ -87,6 +86,9 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during login",
@@ -96,14 +98,14 @@ export class AuthController {
     }
   }
 
-  /**
-   * Refresh access token
-   */
-  public static async refreshToken(req: AuthRequest, res: Response) {
+  
+  export async function refreshToken(req: AuthRequest, res: Response) {
     try {
-      const refreshToken = req.cookies.refreshToken ?? req.body.refreshToken;
+      const refreshTokenValue =
+        (req.cookies as { refreshToken?: string }).refreshToken ??
+        (req.body as { refreshToken?: string }).refreshToken;
 
-      if (!refreshToken) {
+      if (!refreshTokenValue) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
           success: false,
           message: "Refresh token is required",
@@ -113,7 +115,7 @@ export class AuthController {
       }
 
       const serviceResponse = await AuthService.refreshToken(req.drizzle, {
-        refreshToken,
+        refreshToken: refreshTokenValue,
         ipAddress: req.ip,
         userAgent: req.get("user-agent"),
       });
@@ -123,7 +125,10 @@ export class AuthController {
         serviceResponse.responseObject &&
         "refreshToken" in serviceResponse.responseObject
       ) {
-        const tokens = serviceResponse.responseObject;
+        const tokens = serviceResponse.responseObject as {
+          refreshToken: string;
+          refreshExpiresIn: number;
+        };
 
         res.cookie("refreshToken", tokens.refreshToken, {
           httpOnly: true,
@@ -136,6 +141,9 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during token refresh",
@@ -145,10 +153,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Logout user and invalidate session
-   */
-  public static async logout(req: AuthRequest, res: Response) {
+  
+  export async function logout(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -159,7 +165,7 @@ export class AuthController {
         });
       }
 
-      const sessionId = req.body.sessionId ?? "current-session";
+      const sessionId = (req.body as { sessionId?: string }).sessionId ?? "current-session";
 
       const serviceResponse = await AuthService.logout(req.drizzle, sessionId, req.user.id);
 
@@ -169,6 +175,9 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during logout",
@@ -178,12 +187,10 @@ export class AuthController {
     }
   }
 
-  /**
-   * Request password reset
-   */
-  public static async requestPasswordReset(req: AuthRequest, res: Response) {
+  
+  export async function requestPasswordReset(req: AuthRequest, res: Response) {
     try {
-      const data: PasswordResetRequest = req.body;
+      const data = req.body as PasswordResetRequest;
 
       const serviceResponse = await AuthService.requestPasswordReset(req.drizzle, {
         email: data.email,
@@ -193,6 +200,9 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password reset request",
@@ -202,12 +212,10 @@ export class AuthController {
     }
   }
 
-  /**
-   * Reset password with token
-   */
-  public static async resetPassword(req: AuthRequest, res: Response) {
+  
+  export async function resetPassword(req: AuthRequest, res: Response) {
     try {
-      const data: PasswordResetData = req.body;
+      const data = req.body as PasswordResetData;
 
       const serviceResponse = await AuthService.resetPassword(req.drizzle, {
         token: data.token,
@@ -218,6 +226,9 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password reset",
@@ -227,12 +238,10 @@ export class AuthController {
     }
   }
 
-  /**
-   * Verify email address
-   */
-  public static async verifyEmail(req: AuthRequest, res: Response) {
+  
+  export async function verifyEmail(req: AuthRequest, res: Response) {
     try {
-      const data: EmailVerificationData = req.body;
+      const data = req.body as EmailVerificationData;
 
       const serviceResponse = await AuthService.verifyEmail(req.drizzle, {
         token: data.token,
@@ -242,6 +251,9 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during email verification",
@@ -251,10 +263,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Change password for authenticated user
-   */
-  public static async changePassword(req: AuthRequest, res: Response) {
+  
+  export async function changePassword(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -265,7 +275,7 @@ export class AuthController {
         });
       }
 
-      const data: ChangePasswordRequest = req.body;
+      const data = req.body as ChangePasswordRequest;
 
       const serviceResponse = await AuthService.changePassword(req.drizzle, {
         userId: req.user.id,
@@ -277,6 +287,9 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error during password change",
@@ -286,10 +299,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Get current user profile
-   */
-  public static async getProfile(req: AuthRequest, res: Response) {
+  
+  export async function getProfile(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -307,6 +318,9 @@ export class AuthController {
         statusCode: StatusCodes.OK,
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error retrieving profile",
@@ -316,10 +330,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Resend email verification
-   */
-  public static async resendEmailVerification(req: AuthRequest, res: Response) {
+  
+  export async function resendEmailVerification(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -346,6 +358,9 @@ export class AuthController {
         statusCode: StatusCodes.OK,
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error sending verification email",
@@ -355,10 +370,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Get user sessions (for security management)
-   */
-  public static async getUserSessions(req: AuthRequest, res: Response) {
+  
+  export async function getUserSessions(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -388,6 +401,9 @@ export class AuthController {
         statusCode: StatusCodes.OK,
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error retrieving sessions",
@@ -397,10 +413,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Revoke a specific session
-   */
-  public static async revokeSession(req: AuthRequest, res: Response) {
+  
+  export async function revokeSession(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -426,6 +440,9 @@ export class AuthController {
 
       return handleServiceResponse(serviceResponse, res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error revoking session",
@@ -435,10 +452,8 @@ export class AuthController {
     }
   }
 
-  /**
-   * Revoke all sessions except current
-   */
-  public static async revokeAllSessions(req: AuthRequest, res: Response) {
+  
+  export async function revokeAllSessions(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
         return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -456,6 +471,9 @@ export class AuthController {
         statusCode: StatusCodes.OK,
       });
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Internal server error revoking sessions",
@@ -465,3 +483,4 @@ export class AuthController {
     }
   }
 }
+

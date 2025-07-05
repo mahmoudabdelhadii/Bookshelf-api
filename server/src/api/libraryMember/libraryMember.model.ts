@@ -4,7 +4,7 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-// Library member schema based on database schema
+
 export const libraryMemberSchema = z
   .object({
     id: idSchema,
@@ -51,7 +51,7 @@ export const updateLibraryMemberSchema = z
   })
   .openapi({ description: "Library member update data" });
 
-// API-specific schemas for requests
+
 export const getLibraryMemberSchema = z
   .object({
     params: z.object({
@@ -68,12 +68,12 @@ export const getLibraryMembersSchema = z
   })
   .openapi({ description: "Get library members by library ID parameters" });
 
-// Response schemas
+
 export const libraryMemberArraySchema = z
   .array(libraryMemberSchema)
   .openapi({ description: "Array of library members" });
 
-// Library member with detailed information (business logic layer)
+
 export const libraryMemberWithDetailsSchema = libraryMemberSchema
   .extend({
     user: z
@@ -105,7 +105,7 @@ export const libraryMemberWithDetailsSchema = libraryMemberSchema
   })
   .openapi({ description: "Library member with detailed information" });
 
-// Library member with activity stats (business logic layer)
+
 export const libraryMemberWithStatsSchema = libraryMemberWithDetailsSchema
   .extend({
     borrowsCount: z.number().int().min(0).openapi({ description: "Number of books borrowed by this member" }),
@@ -120,7 +120,7 @@ export const libraryMemberWithStatsSchema = libraryMemberWithDetailsSchema
   })
   .openapi({ description: "Library member with activity statistics" });
 
-// TypeScript types derived from schemas
+
 export type LibraryMember = z.infer<typeof libraryMemberSchema>;
 export type CreateLibraryMember = z.infer<typeof createLibraryMemberSchema>;
 export type UpdateLibraryMember = z.infer<typeof updateLibraryMemberSchema>;

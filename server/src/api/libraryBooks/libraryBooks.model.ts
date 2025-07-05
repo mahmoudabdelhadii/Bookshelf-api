@@ -5,7 +5,7 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-// Library book schema based on database schema
+
 export const libraryBookSchema = z
   .object({
     id: idSchema,
@@ -71,7 +71,7 @@ export const errorMessageSchema = z.object({
   message: z.string(),
 });
 
-// TypeScript types derived from schemas
+
 export type LibraryBook = z.infer<typeof libraryBookSchema>;
 export type CreateLibraryBook = z.infer<typeof createLibraryBookSchema>;
 export type UpdateLibraryBook = z.infer<typeof updateLibraryBookSchema>;

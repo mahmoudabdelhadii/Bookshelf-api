@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import express, { type Router } from "express";
+import { Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
@@ -13,15 +13,15 @@ import {
 } from "./subject.model.js";
 
 export const subjectRegistry = new OpenAPIRegistry();
-export const subjectRouter: Router = express.Router();
+export const subjectRouter: Router = Router();
 
-// Register schemas
+
 subjectRegistry.register("Subject", subjectSchema);
 subjectRegistry.register("CreateSubject", createSubjectSchema);
 subjectRegistry.register("UpdateSubject", updateSubjectSchema);
 subjectRegistry.register("SubjectWithChildren", subjectWithChildrenSchema);
 
-// GET /subjects - Get all subjects
+
 subjectRegistry.registerPath({
   method: "get",
   path: "/subjects",
@@ -30,7 +30,7 @@ subjectRegistry.registerPath({
 });
 subjectRouter.get("/", subjectController.getSubjects);
 
-// GET /subjects/hierarchy - Get subject hierarchy
+
 subjectRegistry.registerPath({
   method: "get",
   path: "/subjects/hierarchy",
@@ -42,7 +42,7 @@ subjectRegistry.registerPath({
 });
 subjectRouter.get("/hierarchy", subjectController.getSubjectHierarchy);
 
-// POST /subjects - Create subject
+
 subjectRegistry.registerPath({
   method: "post",
   path: "/subjects",
@@ -60,7 +60,7 @@ subjectRegistry.registerPath({
 });
 subjectRouter.post("/", subjectController.createSubject);
 
-// GET /subjects/:id - Get subject by ID
+
 subjectRegistry.registerPath({
   method: "get",
   path: "/subjects/{id}",
@@ -74,7 +74,7 @@ subjectRegistry.registerPath({
 });
 subjectRouter.get("/:id", subjectController.getSubject);
 
-// PATCH /subjects/:id - Update subject
+
 subjectRegistry.registerPath({
   method: "patch",
   path: "/subjects/{id}",
@@ -95,7 +95,7 @@ subjectRegistry.registerPath({
 });
 subjectRouter.patch("/:id", subjectController.updateSubject);
 
-// DELETE /subjects/:id - Delete subject
+
 subjectRegistry.registerPath({
   method: "delete",
   path: "/subjects/{id}",

@@ -3,13 +3,11 @@ import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
 import type { Application } from "express";
 import { env } from "../utils/envConfig.js";
-import { DrizzleClient } from "database";
+import { DrizzleClient, logger } from "database";
 
 export let redisClient: ReturnType<typeof createClient> | null = null;
 
-/**
- * Initialize Redis client for session storage
- */
+
 export async function initializeRedis(): Promise<ReturnType<typeof createClient>> {
   try {
     if (redisClient && redisClient.isOpen) {
@@ -29,7 +27,9 @@ export async function initializeRedis(): Promise<ReturnType<typeof createClient>
       },
     });
 
-    redisClient.on("error", (err) => {});
+    redisClient.on("error", (err) => {
+      console.error("Redis error", err);
+    });
 
     redisClient.on("connect", () => {});
 
@@ -41,7 +41,7 @@ export async function initializeRedis(): Promise<ReturnType<typeof createClient>
 
     const connectTimeout = setTimeout(() => {
       if (redisClient && !redisClient.isOpen) {
-        redisClient.disconnect().catch(() => {});
+        redisClient.destroy();
         throw new Error("Redis connection timeout after 10 seconds");
       }
     }, 10000);
@@ -58,68 +58,76 @@ export async function initializeRedis(): Promise<ReturnType<typeof createClient>
   }
 }
 
-/**
- * Close Redis connection
- */
+
 export async function closeRedis(): Promise<void> {
   if (redisClient) {
     try {
-      await redisClient.disconnect();
+      redisClient.destroy();
       redisClient = null;
-    } catch (err) {}
+    } catch (err) {
+      console.error("Redis close error", err);
+    }
   }
 }
 
-/**
- * Configure Express session middleware with Redis store
- */
+
 export function configureSession(app: Application): void {
   if (!redisClient) {
     throw new Error("Redis client not initialized. Call initializeRedis() first.");
   }
 
-  try {
-    const redisStore = new RedisStore({
-      client: redisClient,
-      prefix: env.REDIS_SESSION_PREFIX,
-      ttl: Math.floor(env.SESSION_MAX_AGE / 1000),
-      disableTouch: false,
-    });
+  const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: env.REDIS_SESSION_PREFIX,
+    ttl: Math.floor(env.SESSION_MAX_AGE / 1000),
+    disableTouch: false,
+  });
 
-    const sessionConfig: session.SessionOptions = {
-      store: redisStore,
-      name: env.SESSION_NAME,
-      secret: env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-      rolling: true,
-      cookie: {
-        secure: env.isProduction,
-        httpOnly: true,
-        maxAge: env.SESSION_MAX_AGE,
-        sameSite: env.isProduction ? "strict" : "lax",
-      },
-    };
+  const sessionConfig: session.SessionOptions = {
+    store: redisStore,
+    name: env.SESSION_NAME,
+    secret: env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      secure: env.isProduction,
+      httpOnly: true,
+      maxAge: env.SESSION_MAX_AGE,
+      sameSite: env.isProduction ? "strict" : "lax",
+    },
+  };
 
-    if (env.isProduction) {
-      app.set("trust proxy", 1);
-    }
-
-    app.use(session(sessionConfig));
-  } catch (err) {
-    throw err;
+  if (env.isProduction) {
+    app.set("trust proxy", 1);
   }
+
+  app.use(session(sessionConfig));
 }
 
-/**
- * Session utilities for authentication
- */
-export class SessionManager {
-  /**
-   * Store user data in session
-   */
-  static storeUserSession(
-    req: any,
+
+interface SessionRequest {
+  session: {
+    user?: {
+      userId: string;
+      username: string;
+      email: string;
+      role: string;
+      permissions: string[];
+      lastLogin: Date;
+      sessionStartTime: Date;
+      lastActivity?: Date;
+    };
+    destroy: (callback: (err?: Error) => void) => void;
+    regenerate: (callback: (err?: Error) => void) => void;
+  };
+  sessionID: string;
+}
+
+export namespace SessionManager {
+  
+  export function storeUserSession(
+    req: SessionRequest,
     userData: {
       userId: string;
       username: string;
@@ -135,21 +143,17 @@ export class SessionManager {
     };
   }
 
-  /**
-   * Get user data from session
-   */
-  static getUserFromSession(req: any): any | null {
-    return req.session?.user ?? null;
+  
+  export function getUserFromSession(req: SessionRequest): SessionRequest["session"]["user"] | null {
+    return req.session.user ?? null;
   }
 
-  /**
-   * Clear user session
-   */
-  static clearUserSession(req: any): Promise<void> {
+  
+  export function clearUserSession(req: SessionRequest): Promise<void> {
     return new Promise((resolve, reject) => {
-      req.session.destroy((err: any) => {
+      req.session.destroy((err?: Error) => {
         if (err) {
-          reject(err);
+          reject(new Error(`Failed to destroy session: ${err.message}`));
         } else {
           resolve();
         }
@@ -157,14 +161,12 @@ export class SessionManager {
     });
   }
 
-  /**
-   * Regenerate session ID (for security after login)
-   */
-  static regenerateSession(req: any): Promise<void> {
+  
+  export function regenerateSession(req: SessionRequest): Promise<void> {
     return new Promise((resolve, reject) => {
-      req.session.regenerate((err: any) => {
+      req.session.regenerate((err?: Error) => {
         if (err) {
-          reject(err);
+          reject(new Error(`Failed to regenerate session: ${err.message}`));
         } else {
           resolve();
         }
@@ -172,18 +174,16 @@ export class SessionManager {
     });
   }
 
-  /**
-   * Update session with new data
-   */
-  static updateSession(
-    req: any,
+  
+  export function updateSession(
+    req: SessionRequest,
     updates: Partial<{
       permissions: string[];
       role: string;
       lastActivity: Date;
     }>,
   ): void {
-    if (req.session?.user) {
+    if (req.session.user) {
       Object.assign(req.session.user, {
         ...updates,
         lastActivity: new Date(),
@@ -191,11 +191,9 @@ export class SessionManager {
     }
   }
 
-  /**
-   * Check if session is valid and not expired
-   */
-  static isSessionValid(req: any): boolean {
-    if (!req.session?.user) {
+  
+  export function isSessionValid(req: SessionRequest): boolean {
+    if (!req.session.user) {
       return false;
     }
 
@@ -206,19 +204,17 @@ export class SessionManager {
     return sessionAge < env.SESSION_MAX_AGE;
   }
 
-  /**
-   * Get session information
-   */
-  static getSessionInfo(req: any): {
+  
+  export function getSessionInfo(req: SessionRequest): {
     id: string;
     isAuthenticated: boolean;
-    user?: any;
+    user?: SessionRequest["session"]["user"];
     startTime?: Date;
     lastActivity?: Date;
     age: number;
   } {
     const sessionId = req.sessionID;
-    const user = req.session?.user;
+    const user = req.session.user;
     const startTime = user?.sessionStartTime ? new Date(user.sessionStartTime) : undefined;
     const lastActivity = user?.lastActivity ? new Date(user.lastActivity) : undefined;
     const age = startTime ? Date.now() - startTime.getTime() : 0;
@@ -234,12 +230,24 @@ export class SessionManager {
   }
 }
 
-/**
- * Middleware to check session validity
- */
-export function validateSession(req: any, res: any, next: any): void {
-  if (req.session?.user && !SessionManager.isSessionValid(req)) {
-    SessionManager.clearUserSession(req)
+
+interface ExpressRequest extends SessionRequest {
+  user?: SessionRequest["session"]["user"];
+}
+
+interface ExpressResponse {
+  status: (code: number) => {
+    json: (data: unknown) => void;
+  };
+}
+
+export function validateSession(
+  req: ExpressRequest,
+  res: ExpressResponse,
+  next: (err?: Error) => void,
+): void {
+  if (req.session.user && !SessionManager.isSessionValid(req)) {
+    void SessionManager.clearUserSession(req)
       .then(() => {
         res.status(401).json({
           success: false,
@@ -248,75 +256,77 @@ export function validateSession(req: any, res: any, next: any): void {
           statusCode: 401,
         });
       })
-      .catch((err) => {
-        next(err);
+      .catch((err: unknown) => {
+        next(err instanceof Error ? err : new Error("Session cleanup failed"));
       });
     return;
   }
 
-  if (req.session?.user) {
+  if (req.session.user) {
     SessionManager.updateSession(req, { lastActivity: new Date() });
   }
 
   next();
 }
 
-/**
- * Require session authentication
- */
-export function requireSession(req: any, res: any, next: any): void {
-  if (!req.session?.user) {
-    return res.status(401).json({
+
+export function requireSession(req: ExpressRequest, res: ExpressResponse, next: (err?: Error) => void): void {
+  if (!req.session.user) {
+    res.status(401).json({
       success: false,
       message: "Session authentication required. Please log in.",
       responseObject: null,
       statusCode: 401,
-    });
+    }); return;
   }
 
   if (!SessionManager.isSessionValid(req)) {
-    return res.status(401).json({
+    res.status(401).json({
       success: false,
       message: "Session expired. Please log in again.",
       responseObject: null,
       statusCode: 401,
-    });
+    }); return;
   }
 
   next();
+  
 }
 
-/**
- * Session-based authentication middleware (alternative to JWT)
- */
-export function authenticateSession(req: any, res: any, next: any): void {
-  if (req.session?.user && SessionManager.isSessionValid(req)) {
+
+export function authenticateSession(
+  req: ExpressRequest,
+  res: ExpressResponse,
+  next: (err?: Error) => void,
+): void {
+  if (req.session.user && SessionManager.isSessionValid(req)) {
     req.user = req.session.user;
     SessionManager.updateSession(req, { lastActivity: new Date() });
   }
   next();
+  
 }
 
-/**
- * Hybrid authentication (JWT or Session)
- */
-export function hybridAuth(req: any, res: any, next: any): void {
+
+interface RequestWithHeaders extends ExpressRequest {
+  headers: {
+    authorization?: string;
+  };
+}
+
+export function hybridAuth(req: RequestWithHeaders, res: ExpressResponse, next: (err?: Error) => void): void {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith("Bearer ")) {
-    return next();
+    next(); return;
   }
 
   authenticateSession(req, res, next);
 }
 
-/**
- * Session cleanup utilities
- */
-export class SessionCleanup {
-  /**
-   * Clean up expired sessions from Redis
-   */
-  static async cleanupExpiredSessions(): Promise<void> {
+
+export namespace SessionCleanup {
+  
+  export async function cleanupExpiredSessions(): Promise<void> {
     if (!redisClient) {
       return;
     }
@@ -345,13 +355,13 @@ export class SessionCleanup {
       if (keysToDelete.length > 0) {
         await redisClient.del(keysToDelete);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error("Redis error", err);
+    }
   }
 
-  /**
-   * Get session statistics
-   */
-  static async getSessionStats(): Promise<{
+  
+  export async function getSessionStats(): Promise<{
     totalSessions: number;
     activeSessions: number;
     expiringSoon: number;
@@ -378,7 +388,7 @@ export class SessionCleanup {
       let activeSessions = 0;
       let expiringSoon = 0;
 
-      if (ttls)
+      if (ttls) {
         for (const ttl of ttls) {
           const ttlValue = ttl as unknown as number;
           if (ttlValue > 0) {
@@ -388,29 +398,28 @@ export class SessionCleanup {
             }
           }
         }
+      }
 
       return { totalSessions, activeSessions, expiringSoon };
     } catch (err) {
+      console.error("Redis error", err);
+
       return { totalSessions: 0, activeSessions: 0, expiringSoon: 0 };
     }
   }
 }
 
-/**
- * Setup session cleanup interval
- */
+
 export function setupSessionCleanup(): NodeJS.Timeout {
   return setInterval(
     () => {
-      SessionCleanup.cleanupExpiredSessions();
+      void SessionCleanup.cleanupExpiredSessions();
     },
     15 * 60 * 1000,
   );
 }
 
-/**
- * Create session record for database tracking
- */
+
 export async function createSessionRecord(
   drizzle: DrizzleClient,
   userId: string,
@@ -423,14 +432,14 @@ export async function createSessionRecord(
   },
 ): Promise<void> {
   try {
-    console.log(`Session created for user ${userId}:`, {
+    logger.info("Session created for user %s", userId, {
       sessionToken: `${sessionData.sessionToken.substring(0, 10)}...`,
       expiresAt: sessionData.expiresAt,
       ipAddress: sessionData.ipAddress,
       userAgent: sessionData.userAgent?.substring(0, 50),
     });
   } catch (err) {
-    console.error("Failed to create session record:", err);
+    logger.error({ error: err }, "Failed to create session record");
   }
 }
 

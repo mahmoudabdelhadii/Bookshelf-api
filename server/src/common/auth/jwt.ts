@@ -1,13 +1,13 @@
-import { SignOptions, verify, sign, decode, TokenExpiredError, JsonWebTokenError } from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import crypto from "node:crypto";
 import { env } from "../utils/envConfig.js";
 
-const JWT_SECRET = env.JWT_SECRET ?? crypto.randomBytes(64).toString("hex");
-const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET ?? crypto.randomBytes(64).toString("hex");
-const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN ?? "15m";
-const JWT_REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN ?? "7d";
-const JWT_ISSUER = env.JWT_ISSUER ?? "bookshelf-api";
-const JWT_AUDIENCE = env.JWT_AUDIENCE ?? "bookshelf-users";
+const JWT_SECRET = env.JWT_SECRET;
+const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET;
+const JWT_EXPIRES_IN = env.JWT_EXPIRES_IN;
+const JWT_REFRESH_EXPIRES_IN = env.JWT_REFRESH_EXPIRES_IN;
+const JWT_ISSUER = env.JWT_ISSUER;
+const JWT_AUDIENCE = env.JWT_AUDIENCE;
 
 export interface JwtPayload {
   userId: string;
@@ -37,9 +37,7 @@ export interface VerificationResult {
   expired?: boolean;
 }
 
-/**
- * Generate JWT access token
- */
+
 export function generateAccessToken(
   payload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">,
 ): string {
@@ -55,7 +53,7 @@ export function generateAccessToken(
     algorithm: "HS256",
   };
 
-  return sign(tokenPayload, JWT_SECRET, options);
+  return jwt.sign(tokenPayload, JWT_SECRET, options);
 }
 
 export function generateRefreshToken(
@@ -73,10 +71,8 @@ export function generateRefreshToken(
     algorithm: "HS256",
   };
 
-  return sign(tokenPayload, JWT_REFRESH_SECRET, options);
-} /**
- * Generate both access and refresh tokens
- */
+  return jwt.sign(tokenPayload, JWT_REFRESH_SECRET, options);
+} 
 export function generateTokenPair(
   userPayload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">,
 ): TokenPair {
@@ -94,12 +90,10 @@ export function generateTokenPair(
   };
 }
 
-/**
- * Verify JWT access token
- */
+
 export function verifyAccessToken(token: string): VerificationResult {
   try {
-    const payload = verify(token, JWT_SECRET, {
+    const payload = jwt.verify(token, JWT_SECRET, {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
       algorithms: ["HS256"],
@@ -111,22 +105,20 @@ export function verifyAccessToken(token: string): VerificationResult {
 
     return { isValid: true, payload };
   } catch (err) {
-    if (err instanceof TokenExpiredError) {
+    if (err instanceof jwt.TokenExpiredError) {
       return { isValid: false, error: "Token expired", expired: true };
     }
-    if (err instanceof JsonWebTokenError) {
+    if (err instanceof jwt.JsonWebTokenError) {
       return { isValid: false, error: "Invalid token" };
     }
     return { isValid: false, error: "Token verification failed" };
   }
 }
 
-/**
- * Verify JWT refresh token
- */
+
 export function verifyRefreshToken(token: string): VerificationResult {
   try {
-    const payload = verify(token, JWT_REFRESH_SECRET, {
+    const payload = jwt.verify(token, JWT_REFRESH_SECRET, {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
       algorithms: ["HS256"],
@@ -138,30 +130,26 @@ export function verifyRefreshToken(token: string): VerificationResult {
 
     return { isValid: true, payload };
   } catch (err) {
-    if (err instanceof TokenExpiredError) {
+    if (err instanceof jwt.TokenExpiredError) {
       return { isValid: false, error: "Refresh token expired", expired: true };
     }
-    if (err instanceof JsonWebTokenError) {
+    if (err instanceof jwt.JsonWebTokenError) {
       return { isValid: false, error: "Invalid refresh token" };
     }
     return { isValid: false, error: "Refresh token verification failed" };
   }
 }
 
-/**
- * Decode JWT without verification (for debugging/logging)
- */
+
 export function decodeToken(token: string): JwtPayload | null {
   try {
-    return decode(token) as JwtPayload;
+    return jwt.decode(token) as JwtPayload;
   } catch {
     return null;
   }
 }
 
-/**
- * Get token expiration time
- */
+
 export function getTokenExpiration(token: string): Date | null {
   const decoded = decodeToken(token);
   if (!decoded?.exp) {
@@ -170,9 +158,7 @@ export function getTokenExpiration(token: string): Date | null {
   return new Date(decoded.exp * 1000);
 }
 
-/**
- * Check if token is expired
- */
+
 export function isTokenExpired(token: string): boolean {
   const expiration = getTokenExpiration(token);
   if (!expiration) {
@@ -181,9 +167,7 @@ export function isTokenExpired(token: string): boolean {
   return expiration < new Date();
 }
 
-/**
- * Extract token from Authorization header
- */
+
 export function extractTokenFromHeader(authHeader: string | undefined): string | null {
   if (!authHeader) {
     return null;
@@ -197,16 +181,12 @@ export function extractTokenFromHeader(authHeader: string | undefined): string |
   return parts[1];
 }
 
-/**
- * Create a secure session ID
- */
+
 export function generateSessionId(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
-/**
- * Validate JWT configuration
- */
+
 export function validateJwtConfig(): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -240,9 +220,7 @@ export function validateJwtConfig(): { isValid: boolean; errors: string[] } {
   };
 }
 
-/**
- * Parse expiration string to seconds
- */
+
 function parseExpiration(expiration: string): number {
   const units: Record<string, number> = {
     s: 1,
@@ -263,20 +241,14 @@ function parseExpiration(expiration: string): number {
   return value * units[unit];
 }
 
-/**
- * Create a blacklist token hash for token revocation
- */
+
 export function createTokenHash(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-/**
- * Token utilities for testing and debugging
- */
+
 export const TokenUtils = {
-  /**
-   * Create a test token with custom payload
-   */
+  
   createTestToken(payload: Partial<JwtPayload>, type: "access" | "refresh" = "access"): string {
     const defaultPayload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud"> = {
       userId: "test-user-id",
@@ -292,9 +264,7 @@ export const TokenUtils = {
     return type === "access" ? generateAccessToken(fullPayload) : generateRefreshToken(fullPayload);
   },
 
-  /**
-   * Create an expired token for testing
-   */
+  
   createExpiredToken(payload: Partial<JwtPayload> = {}): string {
     const tokenPayload: Omit<JwtPayload, "iat" | "exp"> = {
       userId: "test-user-id",
@@ -309,7 +279,7 @@ export const TokenUtils = {
       ...payload,
     };
 
-    return sign(tokenPayload, JWT_SECRET, {
+    return jwt.sign(tokenPayload, JWT_SECRET, {
       expiresIn: "-1s",
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,

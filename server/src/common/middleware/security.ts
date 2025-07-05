@@ -4,13 +4,9 @@ import { StatusCodes } from "http-status-codes";
 import crypto from "node:crypto";
 import { env } from "../utils/envConfig.js";
 
-/**
- * Comprehensive security middleware setup for production deployment
- */
 
-/**
- * Configure Helmet.js with security headers
- */
+
+
 export function configureSecurityHeaders(app: Application): void {
   app.use(
     helmet({
@@ -31,51 +27,49 @@ export function configureSecurityHeaders(app: Application): void {
         reportOnly: !env.isProduction, // Report only in development
       },
 
-      // HTTP Strict Transport Security
+
       hsts: {
         maxAge: 31536000, // 1 year
         includeSubDomains: true,
         preload: true,
       },
 
-      // X-Frame-Options
+
       frameguard: {
         action: "deny",
       },
 
-      // X-Content-Type-Options
+
       noSniff: true,
 
-      // X-XSS-Protection
+
       xssFilter: true,
 
-      // Referrer Policy
+
       referrerPolicy: {
         policy: ["no-referrer", "strict-origin-when-cross-origin"],
       },
 
-      // Cross-Origin Embedder Policy
+
       crossOriginEmbedderPolicy: false, // May interfere with APIs
 
-      // Cross-Origin Opener Policy
+
       crossOriginOpenerPolicy: {
         policy: "same-origin",
       },
 
-      // Cross-Origin Resource Policy
+
       crossOriginResourcePolicy: {
         policy: "cross-origin",
       },
 
-      // Hide X-Powered-By header
+
       hidePoweredBy: true,
     }),
   );
 }
 
-/**
- * CSRF Protection Implementation
- */
+
 interface CSRFOptions {
   cookieName?: string;
   headerName?: string;
@@ -99,20 +93,16 @@ class CSRFProtection {
     this.whitelist = new Set(options.whitelist ?? []);
   }
 
-  /**
-   * Generate a cryptographically secure CSRF token
-   */
+  
   generateToken(): string {
     return crypto.randomBytes(this.tokenLength).toString("hex");
   }
 
-  /**
-   * Set CSRF token in cookie and make it available to client
-   */
+  
   setToken(_req: Request, res: Response): string {
     const token = this.generateToken();
 
-    // Set secure httpOnly cookie for server verification
+
     res.cookie(`${this.cookieName}-secret`, token, {
       httpOnly: true,
       secure: env.isProduction,
@@ -120,7 +110,7 @@ class CSRFProtection {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
-    // Set readable cookie for client to include in headers
+
     res.cookie(this.cookieName, token, {
       httpOnly: false,
       secure: env.isProduction,
@@ -131,9 +121,7 @@ class CSRFProtection {
     return token;
   }
 
-  /**
-   * Verify CSRF token
-   */
+  
   verifyToken(req: Request): boolean {
     const cookieToken = req.cookies[`${this.cookieName}-secret`];
     const headerToken = req.get(this.headerName) ?? req.body?._csrf;
@@ -142,13 +130,11 @@ class CSRFProtection {
       return false;
     }
 
-    // Use timing-safe comparison
+
     return crypto.timingSafeEqual(Buffer.from(cookieToken), Buffer.from(headerToken));
   }
 
-  /**
-   * CSRF middleware
-   */
+  
   middleware() {
     return (req: Request, res: Response, next: NextFunction): void => {
       if (this.whitelist.has(req.path)) {
@@ -156,9 +142,9 @@ class CSRFProtection {
         return;
       }
 
-      // Skip for ignored methods (GET, HEAD, OPTIONS)
+
       if (this.ignoredMethods.has(req.method)) {
-        // Ensure token is set for non-modifying requests
+
         if (!req.cookies[this.cookieName]) {
           this.setToken(req, res);
         }
@@ -166,7 +152,7 @@ class CSRFProtection {
         return;
       }
 
-      // Verify CSRF token for state-changing requests
+
       if (!this.verifyToken(req)) {
         res.status(StatusCodes.FORBIDDEN).json({
           success: false,
@@ -180,9 +166,7 @@ class CSRFProtection {
     };
   }
 
-  /**
-   * Get CSRF token endpoint
-   */
+  
   getTokenEndpoint() {
     return (req: Request, res: Response) => {
       const token = this.setToken(req, res);
@@ -197,7 +181,7 @@ class CSRFProtection {
   }
 }
 
-// Create CSRF protection instance
+
 export const csrfProtection = new CSRFProtection({
   whitelist: [
     "/health",
@@ -211,11 +195,9 @@ export const csrfProtection = new CSRFProtection({
   ],
 });
 
-/**
- * API Security Headers Middleware
- */
+
 export function apiSecurityHeaders(_req: Request, res: Response, next: NextFunction) {
-  // Security headers specific to API responses
+
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-XSS-Protection", "1; mode=block");
@@ -224,22 +206,20 @@ export function apiSecurityHeaders(_req: Request, res: Response, next: NextFunct
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
 
-  // API-specific headers
+
   res.setHeader("X-API-Version", "1.0.0");
   res.setHeader("X-Response-Time", Date.now().toString());
 
   next();
 }
 
-/**
- * Request sanitization middleware
- */
+
 export function sanitizeRequest(req: Request, _res: Response, next: NextFunction) {
-  // Remove potentially dangerous characters from query parameters
+
   if (req.query) {
     for (const [key, value] of Object.entries(req.query)) {
       if (typeof value === "string") {
-        // Remove HTML tags and potentially dangerous characters
+
         req.query[key] = value
           .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
           .replace(/<[^>]+>/g, "")
@@ -248,7 +228,7 @@ export function sanitizeRequest(req: Request, _res: Response, next: NextFunction
     }
   }
 
-  // Sanitize request body (basic XSS prevention)
+
   if (req.body && typeof req.body === "object") {
     sanitizeObject(req.body);
   }
@@ -256,9 +236,7 @@ export function sanitizeRequest(req: Request, _res: Response, next: NextFunction
   next();
 }
 
-/**
- * Recursively sanitize object properties
- */
+
 function sanitizeObject(obj: any): void {
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === "string") {
@@ -272,9 +250,7 @@ function sanitizeObject(obj: any): void {
   }
 }
 
-/**
- * IP Whitelist/Blacklist Middleware
- */
+
 export class IPAccessControl {
   private whitelist: Set<string>;
   private blacklist: Set<string>;
@@ -288,7 +264,7 @@ export class IPAccessControl {
     return (req: Request, res: Response, next: NextFunction) => {
       const clientIP = this.getClientIP(req);
 
-      // Check blacklist first
+
       if (this.blacklist.has(clientIP)) {
         return res.status(StatusCodes.FORBIDDEN).json({
           success: false,
@@ -298,7 +274,7 @@ export class IPAccessControl {
         });
       }
 
-      // If whitelist is configured, check it
+
       if (this.whitelist.size > 0 && !this.whitelist.has(clientIP)) {
         return res.status(StatusCodes.FORBIDDEN).json({
           success: false,
@@ -339,9 +315,7 @@ export class IPAccessControl {
   }
 }
 
-/**
- * Request ID middleware for tracking
- */
+
 export function requestId(req: Request, res: Response, next: NextFunction) {
   const id = crypto.randomUUID();
   req.headers["x-request-id"] = id;
@@ -350,13 +324,11 @@ export function requestId(req: Request, res: Response, next: NextFunction) {
   
 }
 
-/**
- * Security monitoring middleware
- */
+
 export function securityMonitoring(req: Request, res: Response, next: NextFunction) {
   const startTime = Date.now();
 
-  // Log suspicious patterns
+
   const suspiciousPatterns = [
     /\.\./, // Path traversal
     /<script/i, // XSS attempts
@@ -369,7 +341,7 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
   const url = req.url;
   const body = JSON.stringify(req.body);
 
-  // Check for suspicious patterns
+
   const isSuspicious = suspiciousPatterns.some(
     (pattern) => pattern.test(url) || pattern.test(body) || pattern.test(userAgent),
   );
@@ -385,11 +357,11 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
     });
   }
 
-  // Monitor response time
+
   res.on("finish", () => {
     const duration = Date.now() - startTime;
     if (duration > 5000) {
-      // Log slow requests
+
       console.warn("Slow request detected:", {
         ip: req.ip,
         url,
@@ -404,39 +376,33 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
   next();
 }
 
-/**
- * Complete security middleware setup
- */
+
 export function setupSecurity(app: Application) {
-  // Configure security headers
+
   configureSecurityHeaders(app);
 
-  // Add request ID for tracking
+
   app.use(requestId);
 
-  // Add security monitoring
+
   app.use(securityMonitoring);
 
-  // API-specific security headers
+
   app.use("/api", apiSecurityHeaders);
 
-  // Request sanitization
+
   app.use(sanitizeRequest);
 
-  // CSRF protection (exclude auth endpoints that need to work without existing session)
+
   app.use(csrfProtection.middleware());
 
-  // Add CSRF token endpoint
+
   app.get("/api/csrf-token", csrfProtection.getTokenEndpoint());
 }
 
-/**
- * Security utilities
- */
+
 export const SecurityUtils = {
-  /**
-   * Validate origin header
-   */
+  
   validateOrigin(req: Request, allowedOrigins: string[]): boolean {
     const origin = req.get("origin");
     if (!origin) return false;
@@ -451,25 +417,19 @@ export const SecurityUtils = {
     });
   },
 
-  /**
-   * Check for bot/crawler user agents
-   */
+  
   isBot(userAgent: string): boolean {
     const botPatterns = [/bot/i, /crawler/i, /spider/i, /scraper/i, /curl/i, /wget/i, /python/i, /java/i];
 
     return botPatterns.some((pattern) => pattern.test(userAgent));
   },
 
-  /**
-   * Generate nonce for CSP
-   */
+  
   generateNonce(): string {
     return crypto.randomBytes(16).toString("base64");
   },
 
-  /**
-   * Hash sensitive data for logging
-   */
+  
   hashForLogging(data: string): string {
     return crypto.createHash("sha256").update(data).digest("hex").substring(0, 8);
   },

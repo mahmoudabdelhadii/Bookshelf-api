@@ -48,7 +48,7 @@ export const SubjectService = {
         orderBy: [schema.subject.name],
       });
 
-      // 🛠 Recursive builder now returns Promise<SubjectWithChildren[]>
+
       const buildHierarchy = async (parentId: string): Promise<SubjectWithChildren[]> => {
         const children = await drizzle.query.subject.findMany({
           where: eq(schema.subject.parent, parentId),
@@ -104,7 +104,7 @@ export const SubjectService = {
         );
       }
 
-      // Validate parent exists if provided
+
       if (subjectData.parent) {
         const parentSubject = await drizzle.query.subject.findFirst({
           where: eq(schema.subject.id, subjectData.parent),
@@ -165,7 +165,7 @@ export const SubjectService = {
         }
       }
 
-      // Validate parent exists if provided and prevent circular reference
+
       if (subjectData.parent) {
         if (subjectData.parent === id) {
           const validationError = new ValidationError("Subject cannot be its own parent");
@@ -227,7 +227,7 @@ export const SubjectService = {
         throw new NotFoundError("Subject not found");
       }
 
-      // Check if subject has books
+
       const booksCount = await drizzle
         .select({ count: sql<number>`count(*)` })
         .from(schema.book)
@@ -242,7 +242,7 @@ export const SubjectService = {
         );
       }
 
-      // Check if subject has child subjects
+
       const childrenCount = await drizzle
         .select({ count: sql<number>`count(*)` })
         .from(schema.subject)

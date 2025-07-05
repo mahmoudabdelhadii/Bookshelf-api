@@ -9,12 +9,12 @@ import { authorSchema, createAuthorSchema, updateAuthorSchema, authorArraySchema
 export const authorRegistry = new OpenAPIRegistry();
 export const authorRouter: Router = Router();
 
-// Register schemas
+
 authorRegistry.register("Author", authorSchema);
 authorRegistry.register("CreateAuthor", createAuthorSchema);
 authorRegistry.register("UpdateAuthor", updateAuthorSchema);
 
-// GET /authors - Get all authors
+
 authorRegistry.registerPath({
   method: "get",
   path: "/authors",
@@ -23,7 +23,7 @@ authorRegistry.registerPath({
 });
 authorRouter.get("/", authorController.getAuthors);
 
-// POST /authors - Create author
+
 authorRegistry.registerPath({
   method: "post",
   path: "/authors",
@@ -41,7 +41,7 @@ authorRegistry.registerPath({
 });
 authorRouter.post("/", authorController.createAuthor);
 
-// GET /authors/:id - Get author by ID
+
 authorRegistry.registerPath({
   method: "get",
   path: "/authors/{id}",
@@ -55,7 +55,7 @@ authorRegistry.registerPath({
 });
 authorRouter.get("/:id", authorController.getAuthor);
 
-// PATCH /authors/:id - Update author
+
 authorRegistry.registerPath({
   method: "patch",
   path: "/authors/{id}",
@@ -76,7 +76,7 @@ authorRegistry.registerPath({
 });
 authorRouter.patch("/:id", authorController.updateAuthor);
 
-// DELETE /authors/:id - Delete author
+
 authorRegistry.registerPath({
   method: "delete",
   path: "/authors/{id}",
@@ -90,7 +90,7 @@ authorRegistry.registerPath({
 });
 authorRouter.delete("/:id", authorController.deleteAuthor);
 
-// GET /author/:name - Get author by name (legacy endpoint)
+
 authorRegistry.registerPath({
   method: "get",
   path: "/author/{name}",
@@ -104,7 +104,7 @@ authorRegistry.registerPath({
 });
 authorRouter.get("/by-name/:name", authorController.getAuthorByName);
 
-// GET /authors/search/:query - Search authors
+
 authorRegistry.registerPath({
   method: "get",
   path: "/authors/search/{query}",

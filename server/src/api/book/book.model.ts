@@ -4,7 +4,7 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-// Helper schemas for validation and API
+
 const titleSchema = z
   .string()
   .min(2, "Title must be at least 2 characters long")
@@ -31,7 +31,7 @@ const publishedYearSchema = z
   .optional()
   .openapi({ description: "The year the book was published" });
 
-// Book schema based on database schema
+
 export const bookSchema = z
   .object({
     id: idSchema,
@@ -74,7 +74,7 @@ export const getBookSchema = z
   })
   .openapi({ description: "Get book by ID parameters" });
 
-// For API input - simpler creation schema
+
 export const createBookSchema = z
   .object({
     title: titleSchema,
@@ -95,7 +95,7 @@ export const createBookSchema = z
   })
   .openapi({ description: "Book creation data" });
 
-// For direct database insertion with existing author/publisher IDs
+
 export const createBookWithIdsSchema = z
   .object({
     title: z
@@ -135,7 +135,7 @@ export const createBooksBulkSchema = z
   .max(100)
   .openapi({ description: "Array of books for bulk creation" });
 
-// Book with related entities (business logic layer)
+
 export const bookWithRelationsSchema = bookSchema
   .extend({
     author: z
@@ -164,7 +164,7 @@ export const bookWithRelationsSchema = bookSchema
   })
   .openapi({ description: "Book with related entity details" });
 
-// Book with computed statistics (business logic layer)
+
 export const bookWithStatsSchema = bookWithRelationsSchema
   .extend({
     totalCopies: z.number().int().min(0).openapi({ description: "Total copies across all libraries" }),
@@ -191,7 +191,7 @@ export const bookWithStatsSchema = bookWithRelationsSchema
   })
   .openapi({ description: "Book with computed statistics" });
 
-// TypeScript types derived from schemas
+
 export type Book = z.infer<typeof bookSchema>;
 export type CreateBook = z.infer<typeof createBookSchema>;
 export type CreateBookWithIds = z.infer<typeof createBookWithIdsSchema>;

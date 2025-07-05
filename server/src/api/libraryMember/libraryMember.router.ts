@@ -15,14 +15,14 @@ import {
 export const libraryMemberRegistry = new OpenAPIRegistry();
 export const libraryMemberRouter: Router = Router();
 
-// Register schemas
+
 libraryMemberRegistry.register("LibraryMember", libraryMemberSchema);
 libraryMemberRegistry.register("CreateLibraryMember", createLibraryMemberSchema);
 libraryMemberRegistry.register("UpdateLibraryMember", updateLibraryMemberSchema);
 libraryMemberRegistry.register("LibraryMemberWithDetails", libraryMemberWithDetailsSchema);
 libraryMemberRegistry.register("LibraryMemberWithStats", libraryMemberWithStatsSchema);
 
-// GET /library-members - Get all library members with filtering
+
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members",
@@ -44,7 +44,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/", libraryMemberController.getLibraryMembers);
 
-// POST /library-members - Create library member
+
 libraryMemberRegistry.registerPath({
   method: "post",
   path: "/library-members",
@@ -62,7 +62,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.post("/", libraryMemberController.createLibraryMember);
 
-// GET /library-members/library/:libraryId - Get members by library
+
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members/library/{libraryId}",
@@ -83,7 +83,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/library/:libraryId", libraryMemberController.getLibraryMembersByLibrary);
 
-// GET /library-members/library/:libraryId/stats - Get library member statistics
+
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members/library/{libraryId}/stats",
@@ -108,7 +108,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/library/:libraryId/stats", libraryMemberController.getLibraryMemberStats);
 
-// POST /library-members/library/:libraryId/invite - Invite user to library
+
 libraryMemberRegistry.registerPath({
   method: "post",
   path: "/library-members/library/{libraryId}/invite",
@@ -136,7 +136,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.post("/library/:libraryId/invite", libraryMemberController.inviteLibraryMember);
 
-// DELETE /library-members/library/:libraryId/leave - Leave library
+
 libraryMemberRegistry.registerPath({
   method: "delete",
   path: "/library-members/library/{libraryId}/leave",
@@ -150,7 +150,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.delete("/library/:libraryId/leave", libraryMemberController.leaveLibrary);
 
-// GET /library-members/user/:userId - Get user's library memberships
+
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members/user/{userId}",
@@ -171,7 +171,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/user/:userId", libraryMemberController.getUserLibraryMemberships);
 
-// GET /library-members/user/:userId/library/:libraryId - Get user membership in specific library
+
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members/user/{userId}/library/{libraryId}",
@@ -189,7 +189,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/user/:userId/library/:libraryId", libraryMemberController.getUserInLibrary);
 
-// GET /library-members/:id - Get library member by ID
+
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members/{id}",
@@ -203,7 +203,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/:id", libraryMemberController.getLibraryMember);
 
-// GET /library-members/:id/stats - Get library member with statistics
+
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members/{id}/stats",
@@ -220,7 +220,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/:id/stats", libraryMemberController.getLibraryMemberWithStats);
 
-// PATCH /library-members/:id - Update library member
+
 libraryMemberRegistry.registerPath({
   method: "patch",
   path: "/library-members/{id}",
@@ -241,7 +241,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.patch("/:id", libraryMemberController.updateLibraryMember);
 
-// DELETE /library-members/:id - Remove library member
+
 libraryMemberRegistry.registerPath({
   method: "delete",
   path: "/library-members/{id}",
@@ -255,7 +255,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.delete("/:id", libraryMemberController.removeLibraryMember);
 
-// POST /library-members/:id/activate - Activate member
+
 libraryMemberRegistry.registerPath({
   method: "post",
   path: "/library-members/{id}/activate",
@@ -269,7 +269,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.post("/:id/activate", libraryMemberController.activateLibraryMember);
 
-// POST /library-members/:id/deactivate - Deactivate member
+
 libraryMemberRegistry.registerPath({
   method: "post",
   path: "/library-members/{id}/deactivate",
@@ -283,7 +283,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.post("/:id/deactivate", libraryMemberController.deactivateLibraryMember);
 
-// PATCH /library-members/:id/role - Update member role
+
 libraryMemberRegistry.registerPath({
   method: "patch",
   path: "/library-members/{id}/role",
@@ -308,7 +308,7 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.patch("/:id/role", libraryMemberController.updateMemberRole);
 
-// PATCH /library-members/:id/permissions - Update member permissions
+
 libraryMemberRegistry.registerPath({
   method: "patch",
   path: "/library-members/{id}/permissions",

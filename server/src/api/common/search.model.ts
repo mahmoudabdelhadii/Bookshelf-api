@@ -3,7 +3,7 @@ import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 
 extendZodWithOpenApi(z);
 
-// Common sorting and pagination schemas
+
 export const sortOrderSchema = z.enum(["asc", "desc"]).default("asc").openapi({
   description: "Sort order - ascending or descending",
 });
@@ -34,7 +34,7 @@ export const dateRangeSchema = z
     description: "Date range filter",
   });
 
-// Book search filters
+
 export const bookSearchFiltersSchema = z
   .object({
     query: z.string().optional().openapi({
@@ -90,7 +90,7 @@ export const bookSearchFiltersSchema = z
     description: "Book search and filter parameters",
   });
 
-// Library search filters
+
 export const librarySearchFiltersSchema = z
   .object({
     query: z.string().optional().openapi({
@@ -127,7 +127,7 @@ export const librarySearchFiltersSchema = z
     description: "Library search and filter parameters",
   });
 
-// User search filters
+
 export const userSearchFiltersSchema = z
   .object({
     query: z.string().optional().openapi({
@@ -154,7 +154,7 @@ export const userSearchFiltersSchema = z
     description: "User search and filter parameters",
   });
 
-// Author search filters
+
 export const authorSearchFiltersSchema = z
   .object({
     query: z.string().optional().openapi({
@@ -185,7 +185,7 @@ export const authorSearchFiltersSchema = z
     description: "Author search and filter parameters",
   });
 
-// Publisher search filters
+
 export const publisherSearchFiltersSchema = z
   .object({
     query: z.string().optional().openapi({
@@ -216,7 +216,7 @@ export const publisherSearchFiltersSchema = z
     description: "Publisher search and filter parameters",
   });
 
-// Borrow request search filters
+
 export const borrowRequestSearchFiltersSchema = z
   .object({
     userId: z.string().uuid().optional().openapi({
@@ -253,7 +253,7 @@ export const borrowRequestSearchFiltersSchema = z
     description: "Borrow request search and filter parameters",
   });
 
-// Library member search filters
+
 export const libraryMemberSearchFiltersSchema = z
   .object({
     libraryId: z.string().uuid().optional().openapi({
@@ -285,7 +285,7 @@ export const libraryMemberSearchFiltersSchema = z
     description: "Library member search and filter parameters",
   });
 
-// Advanced search schema combining multiple entities
+
 export const advancedSearchSchema = z
   .object({
     globalQuery: z.string().optional().openapi({
@@ -310,7 +310,7 @@ export const advancedSearchSchema = z
     description: "Advanced search parameters across multiple entities",
   });
 
-// Search result metadata
+
 export const searchResultMetadataSchema = z
   .object({
     totalResults: z.number().openapi({
@@ -339,7 +339,7 @@ export const searchResultMetadataSchema = z
     description: "Search result metadata",
   });
 
-// Faceted search filters (for filtering by categories)
+
 export const facetedSearchFiltersSchema = z
   .object({
     facets: z.record(z.array(z.string())).optional().openapi({
@@ -353,7 +353,7 @@ export const facetedSearchFiltersSchema = z
     description: "Faceted search filter parameters",
   });
 
-// Search suggestion/autocomplete schema
+
 export const searchSuggestionSchema = z
   .object({
     query: z.string().min(1).openapi({
@@ -389,7 +389,7 @@ export const suggestionResponseSchema = z
     description: "Search suggestion response",
   });
 
-// Export types
+
 export type BookSearchFilters = z.infer<typeof bookSearchFiltersSchema>;
 export type LibrarySearchFilters = z.infer<typeof librarySearchFiltersSchema>;
 export type UserSearchFilters = z.infer<typeof userSearchFiltersSchema>;

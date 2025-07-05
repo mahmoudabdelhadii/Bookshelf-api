@@ -180,7 +180,7 @@ export const PublisherService = {
         throw new NotFoundError("Publisher not found");
       }
 
-      // Check if publisher has books
+
       const booksCount = await drizzle
         .select({ count: sql<number>`count(*)` })
         .from(schema.book)

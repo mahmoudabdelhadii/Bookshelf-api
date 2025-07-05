@@ -80,9 +80,7 @@ class ISBNService {
     return data as T;
   }
 
-  /**
-   * Fetch book details by ISBN
-   */
+  
   async getBookByISBN(isbn: string, withPrices?: boolean): Promise<Book> {
     const cleanISBN = isbn.replace(/[^0-9X]/gi, "");
     const path = `/book/${cleanISBN}${withPrices ? "?with_prices=1" : ""}`;
@@ -97,9 +95,7 @@ class ISBNService {
     }
   }
 
-  /**
-   * Search books with various filters
-   */
+  
   async searchBooks(query: string, options: ISBNSearchOptions = {}): Promise<BookSearchResult> {
     const params = new URLSearchParams({
       page: options.page?.toString() ?? "1",
@@ -130,9 +126,7 @@ class ISBNService {
     }
   }
 
-  /**
-   * Get author details with books
-   */
+  
   async getAuthorDetails(name: string, options: AuthorSearchOptions = {}): Promise<Author> {
     const params = new URLSearchParams({
       page: options.page?.toString() ?? "1",
@@ -154,9 +148,7 @@ class ISBNService {
     }
   }
 
-  /**
-   * Search authors
-   */
+  
   async searchAuthors(
     query: string,
     options: { page?: number; pageSize?: number } = {},
@@ -181,9 +173,7 @@ class ISBNService {
     }
   }
 
-  /**
-   * Get publisher details with books
-   */
+  
   async getPublisherDetails(name: string, options: PublisherSearchOptions = {}): Promise<Publisher> {
     const params = new URLSearchParams({
       page: options.page?.toString() ?? "1",
@@ -209,9 +199,7 @@ class ISBNService {
     }
   }
 
-  /**
-   * Search publishers
-   */
+  
   async searchPublishers(
     query: string,
     options: { page?: number; pageSize?: number } = {},
@@ -239,9 +227,7 @@ class ISBNService {
     }
   }
 
-  /**
-   * Search across all ISBNdb databases
-   */
+  
   async searchAll(
     index: "books" | "authors" | "publishers" | "subjects",
     filters: {
@@ -278,9 +264,7 @@ class ISBNService {
     }
   }
 
-  /**
-   * Get database statistics
-   */
+  
   async getStats(): Promise<unknown> {
     const path = "/stats";
 
@@ -294,16 +278,12 @@ class ISBNService {
     }
   }
 
-  /**
-   * Check if service is enabled and configured
-   */
+  
   isEnabled(): boolean {
     return this.enabled;
   }
 
-  /**
-   * Get service configuration info
-   */
+  
   getConfig(): { enabled: boolean; hasApiKey: boolean; baseUrl: string } {
     return {
       enabled: this.enabled,

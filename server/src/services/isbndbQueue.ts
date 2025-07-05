@@ -39,7 +39,7 @@ class SimpleISBNDBQueue {
       callback,
     };
 
-    // Insert based on priority
+
     if (priority === "high") {
       this.queue.unshift(item);
     } else {
@@ -69,7 +69,7 @@ class SimpleISBNDBQueue {
   }
 
   private async processItem(item: QueueItem): Promise<void> {
-    // Respect rate limiting
+
     const now = Date.now();
     const timeSinceLastCall = now - this.lastApiCall;
 
@@ -105,7 +105,7 @@ class SimpleISBNDBQueue {
     item.retries++;
 
     if (item.retries <= this.MAX_RETRIES) {
-      // Add delay before retry
+
       setTimeout(() => {
         this.queue.unshift(item); // Add back to front for retry
       }, this.RETRY_DELAY_MS);
@@ -142,10 +142,10 @@ class SimpleISBNDBQueue {
   }
 }
 
-// Singleton instance
+
 export const isbndbQueue = new SimpleISBNDBQueue();
 
-// Helper function to queue book lookup with promise
+
 export function queueBookLookup(isbn: string, priority: "high" | "low" = "low"): Promise<Book> {
   return new Promise((resolve, reject) => {
     isbndbQueue.addToQueue("book", { isbn }, priority, (error, result) => {
@@ -158,7 +158,7 @@ export function queueBookLookup(isbn: string, priority: "high" | "low" = "low"):
   });
 }
 
-// Helper function to queue author lookup with promise
+
 export function queueAuthorLookup(name: string, priority: "high" | "low" = "low"): Promise<Author> {
   return new Promise((resolve, reject) => {
     isbndbQueue.addToQueue("author", { name }, priority, (error, result) => {
@@ -171,7 +171,7 @@ export function queueAuthorLookup(name: string, priority: "high" | "low" = "low"
   });
 }
 
-// Helper function to queue publisher lookup with promise
+
 export function queuePublisherLookup(name: string, priority: "high" | "low" = "low"): Promise<Publisher> {
   return new Promise((resolve, reject) => {
     isbndbQueue.addToQueue("publisher", { name }, priority, (error, result) => {

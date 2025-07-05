@@ -18,10 +18,7 @@ declare global {
   }
 }
 
-/**
- * Enhanced rate limiting specifically for authentication endpoints
- * with Redis backing for distributed rate limiting
- */
+
 
 const rateLimitResponse = (limit: number, windowMs: number) => ({
   success: false,
@@ -34,9 +31,7 @@ const rateLimitResponse = (limit: number, windowMs: number) => ({
   statusCode: StatusCodes.TOO_MANY_REQUESTS,
 });
 
-/**
- * Create Redis store for rate limiting (if Redis is available)
- */
+
 function createRedisStore() {
   if (redisClient) {
     return new RedisStore({
@@ -47,10 +42,7 @@ function createRedisStore() {
   return undefined;
 }
 
-/**
- * General authentication rate limiting
- * Applies to login, register, and password reset requests
- */
+
 export const authRateLimit = rateLimit({
   store: createRedisStore(),
   windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS,
@@ -88,10 +80,7 @@ export const loginRateLimit = rateLimit({
   },
 });
 
-/**
- * Rate limiting for password reset requests
- * Prevents spam of password reset emails
- */
+
 export const passwordResetRateLimit = rateLimit({
   store: createRedisStore(),
   windowMs: 60 * 60 * 1000,
@@ -118,9 +107,7 @@ export const passwordResetRateLimit = rateLimit({
   },
 });
 
-/**
- * Rate limiting for email verification attempts
- */
+
 export const emailVerificationRateLimit = rateLimit({
   store: createRedisStore(),
   windowMs: 10 * 60 * 1000,
@@ -148,10 +135,7 @@ export const emailVerificationRateLimit = rateLimit({
   },
 });
 
-/**
- * Rate limiting for registration attempts
- * Prevents automated account creation
- */
+
 export const registrationRateLimit = rateLimit({
   store: createRedisStore(),
   windowMs: 60 * 60 * 1000,
@@ -178,10 +162,7 @@ export const registrationRateLimit = rateLimit({
   },
 });
 
-/**
- * Rate limiting for token refresh requests
- * Prevents token refresh abuse
- */
+
 export const refreshTokenRateLimit = rateLimit({
   store: createRedisStore(),
   windowMs: 15 * 60 * 1000,
@@ -208,10 +189,7 @@ export const refreshTokenRateLimit = rateLimit({
   },
 });
 
-/**
- * Adaptive rate limiting based on user behavior
- * Increases restrictions for suspicious patterns
- */
+
 export const createAdaptiveRateLimit = (baseMax: number, baseWindowMs: number) => {
   return rateLimit({
     store: createRedisStore(),
@@ -240,10 +218,7 @@ export const createAdaptiveRateLimit = (baseMax: number, baseWindowMs: number) =
   });
 };
 
-/**
- * Progressive rate limiting
- * Increases restrictions with each violation
- */
+
 export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number) => {
   const violationStore = new Map<string, { count: number; firstViolation: number }>();
 
@@ -284,22 +259,16 @@ export const createProgressiveRateLimit = (baseMax: number, baseWindowMs: number
   });
 };
 
-/**
- * Rate limiting middleware that combines multiple strategies
- */
+
 export const authSecurityRateLimit = [
   authRateLimit,
 
   createAdaptiveRateLimit(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
 ];
 
-/**
- * Utility functions for rate limit management
- */
+
 export class RateLimitUtils {
-  /**
-   * Reset rate limit for a specific key (admin function)
-   */
+  
   static async resetRateLimit(key: string): Promise<void> {
     if (redisClient) {
       try {
@@ -312,9 +281,7 @@ export class RateLimitUtils {
     }
   }
 
-  /**
-   * Get current rate limit status for a key
-   */
+  
   static async getRateLimitStatus(key: string): Promise<{
     remaining: number;
     resetTime: Date | null;
@@ -343,9 +310,7 @@ export class RateLimitUtils {
     };
   }
 
-  /**
-   * Check if IP is currently rate limited
-   */
+  
   static async isRateLimited(ip: string, limitType = "auth"): Promise<boolean> {
     if (redisClient) {
       try {

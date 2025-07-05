@@ -25,22 +25,37 @@ interface OAuthRequest extends Request {
   };
 }
 
-type CallbackHandler = (req: Request, res: Response, next: NextFunction) => void;
+interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  refreshExpiresIn: number;
+}
 
-export class OAuthController {
-  static googleAuth = passport.authenticate("google", {
+interface OAuthData {
+  providerId: string;
+  email: string;
+  profileData: Record<string, unknown>;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace OAuthController {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  export const googleAuth = passport.authenticate("google", {
     scope: ["profile", "email"],
     prompt: "select_account",
   });
 
-  static googleCallback: CallbackHandler = (req: Request, res: Response, next: any) => {
-    passport.authenticate("google", { session: false }, async (err: any, user: OAuthUser, info: any) => {
+  export function googleCallback(req: Request, res: Response, next: NextFunction): void {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    passport.authenticate("google", { session: false }, async (err: Error | null, user: OAuthUser, _info: unknown) => {
       try {
         if (err) {
           res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
           return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!user) {
           res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
           return;
@@ -63,33 +78,32 @@ export class OAuthController {
           expiresAt: new Date(Date.now() + tokenPair.refreshExpiresIn * 1000),
         });
 
-        OAuthController.setAuthCookies(res, tokenPair);
+        setAuthCookies(res, tokenPair);
 
         res.redirect(`${env.FRONTEND_URL}/auth/success?provider=google`);
-      } catch (err_) {
+      } catch {
         res.redirect(`${env.FRONTEND_URL}/auth/error?reason=server_error`);
       }
     })(req, res, next);
-  };
+  }
 
-  /**
-   * Initiate Apple OAuth authentication
-   */
-  static appleAuth = passport.authenticate("apple", {
+  
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  export const appleAuth = passport.authenticate("apple", {
     scope: ["name", "email"],
   });
 
-  /**
-   * Handle Apple OAuth callback
-   */
-  static appleCallback: CallbackHandler = (req: Request, res: Response, next: any) => {
-    passport.authenticate("apple", { session: false }, async (err: any, user: OAuthUser, info: any) => {
+  
+  export function appleCallback(req: Request, res: Response, next: NextFunction): void {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    passport.authenticate("apple", { session: false }, async (err: Error | null, user: OAuthUser, _info: unknown) => {
       try {
         if (err) {
           res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_error`);
           return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!user) {
           res.redirect(`${env.FRONTEND_URL}/auth/error?reason=oauth_failed`);
           return;
@@ -112,21 +126,20 @@ export class OAuthController {
           expiresAt: new Date(Date.now() + tokenPair.refreshExpiresIn * 1000),
         });
 
-        OAuthController.setAuthCookies(res, tokenPair);
+        setAuthCookies(res, tokenPair);
 
         res.redirect(`${env.FRONTEND_URL}/auth/success?provider=apple`);
-      } catch (err_) {
+      } catch {
         res.redirect(`${env.FRONTEND_URL}/auth/error?reason=server_error`);
       }
     })(req, res, next);
-  };
+  }
 
-  /**
-   * Link OAuth account to existing authenticated user
-   */
-  static linkOAuthAccount = async (req: Request, res: Response) => {
+  
+  export async function linkOAuthAccount(req: Request, res: Response): Promise<Response> {
     try {
-      const { provider, oauthData } = req.body;
+      const body = req.body as { provider?: string; oauthData?: OAuthData };
+      const { provider, oauthData } = body;
       const userId = req.user?.id;
 
       if (!userId) {
@@ -161,11 +174,12 @@ export class OAuthController {
         success: true,
         message: `${provider} account linked successfully`,
       });
-    } catch (err: any) {
-      if (err.message.includes("already linked")) {
+    } catch (err) {
+      const error = err as Error;
+      if (error.message.includes("already linked")) {
         return res.status(StatusCodes.CONFLICT).json({
           success: false,
-          message: err.message,
+          message: error.message,
         });
       }
 
@@ -174,12 +188,10 @@ export class OAuthController {
         message: "Failed to link OAuth account",
       });
     }
-  };
+  }
 
-  /**
-   * Unlink OAuth account from authenticated user
-   */
-  static unlinkOAuthAccount = async (req: Request, res: Response) => {
+  
+  export async function unlinkOAuthAccount(req: Request, res: Response): Promise<Response> {
     try {
       const { provider } = req.params;
       const userId = req.user?.id;
@@ -208,11 +220,12 @@ export class OAuthController {
         success: true,
         message: `${provider} account unlinked successfully`,
       });
-    } catch (err: any) {
-      if (err.message.includes("not found")) {
+    } catch (err) {
+      const error = err as Error;
+      if (error.message.includes("not found")) {
         return res.status(StatusCodes.NOT_FOUND).json({
           success: false,
-          message: err.message,
+          message: error.message,
         });
       }
 
@@ -221,12 +234,10 @@ export class OAuthController {
         message: "Failed to unlink OAuth account",
       });
     }
-  };
+  }
 
-  /**
-   * Get user's connected OAuth accounts
-   */
-  static getConnectedAccounts = async (req: Request, res: Response) => {
+  
+  export async function getConnectedAccounts(req: Request, res: Response): Promise<Response> {
     try {
       const userId = req.user?.id;
 
@@ -245,18 +256,16 @@ export class OAuthController {
           accounts: oauthAccounts,
         },
       });
-    } catch (err) {
+    } catch {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Failed to retrieve connected accounts",
       });
     }
-  };
+  }
 
-  /**
-   * Set authentication cookies
-   */
-  private static setAuthCookies(res: Response, tokenPair: any) {
+  
+  function setAuthCookies(res: Response, tokenPair: TokenPair): void {
     const isProduction = env.isProduction;
 
     res.cookie("accessToken", tokenPair.accessToken, {

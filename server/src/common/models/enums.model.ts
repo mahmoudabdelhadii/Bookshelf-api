@@ -60,7 +60,7 @@ export const permissionEnum = z
   ])
   .openapi({ description: "Available permissions for library members" });
 
-// Re-export individual enum types for TypeScript
+
 export type UserRole = z.infer<typeof userRoleEnum>;
 export type LibraryMemberRole = z.infer<typeof libraryMemberRoleEnum>;
 export type BorrowRequestStatus = z.infer<typeof borrowRequestStatusEnum>;
@@ -72,7 +72,7 @@ export type AuditAction = z.infer<typeof auditActionEnum>;
 export type NotificationType = z.infer<typeof notificationTypeEnum>;
 export type Permission = z.infer<typeof permissionEnum>;
 
-// Grouped enum exports for convenience
+
 export const enums = {
   userRole: userRoleEnum,
   libraryMemberRole: libraryMemberRoleEnum,

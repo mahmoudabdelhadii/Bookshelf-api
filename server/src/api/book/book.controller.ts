@@ -285,7 +285,7 @@ class BooksController {
     }
   };
 
-  // Queue a book lookup with priority
+
   public queueBookLookup: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { isbn } = req.params;
@@ -299,7 +299,7 @@ class BooksController {
     }
 
     try {
-      // Queue the book lookup with specified priority
+
       const result = await BookLookupService.getBookByISBN(drizzle, isbn, false);
 
       return handleServiceResponse(
@@ -317,7 +317,7 @@ class BooksController {
     }
   };
 
-  // Get queue status and cache statistics
+
   public getQueueStatus: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
 
@@ -340,7 +340,7 @@ class BooksController {
     }
   };
 
-  // Enhanced search with cache-first approach
+
   public searchBooksWithCache: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { query } = req.params;
@@ -354,7 +354,7 @@ class BooksController {
     }
 
     try {
-      // First search local cache
+
       const cachedResults = await BookLookupService.searchCachedBooks(drizzle, query);
 
       if (cachedResults.length > 0) {
@@ -368,7 +368,7 @@ class BooksController {
         );
       }
 
-      // If no cached results and queue is enabled, search via ISBNDB
+
       if (useQueue === "true") {
         const serviceResponse = await BookService.searchAll(drizzle, "books", 1, 20, {
           text: query,
@@ -406,7 +406,7 @@ class BooksController {
     }
   };
 
-  // Get ISBN service status and configuration
+
   public getISBNServiceStatus: RequestHandler = async (req, res) => {
     try {
       const config = isbnService.getConfig();
@@ -427,7 +427,7 @@ class BooksController {
     }
   };
 
-  // Direct ISBN book lookup (bypasses queue)
+
   public getBookByISBNDirect: RequestHandler = async (req, res) => {
     const { isbn } = req.params;
     const { withPrices = "false" } = req.query;

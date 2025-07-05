@@ -4,7 +4,7 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-// Author schema based on database schema
+
 export const authorSchema = z
   .object({
     id: idSchema,
@@ -64,7 +64,7 @@ export const createAuthorSchema = z
 
 export const updateAuthorSchema = createAuthorSchema.partial().openapi({ description: "Author update data" });
 
-// API-specific schemas for requests
+
 export const getAuthorSchema = z
   .object({
     params: z.object({
@@ -95,10 +95,10 @@ export const searchAuthorsSchema = z
   })
   .openapi({ description: "Search authors parameters" });
 
-// Response schemas
+
 export const authorArraySchema = z.array(authorSchema).openapi({ description: "Array of authors" });
 
-// Author with computed statistics (business logic layer)
+
 export const authorWithStatsSchema = authorSchema
   .extend({
     averageRating: z
@@ -127,7 +127,7 @@ export const authorWithStatsSchema = authorSchema
   })
   .openapi({ description: "Author with computed statistics" });
 
-// TypeScript types derived from schemas
+
 export type Author = z.infer<typeof authorSchema>;
 export type CreateAuthor = z.infer<typeof createAuthorSchema>;
 export type UpdateAuthor = z.infer<typeof updateAuthorSchema>;

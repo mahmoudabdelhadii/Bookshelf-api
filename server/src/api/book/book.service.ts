@@ -228,7 +228,7 @@ export const BookService = {
 
   getBookByISBN: async (drizzle: DrizzleClient, isbn: string) => {
     try {
-      // Use lookup service which handles DB lookup and ISBNDB queue automatically
+
       const bookData = await BookLookupService.getBookByISBN(drizzle, isbn);
 
       if (!bookData) {
@@ -414,7 +414,7 @@ export const BookService = {
       publisher?: string;
     } = {},
   ) => {
-    // First try local database search
+
     const offset = (page - 1) * pageSize;
     const conditions = [sql`TRUE`];
 
@@ -486,7 +486,7 @@ export const BookService = {
         throw new BadRequest("Invalid search index");
     }
 
-    // If we have local results, return them
+
     const hasLocalResults =
       localResults &&
       ((localResults.books && localResults.books.length > 0) ??
@@ -500,7 +500,7 @@ export const BookService = {
       });
     }
 
-    // If no local results and ISBNdb is enabled, search via ISBNdb
+
     if (isbnService.isEnabled()) {
       try {
         const isbndbResults = await isbnService.searchAll(index, {
@@ -515,7 +515,7 @@ export const BookService = {
         });
       } catch (err) {
         logger.error({ error: err, filters }, "ISBNdb search failed for index %s", index);
-        // Fall back to local results even if empty
+
         return ServiceResponse.success("No results found", {
           ...localResults,
           source: "local",

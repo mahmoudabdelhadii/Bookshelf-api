@@ -5,7 +5,7 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-// Library schema based on database schema
+
 export const librarySchema = z
   .object({
     id: idSchema,
@@ -51,7 +51,7 @@ export const getLibrarySchema = z.object({
 
 export const libraryArraySchema = z.array(librarySchema);
 
-// Library with owner details (business logic layer)
+
 export const libraryWithOwnerSchema = librarySchema
   .extend({
     owner: z
@@ -66,7 +66,7 @@ export const libraryWithOwnerSchema = librarySchema
   })
   .openapi({ description: "Library with owner details" });
 
-// Library with computed statistics (business logic layer)
+
 export const libraryWithStatsSchema = libraryWithOwnerSchema
   .extend({
     totalBooks: z.number().int().min(0).openapi({ description: "Total number of books in library" }),
@@ -98,7 +98,7 @@ export const libraryWithStatsSchema = libraryWithOwnerSchema
   })
   .openapi({ description: "Library with comprehensive statistics" });
 
-// Enhanced library response for detailed views
+
 export const libraryDetailedSchema = libraryWithStatsSchema
   .extend({
     members: z
@@ -125,7 +125,7 @@ export const libraryDetailedSchema = libraryWithStatsSchema
   })
   .openapi({ description: "Detailed library information" });
 
-// TypeScript types derived from schemas
+
 export type Library = z.infer<typeof librarySchema>;
 export type CreateLibrary = z.infer<typeof createLibrarySchema>;
 export type UpdateLibrary = z.infer<typeof updateLibrarySchema>;

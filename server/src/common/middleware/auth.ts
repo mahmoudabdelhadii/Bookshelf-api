@@ -15,10 +15,7 @@ declare global {
   }
 }
 
-/**
- * Authentication middleware using JWT
- * Verifies the JWT token and sets req.user
- */
+
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = extractTokenFromHeader(authHeader);
@@ -69,17 +66,13 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
   })(req, res, next);
 };
 
-/**
- * Optional authentication middleware
- * Sets req.user if valid token is provided, but doesn't fail if no token
- */
+
 export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
   const token = extractTokenFromHeader(authHeader);
 
   if (!token) {
     next();
-    return;
     return;
   }
 
@@ -88,7 +81,6 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction): v
   if (!verification.isValid) {
     next();
     return;
-    return;
   }
 
   passport.authenticate("jwt", { session: false }, (err: any, user: AuthUser | false) => {
@@ -96,14 +88,10 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction): v
       req.user = user;
     }
     next();
-    
   })(req, res, next);
 };
 
-/**
- * Local authentication middleware for login
- * Uses username/password authentication
- */
+
 export const authenticateLocal = (req: Request, res: Response, next: NextFunction): void => {
   passport.authenticate("local", { session: false }, (err: any, user: AuthUser | false, info: any) => {
     if (err) {
@@ -130,9 +118,7 @@ export const authenticateLocal = (req: Request, res: Response, next: NextFunctio
   })(req, res, next);
 };
 
-/**
- * Require email verification middleware
- */
+
 export const requireEmailVerified = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
     const errorResponse = ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED);
@@ -152,9 +138,7 @@ export const requireEmailVerified = (req: Request, res: Response, next: NextFunc
   
 };
 
-/**
- * Require active account middleware
- */
+
 export const requireActiveAccount = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
     const errorResponse = ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED);
@@ -365,7 +349,6 @@ export const combineAuthMiddleware = (
       if (currentIndex >= middlewares.length) {
         next();
         return;
-        return;
       }
 
       const middleware = middlewares[currentIndex++];
@@ -373,6 +356,7 @@ export const combineAuthMiddleware = (
         middleware(req, res, runNextMiddleware);
       } catch (err) {
         next(err);
+        
       }
     };
 

@@ -5,7 +5,7 @@ import { env } from "../../common/utils/envConfig.js";
 
 const router = Router();
 
-// Get current feature flags status
+
 router.get("/", (req, res) => {
   const flags = {
     isbndbEnabled: env.ISBNDB_ENABLED,
@@ -19,7 +19,7 @@ router.get("/", (req, res) => {
   });
 });
 
-// Get cache statistics
+
 router.get("/cache-stats", async (req, res) => {
   try {
     const stats = await BookLookupService.getCacheStats(req.drizzle);
@@ -35,7 +35,7 @@ router.get("/cache-stats", async (req, res) => {
   }
 });
 
-// Manual book lookup (for testing/admin purposes)
+
 router.post("/lookup-book", async (req, res) => {
   const { isbn } = req.body;
 

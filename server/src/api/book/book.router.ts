@@ -207,7 +207,7 @@ booksRegistry.registerPath({
 });
 booksRouter.get("/search/:index", booksController.searchAll);
 
-// Queue-related endpoints
+
 booksRegistry.registerPath({
   method: "post",
   path: "/books/queue/{isbn}",
@@ -264,7 +264,7 @@ booksRegistry.registerPath({
 });
 booksRouter.get("/search-cached/:query", booksController.searchBooksWithCache);
 
-// ISBN Service endpoints
+
 booksRegistry.registerPath({
   method: "get",
   path: "/books/service/status",

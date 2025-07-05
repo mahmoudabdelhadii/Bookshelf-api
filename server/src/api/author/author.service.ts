@@ -178,7 +178,7 @@ export const AuthorService = {
         throw new NotFoundError("Author not found");
       }
 
-      // Check if author has books
+
       const booksCount = await drizzle
         .select({ count: sql<number>`count(*)` })
         .from(schema.book)

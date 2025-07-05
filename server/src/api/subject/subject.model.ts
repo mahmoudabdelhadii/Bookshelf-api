@@ -4,7 +4,7 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-// Subject schema based on database schema
+
 export const subjectSchema = z
   .object({
     id: idSchema,
@@ -56,7 +56,7 @@ export const updateSubjectSchema = createSubjectSchema
   .partial()
   .openapi({ description: "Subject update data" });
 
-// API-specific schemas for requests
+
 export const getSubjectSchema = z
   .object({
     params: z.object({
@@ -65,11 +65,11 @@ export const getSubjectSchema = z
   })
   .openapi({ description: "Get subject by ID parameters" });
 
-// Response schemas
+
 export const subjectArraySchema = z.array(subjectSchema).openapi({ description: "Array of subjects" });
 
-// Subject with hierarchical structure (business logic layer)
-// Note: Simplified to avoid z.lazy() which causes OpenAPI generation issues
+
+
 export const subjectWithChildrenSchema = subjectSchema
   .extend({
     children: z
@@ -87,7 +87,7 @@ export const subjectWithChildrenSchema = subjectSchema
   })
   .openapi({ description: "Subject with nested children" });
 
-// Subject with computed statistics (business logic layer)
+
 export const subjectWithStatsSchema = subjectSchema
   .extend({
     totalBooksIncludingChildren: z
@@ -111,7 +111,7 @@ export const subjectWithStatsSchema = subjectSchema
   })
   .openapi({ description: "Subject with computed statistics" });
 
-// TypeScript types derived from schemas
+
 export type Subject = z.infer<typeof subjectSchema>;
 export type CreateSubject = z.infer<typeof createSubjectSchema>;
 export type UpdateSubject = z.infer<typeof updateSubjectSchema>;

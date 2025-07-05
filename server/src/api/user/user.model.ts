@@ -10,7 +10,7 @@ const usernameSchema = z
   .max(50)
   .openapi({ description: "User's unique username" });
 
-// User schema based on database schema
+
 export const userSchema = z
   .object({
     id: idSchema,
@@ -56,6 +56,6 @@ export const updateUserSchema = z
   })
   .openapi({ description: "User update data" });
 
-// TypeScript types derived from schemas
+
 export type User = z.infer<typeof userSchema>;
 export type CreateUser = z.infer<typeof createUserSchema>;

@@ -3,7 +3,7 @@ import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 
 extendZodWithOpenApi(z);
 
-// Base statistic item schema
+
 export const statisticItemSchema = z
   .object({
     label: z.string().openapi({ description: "Label for the statistic" }),
@@ -17,7 +17,7 @@ export const statisticItemSchema = z
   })
   .openapi({ description: "Individual statistic item" });
 
-// Time-based statistic schema
+
 export const timeBasedStatisticSchema = z
   .object({
     period: z.string().openapi({ description: "Time period (e.g., '2024-01', 'Q1-2024')" }),
@@ -34,7 +34,7 @@ export const timeSeriesSchema = z
   })
   .openapi({ description: "Time series statistics" });
 
-// Library statistics
+
 export const libraryStatisticsSchema = z
   .object({
     totalBooks: z.number().openapi({ description: "Total number of books in the library" }),
@@ -70,7 +70,7 @@ export const libraryStatisticsSchema = z
   })
   .openapi({ description: "Comprehensive library statistics" });
 
-// User statistics
+
 export const userStatisticsSchema = z
   .object({
     totalBorrowedBooks: z.number().openapi({ description: "Total books borrowed by user" }),
@@ -106,7 +106,7 @@ export const userStatisticsSchema = z
   })
   .openapi({ description: "User reading statistics" });
 
-// System-wide statistics
+
 export const systemStatisticsSchema = z
   .object({
     totalUsers: z.number().openapi({ description: "Total registered users" }),
@@ -144,7 +144,7 @@ export const systemStatisticsSchema = z
   })
   .openapi({ description: "System-wide statistics" });
 
-// Book statistics
+
 export const bookStatisticsSchema = z
   .object({
     totalCopies: z.number().openapi({ description: "Total copies across all libraries" }),
@@ -168,7 +168,7 @@ export const bookStatisticsSchema = z
   })
   .openapi({ description: "Book-specific statistics" });
 
-// Author statistics
+
 export const authorStatisticsSchema = z
   .object({
     totalBooks: z.number().openapi({ description: "Total books authored" }),
@@ -210,7 +210,7 @@ export const authorStatisticsSchema = z
   })
   .openapi({ description: "Author statistics" });
 
-// Publisher statistics
+
 export const publisherStatisticsSchema = z
   .object({
     totalBooks: z.number().openapi({ description: "Total books published" }),
@@ -244,7 +244,7 @@ export const publisherStatisticsSchema = z
   })
   .openapi({ description: "Publisher statistics" });
 
-// Analytics dashboard response
+
 export const analyticsDashboardSchema = z
   .object({
     overview: z
@@ -304,7 +304,7 @@ export const analyticsDashboardSchema = z
   })
   .openapi({ description: "Analytics dashboard data" });
 
-// Statistical summary schema for any entity
+
 export const statisticalSummarySchema = z
   .object({
     count: z.number().openapi({ description: "Total count" }),
@@ -326,7 +326,7 @@ export const statisticalSummarySchema = z
   })
   .openapi({ description: "Statistical summary" });
 
-// Report generation schema
+
 export const reportConfigSchema = z
   .object({
     type: z.enum(["library", "user", "system", "book", "author", "publisher"]).openapi({
@@ -353,7 +353,7 @@ export const reportConfigSchema = z
   })
   .openapi({ description: "Report configuration" });
 
-// Export types
+
 export type StatisticItem = z.infer<typeof statisticItemSchema>;
 export type TimeBasedStatistic = z.infer<typeof timeBasedStatisticSchema>;
 export type TimeSeries = z.infer<typeof timeSeriesSchema>;

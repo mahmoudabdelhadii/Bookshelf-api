@@ -21,9 +21,7 @@ export interface AuthUser {
   passwordHash?: string;
 }
 
-/**
- * Configure Passport.js with Local and JWT strategies
- */
+
 export function configurePassport(drizzle: DrizzleClient) {
   passport.use(
     new LocalStrategy(

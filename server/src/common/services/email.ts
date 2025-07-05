@@ -2,10 +2,7 @@ import { createTransport } from "nodemailer";
 import type { Transporter } from "nodemailer";
 import { env } from "../utils/envConfig.js";
 
-/**
- * Email service for sending authentication-related emails
- * Supports multiple email providers and templates
- */
+
 
 export interface EmailOptions {
   to: string;
@@ -49,9 +46,7 @@ class EmailService {
   private transporter: Transporter | null = null;
   private isConfigured = false;
 
-  /**
-   * Initialize email service with configuration
-   */
+  
   async initialize(): Promise<void> {
     try {
       if (!env.EMAIL_USER || !env.EMAIL_PASS) {
@@ -81,9 +76,7 @@ class EmailService {
     }
   }
 
-  /**
-   * Send email with error handling and retry logic
-   */
+  
   async sendEmail(options: EmailOptions): Promise<boolean> {
     if (!this.isConfigured || !this.transporter) {
       return false;
@@ -116,9 +109,7 @@ class EmailService {
     return false;
   }
 
-  /**
-   * Send email verification email
-   */
+  
   async sendEmailVerification(data: EmailVerificationData): Promise<boolean> {
     const html = this.getEmailVerificationTemplate(data);
 
@@ -129,9 +120,7 @@ class EmailService {
     });
   }
 
-  /**
-   * Send password reset email
-   */
+  
   async sendPasswordReset(data: PasswordResetData): Promise<boolean> {
     const html = this.getPasswordResetTemplate(data);
 
@@ -142,9 +131,7 @@ class EmailService {
     });
   }
 
-  /**
-   * Send welcome email after successful registration
-   */
+  
   async sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean> {
     const html = this.getWelcomeTemplate(data);
 
@@ -155,9 +142,7 @@ class EmailService {
     });
   }
 
-  /**
-   * Send security alert email
-   */
+  
   async sendSecurityAlert(data: SecurityAlertData): Promise<boolean> {
     const html = this.getSecurityAlertTemplate(data);
 
@@ -168,9 +153,7 @@ class EmailService {
     });
   }
 
-  /**
-   * Email verification template
-   */
+  
   private getEmailVerificationTemplate(data: EmailVerificationData): string {
     return `
 <!DOCTYPE html>
@@ -225,9 +208,7 @@ class EmailService {
 </html>`;
   }
 
-  /**
-   * Password reset template
-   */
+  
   private getPasswordResetTemplate(data: PasswordResetData): string {
     return `
 <!DOCTYPE html>
@@ -292,9 +273,7 @@ class EmailService {
 </html>`;
   }
 
-  /**
-   * Welcome email template
-   */
+  
   private getWelcomeTemplate(data: WelcomeEmailData): string {
     return `
 <!DOCTYPE html>
@@ -365,9 +344,7 @@ class EmailService {
 </html>`;
   }
 
-  /**
-   * Security alert template
-   */
+  
   private getSecurityAlertTemplate(data: SecurityAlertData): string {
     return `
 <!DOCTYPE html>
@@ -433,9 +410,7 @@ class EmailService {
 </html>`;
   }
 
-  /**
-   * Convert HTML to plain text (basic implementation)
-   */
+  
   private htmlToText(html: string): string {
     return html
       .replace(/<[^>]+>/g, "")
@@ -449,9 +424,7 @@ class EmailService {
       .trim();
   }
 
-  /**
-   * Test email configuration
-   */
+  
   async testConnection(): Promise<boolean> {
     if (!this.transporter) {
       return false;
@@ -465,9 +438,7 @@ class EmailService {
     }
   }
 
-  /**
-   * Send test email
-   */
+  
   async sendTestEmail(to: string): Promise<boolean> {
     return this.sendEmail({
       to,
@@ -481,9 +452,7 @@ class EmailService {
     });
   }
 
-  /**
-   * Get service status
-   */
+  
   getStatus(): {
     configured: boolean;
     transporter: boolean;

@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import express, { type Router } from "express";
+import { Router } from "express";
 import { z } from "zod";
 
 import { createApiResponse } from "../../api-docs/openAPIResponseBuilders.js";
@@ -12,14 +12,14 @@ import {
 } from "./publisher.model.js";
 
 export const publisherRegistry = new OpenAPIRegistry();
-export const publisherRouter: Router = express.Router();
+export const publisherRouter: Router = Router();
 
-// Register schemas
+
 publisherRegistry.register("Publisher", publisherSchema);
 publisherRegistry.register("CreatePublisher", createPublisherSchema);
 publisherRegistry.register("UpdatePublisher", updatePublisherSchema);
 
-// GET /publishers - Get all publishers
+
 publisherRegistry.registerPath({
   method: "get",
   path: "/publishers",
@@ -28,7 +28,7 @@ publisherRegistry.registerPath({
 });
 publisherRouter.get("/", publisherController.getPublishers);
 
-// POST /publishers - Create publisher
+
 publisherRegistry.registerPath({
   method: "post",
   path: "/publishers",
@@ -46,7 +46,7 @@ publisherRegistry.registerPath({
 });
 publisherRouter.post("/", publisherController.createPublisher);
 
-// GET /publishers/:id - Get publisher by ID
+
 publisherRegistry.registerPath({
   method: "get",
   path: "/publishers/{id}",
@@ -60,7 +60,7 @@ publisherRegistry.registerPath({
 });
 publisherRouter.get("/:id", publisherController.getPublisher);
 
-// PATCH /publishers/:id - Update publisher
+
 publisherRegistry.registerPath({
   method: "patch",
   path: "/publishers/{id}",
@@ -81,7 +81,7 @@ publisherRegistry.registerPath({
 });
 publisherRouter.patch("/:id", publisherController.updatePublisher);
 
-// DELETE /publishers/:id - Delete publisher
+
 publisherRegistry.registerPath({
   method: "delete",
   path: "/publishers/{id}",
@@ -95,7 +95,7 @@ publisherRegistry.registerPath({
 });
 publisherRouter.delete("/:id", publisherController.deletePublisher);
 
-// GET /publisher/:name - Get publisher by name (legacy endpoint)
+
 publisherRegistry.registerPath({
   method: "get",
   path: "/publisher/{name}",
@@ -109,7 +109,7 @@ publisherRegistry.registerPath({
 });
 publisherRouter.get("/by-name/:name", publisherController.getPublisherByName);
 
-// GET /publishers/search/:query - Search publishers
+
 publisherRegistry.registerPath({
   method: "get",
   path: "/publishers/search/{query}",
