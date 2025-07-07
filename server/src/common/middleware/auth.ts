@@ -15,7 +15,6 @@ declare global {
   }
 }
 
-
 export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = extractTokenFromHeader(authHeader);
@@ -61,39 +60,34 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     }
 
     req.user = user;
-    next();
-    
+    return next();
   })(req, res, next);
 };
-
 
 export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
   const token = extractTokenFromHeader(authHeader);
 
   if (!token) {
-    next();
-    return;
+    return next();
   }
 
   const verification = verifyAccessToken(token);
 
   if (!verification.isValid) {
-    next();
-    return;
+    return next();
   }
 
   passport.authenticate("jwt", { session: false }, (err: any, user: AuthUser | false) => {
     if (!err && user) {
       req.user = user;
     }
-    next();
+    return next();
   })(req, res, next);
 };
 
-
 export const authenticateLocal = (req: Request, res: Response, next: NextFunction): void => {
-  passport.authenticate("local", { session: false }, (err: any, user: AuthUser | false, info: any) => {
+  passport.authenticate("local", { session: false }, (err: unknown, user: AuthUser | false, info: any) => {
     if (err) {
       const errorResponse = ServiceResponse.failure(
         "Authentication error occurred.",
@@ -113,11 +107,9 @@ export const authenticateLocal = (req: Request, res: Response, next: NextFunctio
     }
 
     req.user = user;
-    next();
-    
+    return next();
   })(req, res, next);
 };
-
 
 export const requireEmailVerified = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
@@ -134,10 +126,8 @@ export const requireEmailVerified = (req: Request, res: Response, next: NextFunc
     return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
   }
 
-  next();
-  
+  return next();
 };
-
 
 export const requireActiveAccount = (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
@@ -163,8 +153,7 @@ export const requireActiveAccount = (req: Request, res: Response, next: NextFunc
     return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
   }
 
-  next();
-  
+  return next();
 };
 
 export const requireRoles = (...allowedRoles: string[]) => {
@@ -187,8 +176,7 @@ export const requireRoles = (...allowedRoles: string[]) => {
       return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
     }
 
-    next();
-    
+    return next();
   };
 };
 
@@ -214,8 +202,7 @@ export const requirePermissions = (...requiredPermissions: string[]) => {
       return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
     }
 
-    next();
-    
+    return next();
   };
 };
 
@@ -241,8 +228,7 @@ export const requireAnyPermission = (...requiredPermissions: string[]) => {
       return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
     }
 
-    next();
-    
+    return next();
   };
 };
 
@@ -258,20 +244,18 @@ export const requireOwnershipOrAdmin = (userIdField = "userId") => {
     }
 
     if (req.user.role === "admin" || req.user.role === "Super Administrator") {
-      next();
-      return;
+      return next();
     }
 
     const hasManagementPermission = req.user.permissions.some(
-      (p) => p.includes(":manage") ?? p.includes("system:manage"),
+      (p) => p.includes(":manage") || p.includes("system:manage"),
     );
 
     if (hasManagementPermission) {
-      next();
-      return;
+      return next();
     }
 
-    const resourceUserId = req.params[userIdField] ?? req.body[userIdField] ?? req.query[userIdField];
+    const resourceUserId = req.params[userIdField] || req.body[userIdField] || req.query[userIdField];
 
     if (!resourceUserId) {
       const errorResponse = ServiceResponse.failure(
@@ -291,8 +275,7 @@ export const requireOwnershipOrAdmin = (userIdField = "userId") => {
       return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
     }
 
-    next();
-    
+    return next();
   };
 };
 
@@ -316,8 +299,7 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction) =>
     return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
   }
 
-  next();
-  
+  return next();
 };
 
 export const developmentOnly = (_req: Request, res: Response, next: NextFunction) => {
@@ -330,37 +312,26 @@ export const developmentOnly = (_req: Request, res: Response, next: NextFunction
     return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
   }
 
-  next();
-  
+  return next();
 };
 
 export const combineAuthMiddleware = (
-  ...middlewares: ((req: Request, res: Response, next: NextFunction) => void)[]
+  ...middlewares: Array<(req: Request, res: Response, next: NextFunction) => unknown>
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    let currentIndex = 0;
-
-    const runNextMiddleware = (error?: any) => {
-      if (error) {
-        next(error);
-        return;
+    try {
+      for (const middleware of middlewares) {
+        await new Promise<void>((resolve, reject) => {
+          middleware(req, res, (err?: any) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
       }
-
-      if (currentIndex >= middlewares.length) {
-        next();
-        return;
-      }
-
-      const middleware = middlewares[currentIndex++];
-      try {
-        middleware(req, res, runNextMiddleware);
-      } catch (err) {
-        next(err);
-        
-      }
-    };
-
-    runNextMiddleware();
+      return next();
+    } catch (err) {
+      return next(err);
+    }
   };
 };
 

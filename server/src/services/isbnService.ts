@@ -14,12 +14,13 @@ export interface ISBNSearchOptions {
 function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
   if (!headers) return {};
 
+  const result: Record<string, string> = {};
+
   if (headers instanceof Headers) {
-    const obj: Record<string, string> = {};
     headers.forEach((value, key) => {
-      obj[key] = value;
+      result[key] = value;
     });
-    return obj;
+    return result;
   }
 
   if (Array.isArray(headers)) {

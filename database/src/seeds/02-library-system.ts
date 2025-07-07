@@ -48,7 +48,7 @@ export async function runSeed(drizzle: DrizzleClient) {
         }),
         permissions: funcs.default({ defaultValue: ["read", "borrow"] }),
         joinDate: funcs.date(),
-        isActive: funcs.boolean({ probability: 0.9 }),
+        isActive: funcs.boolean(),
         createdAt: funcs.date(),
         updatedAt: funcs.date(),
       },
@@ -60,7 +60,10 @@ export async function runSeed(drizzle: DrizzleClient) {
         id: funcs.uuid(),
         requestDate: funcs.date(),
         approvedDate: funcs.date(),
-        dueDate: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }),
+        dueDate: funcs.date({
+          minDate: new Date(),
+          maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }),
         returnDate: funcs.date(),
         status: funcs.valuesFromArray({
           values: ["pending", "approved", "rejected", "borrowed", "returned", "overdue"],
@@ -72,3 +75,4 @@ export async function runSeed(drizzle: DrizzleClient) {
     },
   }));
 }
+

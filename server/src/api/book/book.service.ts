@@ -13,7 +13,6 @@ import { queueAuthorLookup, queuePublisherLookup } from "../../services/isbndbQu
 import { BookLookupService } from "../../services/bookLookup.js";
 import { isbnService } from "../../services/isbnService.js";
 import type { CreateBookWithIds } from "./book.model.js";
-import type { Publisher } from "../../common/types/shared/isbndbAPI.js";
 
 type Language = (typeof schema.book.language.enumValues)[number];
 

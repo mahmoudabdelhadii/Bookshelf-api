@@ -46,13 +46,13 @@ export async function runSeed(drizzle: DrizzleClient) {
         country: funcs.country(),
         profilePicture: funcs.default({ defaultValue: "profile.jpg" }),
         bio: funcs.loremIpsum(),
-        isActive: funcs.boolean({ probability: 0.95 }),
+        isActive: funcs.boolean(),
         lastLoginAt: funcs.date(),
         createdAt: funcs.date(),
         updatedAt: funcs.date(),
       },
     },
-    
+
     userRoleType: {
       count: 5,
       columns: {
@@ -100,8 +100,29 @@ export async function runSeed(drizzle: DrizzleClient) {
       count: 20,
       columns: {
         id: funcs.uuid(),
-        name: funcs.valuesFromArray({ 
-          values: ["Science", "Technology", "History", "Literature", "Philosophy", "Art", "Religion", "Politics", "Economics", "Psychology", "Mathematics", "Physics", "Chemistry", "Biology", "Geography", "Sociology", "Medicine", "Engineering", "Law", "Business"],
+        name: funcs.valuesFromArray({
+          values: [
+            "Science",
+            "Technology",
+            "History",
+            "Literature",
+            "Philosophy",
+            "Art",
+            "Religion",
+            "Politics",
+            "Economics",
+            "Psychology",
+            "Mathematics",
+            "Physics",
+            "Chemistry",
+            "Biology",
+            "Geography",
+            "Sociology",
+            "Medicine",
+            "Engineering",
+            "Law",
+            "Business",
+          ],
           isUnique: true,
         }),
         description: funcs.loremIpsum(),
@@ -143,7 +164,9 @@ export async function runSeed(drizzle: DrizzleClient) {
         deweyDecimal: funcs.string(),
         binding: funcs.valuesFromArray({ values: ["Hardcover", "Paperback", "Ebook"] }),
         language: funcs.valuesFromArray({ values: ["en", "ar", "other"] }),
-        genre: funcs.valuesFromArray({ values: ["Fiction", "Non-fiction", "Mystery", "Romance", "Science", "History", "Biography"] }),
+        genre: funcs.valuesFromArray({
+          values: ["Fiction", "Non-fiction", "Mystery", "Romance", "Science", "History", "Biography"],
+        }),
         publishedYear: funcs.int({ minValue: 1900, maxValue: 2024 }),
         edition: funcs.string(),
         pages: funcs.int({ minValue: 50, maxValue: 1000 }),
@@ -156,3 +179,4 @@ export async function runSeed(drizzle: DrizzleClient) {
     },
   }));
 }
+

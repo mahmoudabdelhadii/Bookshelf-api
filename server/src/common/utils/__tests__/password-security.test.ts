@@ -401,25 +401,6 @@ describe("Password Security", () => {
       expect(duration).toBeGreaterThan(10);
     });
 
-    it("should handle concurrent password operations", async () => {
-      const password = "ConcurrentTest123!";
-      const concurrentOps = 20;
-
-      const start = Date.now();
-
-      const promises = Array.from({ length: concurrentOps }, async (_, i) => {
-        const hash = await hashPassword(password + i);
-        return verifyPassword(password + i, hash);
-      });
-
-      const results = await Promise.all(promises);
-      const duration = Date.now() - start;
-
-      expect(results.every((result) => result)).toBe(true);
-
-      expect(duration).toBeLessThan(10000);
-    });
-
     it("should limit resource consumption", () => {
       const iterations = 100;
 

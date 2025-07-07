@@ -44,7 +44,6 @@ export interface OAuthUser {
   avatar?: string;
 }
 
-
 export function configureOAuthStrategies(drizzle: DrizzleClient) {
   if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
     passport.use(
@@ -98,13 +97,12 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
 
   if (env.APPLE_CLIENT_ID && env.APPLE_TEAM_ID && env.APPLE_KEY_ID && env.APPLE_PRIVATE_KEY) {
     passport.use(
-
       new AppleStrategy(
         {
           clientID: env.APPLE_CLIENT_ID,
           teamID: env.APPLE_TEAM_ID,
           keyID: env.APPLE_KEY_ID,
-          privateKey: env.APPLE_PRIVATE_KEY,
+          privateKeyString: env.APPLE_PRIVATE_KEY,
           callbackURL: env.APPLE_CALLBACK_URL,
           scope: ["email", "name"],
           passReqToCallback: true,
@@ -152,7 +150,6 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
   return passport;
 }
 
-
 async function findUserByEmail(drizzle: DrizzleClient, email: string) {
   return await drizzle.query.user.findFirst({
     where: (user, { eq }) => eq(user.email, email),
@@ -166,7 +163,6 @@ async function findUserByEmail(drizzle: DrizzleClient, email: string) {
     },
   });
 }
-
 
 async function createOAuthUser(
   drizzle: DrizzleClient,
@@ -253,7 +249,6 @@ async function createOAuthUser(
   });
 }
 
-
 async function updateUserOAuthInfo(
   drizzle: DrizzleClient,
   userId: string,
@@ -305,7 +300,6 @@ async function updateUserOAuthInfo(
   });
 }
 
-
 async function buildAuthUser(
   drizzle: DrizzleClient,
   user: any,
@@ -341,7 +335,6 @@ async function buildAuthUser(
   };
 }
 
-
 function generateUsernameFromEmail(email: string): string {
   const baseUsername = email.split("@")[0].toLowerCase();
 
@@ -350,9 +343,7 @@ function generateUsernameFromEmail(email: string): string {
   return `${cleanUsername}_${randomSuffix}`;
 }
 
-
 export class OAuthService {
-  
   static async linkOAuthAccount(
     drizzle: DrizzleClient,
     userId: string,
@@ -408,7 +399,6 @@ export class OAuthService {
     }
   }
 
-  
   static async unlinkOAuthAccount(drizzle: DrizzleClient, userId: string, provider: "google" | "apple") {
     try {
       const profile = await drizzle.query.oauthProfile.findFirst({
@@ -437,7 +427,6 @@ export class OAuthService {
     }
   }
 
-  
   static async getUserOAuthAccounts(drizzle: DrizzleClient, userId: string) {
     return await drizzle.query.oauthProfile.findMany({
       where: (profile, { eq }) => eq(profile.userId, userId),

@@ -54,8 +54,11 @@ export async function runSeed(drizzle: DrizzleClient) {
         refreshToken: funcs.string(),
         ipAddress: funcs.default({ defaultValue: "192.168.1.1" }),
         userAgent: funcs.string(),
-        isActive: funcs.boolean({ probability: 0.7 }),
-        expiresAt: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }),
+        isActive: funcs.boolean(),
+        expiresAt: funcs.date({
+          minDate: new Date(),
+          maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }),
         createdAt: funcs.date(),
         lastAccessedAt: funcs.date(),
         updatedAt: funcs.date(),
@@ -68,7 +71,7 @@ export async function runSeed(drizzle: DrizzleClient) {
         id: funcs.uuid(),
         token: funcs.string(),
         expiresAt: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 24 * 60 * 60 * 1000) }),
-        isUsed: funcs.boolean({ probability: 0.5 }),
+        isUsed: funcs.boolean(),
         createdAt: funcs.date(),
         updatedAt: funcs.date(),
       },
@@ -80,7 +83,7 @@ export async function runSeed(drizzle: DrizzleClient) {
         id: funcs.uuid(),
         token: funcs.string(),
         expiresAt: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 24 * 60 * 60 * 1000) }),
-        isUsed: funcs.boolean({ probability: 0.6 }),
+        isUsed: funcs.boolean(),
         createdAt: funcs.date(),
         updatedAt: funcs.date(),
       },
@@ -93,10 +96,15 @@ export async function runSeed(drizzle: DrizzleClient) {
         lockedAt: funcs.date(),
         lockedUntil: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 24 * 60 * 60 * 1000) }),
         reason: funcs.valuesFromArray({
-          values: ["Too many failed login attempts", "Suspicious activity", "Admin lockout", "Security breach"],
+          values: [
+            "Too many failed login attempts",
+            "Suspicious activity",
+            "Admin lockout",
+            "Security breach",
+          ],
         }),
         failedAttempts: funcs.int({ minValue: 3, maxValue: 10 }),
-        isActive: funcs.boolean({ probability: 0.8 }),
+        isActive: funcs.boolean(),
       },
     },
 
@@ -112,7 +120,10 @@ export async function runSeed(drizzle: DrizzleClient) {
         profileData: funcs.string(),
         accessToken: funcs.string(),
         refreshToken: funcs.string(),
-        tokenExpiresAt: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }),
+        tokenExpiresAt: funcs.date({
+          minDate: new Date(),
+          maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }),
         createdAt: funcs.date(),
         updatedAt: funcs.date(),
       },
@@ -123,7 +134,15 @@ export async function runSeed(drizzle: DrizzleClient) {
       columns: {
         id: funcs.uuid(),
         action: funcs.valuesFromArray({
-          values: ["login", "logout", "password_change", "profile_update", "role_assignment", "data_access", "failed_login"],
+          values: [
+            "login",
+            "logout",
+            "password_change",
+            "profile_update",
+            "role_assignment",
+            "data_access",
+            "failed_login",
+          ],
         }),
         details: funcs.loremIpsum(),
         ipAddress: funcs.default({ defaultValue: "192.168.1.1" }),
@@ -136,3 +155,4 @@ export async function runSeed(drizzle: DrizzleClient) {
     },
   }));
 }
+

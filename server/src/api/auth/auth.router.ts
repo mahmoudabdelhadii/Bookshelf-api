@@ -95,7 +95,7 @@ const validateRequest = (req: Request, res: Response, next: NextFunction) => {
       statusCode: StatusCodes.UNPROCESSABLE_ENTITY,
     });
   }
-  next();
+  return next();
 };
 
 const registerValidation = [
@@ -161,13 +161,11 @@ const changePasswordValidation = [
 
 const sessionIdValidation = [param("sessionId").notEmpty().withMessage("Session ID is required")];
 
-
 authRegistry.register("User", userResponseSchema);
 authRegistry.register("LoginResponse", loginResponseSchema);
 authRegistry.register("TokenResponse", refreshTokenResponseSchema);
 authRegistry.register("RegisterRequest", registerSchema);
 authRegistry.register("LoginRequest", loginSchema);
-
 
 authRegistry.registerPath({
   method: "post",
@@ -242,7 +240,6 @@ authRegistry.registerPath({
     },
   },
 });
-
 
 authRegistry.registerPath({
   method: "get",

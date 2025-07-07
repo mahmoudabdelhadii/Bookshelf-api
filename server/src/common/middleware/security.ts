@@ -126,8 +126,7 @@ class CSRFProtection {
         if (!req.cookies[this.cookieName]) {
           this.setToken(req, res);
         }
-        next();
-        return;
+        return next();
       }
 
       if (!this.verifyToken(req)) {
@@ -139,7 +138,7 @@ class CSRFProtection {
         });
       }
 
-      next();
+      return next();
     };
   }
 
@@ -248,8 +247,7 @@ export class IPAccessControl {
         });
       }
 
-      next();
-      return;
+      return next();
     };
   }
 
@@ -283,7 +281,7 @@ export function requestId(req: Request, res: Response, next: NextFunction) {
   const id = crypto.randomUUID();
   req.headers["x-request-id"] = id;
   res.setHeader("X-Request-ID", id);
-  next();
+  return next();
 }
 
 export function securityMonitoring(req: Request, res: Response, next: NextFunction) {
@@ -330,7 +328,7 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
     }
   });
 
-  next();
+  return next();
 }
 
 export function setupSecurity(app: Application) {
