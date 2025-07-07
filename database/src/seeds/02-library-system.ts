@@ -75,4 +75,3 @@ export async function runSeed(drizzle: DrizzleClient) {
     },
   }));
 }
-

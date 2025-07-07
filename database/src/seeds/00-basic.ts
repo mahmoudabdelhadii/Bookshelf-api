@@ -3,7 +3,7 @@ import { DrizzleClient } from "../drizzle.js";
 
 // Import only the basic tables first
 import { user } from "../drizzle/user.js";
-import { userRoleType } from "../drizzle/role.js";
+import { role } from "../drizzle/role.js";
 import { author } from "../drizzle/author.js";
 import { publisher } from "../drizzle/publisher.js";
 import { subject } from "../drizzle/subject.js";
@@ -14,7 +14,7 @@ export async function runSeed(drizzle: DrizzleClient) {
   // Reset all basic tables first
   await reset(drizzle, {
     user,
-    userRoleType,
+    role,
     author,
     publisher,
     subject,
@@ -24,7 +24,7 @@ export async function runSeed(drizzle: DrizzleClient) {
 
   await seed(drizzle, {
     user,
-    userRoleType,
+    role,
     author,
     publisher,
     subject,
@@ -53,7 +53,7 @@ export async function runSeed(drizzle: DrizzleClient) {
       },
     },
 
-    userRoleType: {
+    role: {
       count: 5,
       columns: {
         id: funcs.uuid(),
@@ -179,4 +179,3 @@ export async function runSeed(drizzle: DrizzleClient) {
     },
   }));
 }
-

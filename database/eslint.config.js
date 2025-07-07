@@ -8,6 +8,9 @@ export default kitabEslintConfig.config(
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    rules: {
+      "@typescript-eslint/naming-convention": "off",
+    },
   },
   {
     ignores: ["src/seedtypes.ts", "src/schematypes.ts", "drizzle.config.ts"],

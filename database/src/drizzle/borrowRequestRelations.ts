@@ -15,5 +15,6 @@ export const borrowRequestRelations = relations(borrowRequest, ({ one }) => ({
   approver: one(user, {
     fields: [borrowRequest.approvedBy],
     references: [user.id],
+    relationName: "approvedBorrowRequests",
   }),
 }));

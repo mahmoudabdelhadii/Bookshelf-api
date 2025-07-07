@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { user } from "./user.js";
-import { userRoleType } from "./role.js";
+import { role } from "./role.js";
 import { userRole } from "./userRole.js";
 
 export const userRoleRelations = relations(userRole, ({ one }) => ({
@@ -9,9 +9,9 @@ export const userRoleRelations = relations(userRole, ({ one }) => ({
     references: [user.id],
     relationName: "userToRole",
   }),
-  role: one(userRoleType, {
+  role: one(role, {
     fields: [userRole.roleId],
-    references: [userRoleType.id],
+    references: [role.id],
   }),
   assignedByUser: one(user, {
     fields: [userRole.assignedBy],

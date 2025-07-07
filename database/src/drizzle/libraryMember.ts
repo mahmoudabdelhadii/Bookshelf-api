@@ -28,7 +28,5 @@ export const libraryMember = server.table(
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
-  (table) => [
-    uniqueIndex("unique_library_member").on(table.userId, table.libraryId),
-  ],
+  (table) => [uniqueIndex("unique_library_member").on(table.userId, table.libraryId)],
 );

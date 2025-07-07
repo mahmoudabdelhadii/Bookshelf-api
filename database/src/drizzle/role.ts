@@ -1,8 +1,8 @@
 import { text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 
-export const userRoleType = server.table(
-  "user_role_type",
+export const role = server.table(
+  "role",
   {
     id: idpk("id"),
     name: text("name").notNull(),
@@ -11,5 +11,5 @@ export const userRoleType = server.table(
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
-  (table) => [uniqueIndex("unique_user_role_type_name").on(table.name)],
+  (table) => [uniqueIndex("unique_role_name").on(table.name)],
 );

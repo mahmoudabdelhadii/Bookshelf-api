@@ -3,7 +3,7 @@ import { DrizzleClient } from "../drizzle.js";
 
 // Import referenced tables
 import { user } from "../drizzle/user.js";
-import { userRoleType } from "../drizzle/role.js";
+import { role } from "../drizzle/role.js";
 
 // Import auth-related tables that depend on users
 import { userRole } from "../drizzle/userRole.js";
@@ -28,7 +28,7 @@ export async function runSeed(drizzle: DrizzleClient) {
 
   await seed(drizzle, {
     user,
-    userRoleType,
+    role,
     userRole,
     userSession,
     passwordResetToken,
@@ -155,4 +155,3 @@ export async function runSeed(drizzle: DrizzleClient) {
     },
   }));
 }
-

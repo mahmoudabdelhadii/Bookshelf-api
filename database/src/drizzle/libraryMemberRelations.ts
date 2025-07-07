@@ -15,5 +15,6 @@ export const libraryMemberRelations = relations(libraryMember, ({ one }) => ({
   inviter: one(user, {
     fields: [libraryMember.invitedBy],
     references: [user.id],
+    relationName: "invitedLibraryMembers",
   }),
 }));

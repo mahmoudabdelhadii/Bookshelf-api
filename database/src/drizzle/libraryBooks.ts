@@ -22,7 +22,5 @@ export const libraryBooks = server.table(
     addedAt: timestamp("added_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
-  (table) => [
-    uniqueIndex("unique_library_book").on(table.libraryId, table.bookId),
-  ],
+  (table) => [uniqueIndex("unique_library_book").on(table.libraryId, table.bookId)],
 );

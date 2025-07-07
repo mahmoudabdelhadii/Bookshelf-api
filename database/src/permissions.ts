@@ -1,32 +1,3 @@
-export enum ResourceType {
-  USER = "user",
-  BOOK = "book",
-  LIBRARY = "library",
-  LIBRARY_BOOK = "library_book",
-  AUTHOR = "author",
-  PUBLISHER = "publisher",
-  SYSTEM = "system",
-  AUDIT_LOG = "audit_log",
-  ROLE = "role",
-  PERMISSION = "permission",
-}
-
-export enum ActionType {
-  CREATE = "create",
-  READ = "read",
-  UPDATE = "update",
-  DELETE = "delete",
-  MANAGE = "manage",
-  LIST = "list",
-  SEARCH = "search",
-  EXPORT = "export",
-  IMPORT = "import",
-  APPROVE = "approve",
-  REJECT = "reject",
-  ASSIGN = "assign",
-  REVOKE = "revoke",
-}
-
 export const PERMISSIONS = {
   USER_CREATE: "user:create",
   USER_READ: "user:read",
@@ -286,55 +257,53 @@ export const ROLE_TEMPLATES = {
   },
 } as const;
 
-export class PermissionValidator {
-  static isValidPermission(permission: string): boolean {
-    return Object.values(PERMISSIONS).includes(permission as any);
+export function isValidPermission(permission: string): permission is PermissionString {
+  return Object.values(PERMISSIONS).includes(permission as PermissionString);
+}
+
+export function parsePermission(permission: string): {
+  resource: string;
+  action: string;
+  scope?: string;
+} | null {
+  const parts = permission.split(":");
+  if (parts.length < 2 || parts.length > 3) {
+    return null;
   }
 
-  static parsePermission(permission: string): {
-    resource: string;
-    action: string;
-    scope?: string;
-  } | null {
-    const parts = permission.split(":");
-    if (parts.length < 2 || parts.length > 3) {
-      return null;
-    }
+  return {
+    resource: parts[0],
+    action: parts[1],
+    scope: parts[2],
+  };
+}
 
-    return {
-      resource: parts[0],
-      action: parts[1],
-      scope: parts[2],
-    };
+export function hasPermission(userPermissions: string[], requiredPermission: string): boolean {
+  if (userPermissions.includes(requiredPermission)) {
+    return true;
   }
 
-  static hasPermission(userPermissions: string[], requiredPermission: string): boolean {
-    if (userPermissions.includes(requiredPermission)) {
-      return true;
-    }
+  const parsed = parsePermission(requiredPermission);
+  if (!parsed) return false;
 
-    const parsed = this.parsePermission(requiredPermission);
-    if (!parsed) return false;
-
-    const managePermission = `${parsed.resource}:manage`;
-    if (userPermissions.includes(managePermission)) {
-      return true;
-    }
-
-    if (userPermissions.includes(PERMISSIONS.SYSTEM_MANAGE)) {
-      return true;
-    }
-
-    return false;
+  const managePermission = `${parsed.resource}:manage`;
+  if (userPermissions.includes(managePermission)) {
+    return true;
   }
 
-  static hasAnyPermission(userPermissions: string[], requiredPermissions: string[]): boolean {
-    return requiredPermissions.some((permission) => this.hasPermission(userPermissions, permission));
+  if (userPermissions.includes(PERMISSIONS.SYSTEM_MANAGE)) {
+    return true;
   }
 
-  static hasAllPermissions(userPermissions: string[], requiredPermissions: string[]): boolean {
-    return requiredPermissions.every((permission) => this.hasPermission(userPermissions, permission));
-  }
+  return false;
+}
+
+export function hasAnyPermission(userPermissions: string[], requiredPermissions: string[]): boolean {
+  return requiredPermissions.some((permission) => hasPermission(userPermissions, permission));
+}
+
+export function hasAllPermissions(userPermissions: string[], requiredPermissions: string[]): boolean {
+  return requiredPermissions.every((permission) => hasPermission(userPermissions, permission));
 }
 
 export type Permission = keyof typeof PERMISSIONS;
