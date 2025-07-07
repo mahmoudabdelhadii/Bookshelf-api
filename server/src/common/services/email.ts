@@ -327,7 +327,6 @@ class EmailService {
             <ul>
                 <li>Your account is protected with enterprise-grade security</li>
                 <li>We monitor all login attempts and unusual activity</li>
-                <li>You can enable two-factor authentication for extra security</li>
             </ul>
         </div>
         
@@ -389,12 +388,11 @@ class EmailService {
         <ul>
             <li>Change your password immediately</li>
             <li>Review your account for any unauthorized changes</li>
-            <li>Enable two-factor authentication</li>
             <li>Contact our support team</li>
         </ul>
         
         <div class="alert">
-            <strong>🛡️ Security Tip:</strong> We recommend enabling two-factor authentication and using a strong, unique password for your account.
+            <strong>🛡️ Security Tip:</strong> We recommend using a strong, unique password for your account.
         </div>
         
         <p>We take your account security seriously. If you have any concerns, please contact our support team immediately.</p>

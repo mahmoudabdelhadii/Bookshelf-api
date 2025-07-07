@@ -11,5 +11,5 @@ export const role = server.table(
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
-  (table) => [uniqueIndex("unique_role_name").on(table.name)],
+  (table) => [uniqueIndex("unique_user_role_type_name").on(table.name)],
 );

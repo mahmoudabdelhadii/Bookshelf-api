@@ -1,9 +1,0 @@
-export { userAuthRelations } from "./userAuthRelations.js";
-export { userSessionRelations } from "./userSessionRelations.js";
-export { passwordResetTokenRelations } from "./passwordResetTokenRelations.js";
-export { emailVerificationTokenRelations } from "./emailVerificationTokenRelations.js";
-export { userRoleRelations } from "./userRoleRelations.js";
-export { roleRelations } from "./roleRelations.js";
-export { securityAuditLogRelations } from "./securityAuditLogRelations.js";
-export { accountLockoutRelations } from "./accountLockoutRelations.js";
-export { oauthProfileRelations } from "./oauthProfileRelations.js";

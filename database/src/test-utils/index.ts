@@ -1,5 +1,25 @@
 import { connect, type DrizzleClient } from "database";
 
+export interface MockRequest {
+  drizzle: DrizzleClient;
+  params: Record<string, string>;
+  query: Record<string, string>;
+  body: unknown;
+  headers: Record<string, string>;
+  get: (header: string) => string | undefined;
+  ip: string;
+  url: string;
+  method: string;
+}
+
+export interface MockResponse {
+  status: (code: number) => this;
+  send: (data: unknown) => this;
+  json: (data: unknown) => this;
+  statusCode: number;
+  body: unknown;
+}
+
 export async function setupTestDb(
   testName: string,
 ): Promise<{ drizzle: DrizzleClient; close: () => Promise<void> }> {
@@ -7,37 +27,37 @@ export async function setupTestDb(
   return { drizzle, close };
 }
 
-export function createMockRequest(drizzle: DrizzleClient) {
+export function createMockRequest(drizzle: DrizzleClient): MockRequest {
   return {
     drizzle,
     params: {},
     query: {},
     body: {},
     headers: {},
-    get: (header: string) => undefined,
+    get: () => undefined,
     ip: "127.0.0.1",
     url: "/test",
     method: "GET",
-  } as any;
+  };
 }
 
-export function createMockResponse() {
-  const res = {
+export function createMockResponse(): MockResponse {
+  const res: MockResponse = {
     status(code: number) {
       this.statusCode = code;
       return this;
     },
-    send(data: any) {
+    send(data: unknown) {
       this.body = data;
       return this;
     },
-    json(data: any) {
+    json(data: unknown) {
       this.body = data;
       return this;
     },
     statusCode: 200,
     body: null,
-  } as any;
+  };
 
   return res;
 }

@@ -1,9 +1,9 @@
-import { timestamp, pgEnum, uniqueIndex, index, uuid } from "drizzle-orm/pg-core";
+import { timestamp, uniqueIndex, index, uuid } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 import { libraryBooks } from "./libraryBooks.js";
 
-export const borrowStatusEnum = pgEnum("borrow_status", ["pending", "approved", "rejected", "returned"]);
+export const borrowStatusEnum = server.enum("borrow_status", ["pending", "approved", "rejected", "returned"]);
 
 export const borrowRequest = server.table(
   "borrow_request",

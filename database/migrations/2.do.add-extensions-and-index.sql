@@ -35,7 +35,7 @@ CREATE TRIGGER update_oauth_profile_updated_at
 COMMENT ON TABLE server."oauth_profile" IS 'OAuth profiles for external authentication providers';
 
 -- Insert default roles
-INSERT INTO server."user_role_type" (name, description, permissions) VALUES 
+INSERT INTO server."role" (name, description, permissions) VALUES 
 (
     'Super Administrator',
     'Full system access with all permissions',
@@ -104,8 +104,8 @@ CREATE TRIGGER update_user_auth_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION server.update_updated_at_column();
 
-CREATE TRIGGER update_user_role_type_updated_at
-    BEFORE UPDATE ON server."user_role_type"
+CREATE TRIGGER update_role_updated_at
+    BEFORE UPDATE ON server."role"
     FOR EACH ROW
     EXECUTE FUNCTION server.update_updated_at_column();
 
@@ -163,7 +163,7 @@ COMMENT ON TABLE server."user_session" IS 'Active user sessions for authenticati
 COMMENT ON TABLE server."password_reset_token" IS 'Tokens for password reset functionality';
 COMMENT ON TABLE server."email_verification_token" IS 'Tokens for email verification';
 COMMENT ON TABLE server."login_attempt" IS 'Log of all login attempts for security monitoring';
-COMMENT ON TABLE server."user_role_type" IS 'System roles with associated permissions';
+COMMENT ON TABLE server."role" IS 'System roles with associated permissions';
 COMMENT ON TABLE server."user_role" IS 'Assignment of roles to users';
 COMMENT ON TABLE server."security_audit_log" IS 'Comprehensive security event logging';
 COMMENT ON TABLE server."account_lockout" IS 'Account lockout tracking for security';

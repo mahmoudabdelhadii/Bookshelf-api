@@ -1,7 +1,7 @@
 import { text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 
-export const userRoleEnum = server.enum("role", ["user", "admin"]);
+export const userRoleEnum = server.enum("role_type", ["user", "admin"]);
 
 export const user = server.table(
   "user",

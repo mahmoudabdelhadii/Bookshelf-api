@@ -199,7 +199,6 @@ async function createOAuthUser(
       emailVerifiedAt: new Date(),
       isActive: true,
       isSuspended: false,
-      twoFactorEnabled: false,
       failedLoginAttempts: 0,
     });
 
@@ -214,8 +213,8 @@ async function createOAuthUser(
       }),
     });
 
-    const readerRole = await tx.query.userRoleType.findFirst({
-      where: (userRoleType, { eq }) => eq(userRoleType.name, "Reader"),
+    const readerRole = await tx.query.role.findFirst({
+      where: (role, { eq }) => eq(role.name, "Reader"),
     });
 
     if (readerRole) {
@@ -305,7 +304,7 @@ async function buildAuthUser(
   user: typeof schema.user.$inferSelect & {
     userAuth: typeof schema.userAuth.$inferSelect;
     userRoles: (typeof schema.userRole.$inferSelect & {
-      role: typeof schema.userRoleType.$inferSelect;
+      role: typeof schema.role.$inferSelect;
     })[];
   },
   provider: "google" | "apple",

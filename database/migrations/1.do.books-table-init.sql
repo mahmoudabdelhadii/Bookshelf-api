@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE SCHEMA "server";
 
 CREATE TYPE "server"."language" AS ENUM('en', 'ar', 'other');
-CREATE TYPE "server"."role" AS ENUM('user', 'admin');
+CREATE TYPE "server"."role_type" AS ENUM('user', 'admin');
 CREATE TYPE "server"."borrow_request_status" AS ENUM('pending', 'approved', 'rejected', 'borrowed', 'returned', 'overdue');
 CREATE TYPE "server"."library_member_role" AS ENUM('owner', 'manager', 'staff', 'member');
 CREATE TABLE IF NOT EXISTS "server"."book" (
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS "server"."user" (
 	"email" text NOT NULL,
 	"first_name" text NOT NULL,
 	"last_name" text NOT NULL,
-	"role" "server"."role" DEFAULT 'user' NOT NULL,
+	"role" "server"."role_type" DEFAULT 'user' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -84,9 +84,6 @@ CREATE TABLE IF NOT EXISTS "server"."user_auth" (
 	"suspended_at" timestamp with time zone,
 	"suspended_by" uuid,
 	"suspension_reason" text,
-	"two_factor_enabled" boolean DEFAULT false NOT NULL,
-	"two_factor_secret" text,
-	"backup_codes" text[],
 	"failed_login_attempts" integer DEFAULT 0 NOT NULL,
 	"last_failed_login_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -137,7 +134,7 @@ CREATE TABLE IF NOT EXISTS "server"."login_attempt" (
 	"failure_reason" text
 );
 
-CREATE TABLE IF NOT EXISTS "server"."user_role_type" (
+CREATE TABLE IF NOT EXISTS "server"."role" (
 	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
@@ -323,7 +320,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "server"."user_role" ADD CONSTRAINT "user_role_role_id_user_role_type_id_fk" FOREIGN KEY ("role_id") REFERENCES "server"."user_role_type"("id") ON DELETE restrict ON UPDATE cascade;
+ ALTER TABLE "server"."user_role" ADD CONSTRAINT "user_role_role_id_role_id_fk" FOREIGN KEY ("role_id") REFERENCES "server"."role"("id") ON DELETE restrict ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -434,7 +431,7 @@ CREATE INDEX IF NOT EXISTS "idx_email_verification_expires_at" ON "server"."emai
 CREATE INDEX IF NOT EXISTS "idx_login_attempts_email" ON "server"."login_attempt" USING btree ("email");
 CREATE INDEX IF NOT EXISTS "idx_login_attempts_ip" ON "server"."login_attempt" USING btree ("ip_address");
 CREATE INDEX IF NOT EXISTS "idx_login_attempts_attempted_at" ON "server"."login_attempt" USING btree ("attempted_at");
-CREATE UNIQUE INDEX IF NOT EXISTS "unique_user_role_type_name" ON "server"."user_role_type" USING btree ("name");
+CREATE UNIQUE INDEX IF NOT EXISTS "unique_user_role_type_name" ON "server"."role" USING btree ("name");
 CREATE UNIQUE INDEX IF NOT EXISTS "unique_user_role" ON "server"."user_role" USING btree ("user_id","role_id");
 CREATE INDEX IF NOT EXISTS "idx_user_roles_user_id" ON "server"."user_role" USING btree ("user_id");
 CREATE INDEX IF NOT EXISTS "idx_user_roles_role_id" ON "server"."user_role" USING btree ("role_id");

@@ -57,117 +57,6 @@ export function configureSecurityHeaders(app: Application): void {
   );
 }
 
-interface CSRFOptions {
-  cookieName?: string;
-  headerName?: string;
-  tokenLength?: number;
-  ignoredMethods?: string[];
-  whitelist?: string[];
-}
-
-class CSRFProtection {
-  private cookieName: string;
-  private headerName: string;
-  private tokenLength: number;
-  private ignoredMethods: Set<string>;
-  private whitelist: Set<string>;
-
-  constructor(options: CSRFOptions = {}) {
-    this.cookieName = options.cookieName ?? "csrf-token";
-    this.headerName = options.headerName ?? "x-csrf-token";
-    this.tokenLength = options.tokenLength ?? 32;
-    this.ignoredMethods = new Set(options.ignoredMethods ?? ["GET", "HEAD", "OPTIONS"]);
-    this.whitelist = new Set(options.whitelist ?? []);
-  }
-
-  generateToken(): string {
-    return crypto.randomBytes(this.tokenLength).toString("hex");
-  }
-
-  setToken(_req: Request, res: Response): string {
-    const token = this.generateToken();
-
-    res.cookie(`${this.cookieName}-secret`, token, {
-      httpOnly: true,
-      secure: env.isProduction,
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
-
-    res.cookie(this.cookieName, token, {
-      httpOnly: false,
-      secure: env.isProduction,
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
-
-    return token;
-  }
-
-  verifyToken(req: Request): boolean {
-    const cookieToken = req.cookies[`${this.cookieName}-secret`];
-    const headerToken = req.get(this.headerName) ?? req.body?._csrf;
-
-    if (!cookieToken || !headerToken) {
-      return false;
-    }
-
-    return crypto.timingSafeEqual(Buffer.from(cookieToken), Buffer.from(headerToken));
-  }
-
-  middleware() {
-    return (req: Request, res: Response, next: NextFunction): void => {
-      if (this.whitelist.has(req.path)) {
-        next();
-        return;
-      }
-
-      if (this.ignoredMethods.has(req.method)) {
-        if (!req.cookies[this.cookieName]) {
-          this.setToken(req, res);
-        }
-        return next();
-      }
-
-      if (!this.verifyToken(req)) {
-        res.status(StatusCodes.FORBIDDEN).json({
-          success: false,
-          message: "Invalid CSRF token. Please refresh the page and try again.",
-          responseObject: null,
-          statusCode: StatusCodes.FORBIDDEN,
-        });
-      }
-
-      return next();
-    };
-  }
-
-  getTokenEndpoint() {
-    return (req: Request, res: Response) => {
-      const token = this.setToken(req, res);
-
-      res.json({
-        success: true,
-        message: "CSRF token generated",
-        responseObject: { token },
-        statusCode: StatusCodes.OK,
-      });
-    };
-  }
-}
-
-export const csrfProtection = new CSRFProtection({
-  whitelist: [
-    "/health",
-    "/api-docs",
-    "/auth/login",
-    "/auth/register",
-    "/auth/refresh",
-    "/auth/password/reset-request",
-    "/auth/password/reset",
-    "/auth/email/verify",
-  ],
-});
 
 export function apiSecurityHeaders(_req: Request, res: Response, next: NextFunction) {
   res.setHeader("X-Content-Type-Options", "nosniff");
@@ -341,10 +230,6 @@ export function setupSecurity(app: Application) {
   app.use("/api", apiSecurityHeaders);
 
   app.use(sanitizeRequest);
-
-  app.use(csrfProtection.middleware());
-
-  app.get("/api/csrf-token", csrfProtection.getTokenEndpoint());
 }
 
 export const SecurityUtils = {

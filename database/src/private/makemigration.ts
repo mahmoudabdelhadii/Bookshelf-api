@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeFile } from "node:fs/promises";
 import Postgrator from "postgrator";
+import { DATABASE_URL } from "../env.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -23,7 +24,7 @@ async function main() {
     const postgrator = new Postgrator({
       migrationPattern: join(migrationDir, "*"),
       driver: "pg",
-      database: "kitab",
+      database: DATABASE_URL,
       schemaTable: "public.__postgrator_migrations",
     });
     const last = await postgrator.getMaxVersion();

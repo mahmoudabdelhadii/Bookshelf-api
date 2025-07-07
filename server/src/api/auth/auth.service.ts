@@ -73,7 +73,6 @@ export interface RefreshTokenData {
 }
 
 export const AuthService = {
-  
   async registerUser(drizzle: DrizzleClient, userData: RegisterUserData) {
     try {
       const { username, email, firstName, lastName, password } = userData;
@@ -133,12 +132,11 @@ export const AuthService = {
           isEmailVerified: false,
           isActive: true,
           isSuspended: false,
-          twoFactorEnabled: false,
           failedLoginAttempts: 0,
         });
 
-        const readerRole = await tx.query.userRoleType.findFirst({
-          where: (userRoleType, { eq }) => eq(userRoleType.name, "Reader"),
+        const readerRole = await tx.query.role.findFirst({
+          where: (role, { eq }) => eq(role.name, "Reader"),
         });
 
         if (readerRole) {
@@ -189,7 +187,6 @@ export const AuthService = {
     }
   },
 
-  
   async login(drizzle: DrizzleClient, credentials: LoginCredentials) {
     try {
       const { email, password, ipAddress, userAgent } = credentials;
@@ -220,7 +217,6 @@ export const AuthService = {
       }
 
       const { userAuth, userRoles, ...user } = userWithAuth;
-
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!userAuth) {
@@ -349,7 +345,6 @@ export const AuthService = {
     }
   },
 
-  
   async logout(drizzle: DrizzleClient, sessionId: string, userId: string) {
     try {
       await drizzle
@@ -372,7 +367,6 @@ export const AuthService = {
     }
   },
 
-  
   async refreshToken(drizzle: DrizzleClient, data: RefreshTokenData) {
     try {
       const { refreshToken, ipAddress, userAgent } = data;
@@ -453,7 +447,6 @@ export const AuthService = {
     }
   },
 
-  
   async requestPasswordReset(drizzle: DrizzleClient, data: PasswordResetRequest) {
     try {
       const { email, ipAddress, userAgent } = data;
@@ -499,7 +492,6 @@ export const AuthService = {
     }
   },
 
-  
   async resetPassword(drizzle: DrizzleClient, data: PasswordResetData) {
     try {
       const { token, newPassword, ipAddress, userAgent } = data;
@@ -558,7 +550,6 @@ export const AuthService = {
     }
   },
 
-  
   async verifyEmail(drizzle: DrizzleClient, data: EmailVerificationData) {
     try {
       const { token, ipAddress, userAgent } = data;
@@ -605,7 +596,6 @@ export const AuthService = {
     }
   },
 
-  
   async changePassword(drizzle: DrizzleClient, data: ChangePasswordData) {
     try {
       const { userId, currentPassword, newPassword, ipAddress, userAgent } = data;
@@ -652,7 +642,6 @@ export const AuthService = {
     }
   },
 
-  
   async logSecurityEvent(
     drizzle: DrizzleClient,
     event: {
@@ -674,13 +663,11 @@ export const AuthService = {
         severity: event.severity ?? "info",
       });
     } catch (err) {
-
       // eslint-disable-next-line no-console
       console.error("Failed to log security event:", err);
     }
   },
 
-  
   async logLoginAttempt(
     drizzle: DrizzleClient,
     attempt: {
@@ -700,7 +687,6 @@ export const AuthService = {
         failureReason: attempt.failureReason ?? null,
       });
     } catch (err) {
-
       // eslint-disable-next-line no-console
       console.error("Failed to log security event:", err);
     }
