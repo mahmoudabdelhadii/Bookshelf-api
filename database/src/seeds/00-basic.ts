@@ -1,7 +1,7 @@
 import { seed, reset } from "drizzle-seed";
 import { DrizzleClient } from "../drizzle.js";
 
-// Import only the basic tables first
+// Import all tables
 import { user } from "../drizzle/user.js";
 import { role } from "../drizzle/role.js";
 import { author } from "../drizzle/author.js";
@@ -9,17 +9,31 @@ import { publisher } from "../drizzle/publisher.js";
 import { subject } from "../drizzle/subject.js";
 import { book } from "../drizzle/book.js";
 import { library } from "../drizzle/library.js";
+import { userRole } from "../drizzle/userRole.js";
+import { userSession } from "../drizzle/userSession.js";
+import { passwordResetToken } from "../drizzle/passwordResetToken.js";
+import { emailVerificationToken } from "../drizzle/emailVerificationToken.js";
+import { accountLockout } from "../drizzle/accountLockout.js";
+import { oauthProfile } from "../drizzle/oauthProfile.js";
+import { securityAuditLog } from "../drizzle/securityAuditLog.js";
 
 export async function runSeed(drizzle: DrizzleClient) {
-  // Reset all basic tables first
+  // Reset all tables in dependency order (dependent tables first)
   await reset(drizzle, {
-    user,
-    role,
-    author,
-    publisher,
-    subject,
+    securityAuditLog,
+    oauthProfile,
+    accountLockout,
+    emailVerificationToken,
+    passwordResetToken,
+    userSession,
+    userRole,
     book,
     library,
+    subject,
+    publisher,
+    author,
+    role,
+    user,
   });
 
   await seed(drizzle, {
@@ -30,24 +44,26 @@ export async function runSeed(drizzle: DrizzleClient) {
     subject,
     book,
     library,
+    userRole,
+    userSession,
+    passwordResetToken,
+    emailVerificationToken,
+    accountLockout,
+    oauthProfile,
+    securityAuditLog,
   }).refine((funcs) => ({
     // Independent tables first
     user: {
       count: 25,
       columns: {
         id: funcs.uuid(),
+        username: funcs.string(),
         email: funcs.email(),
         firstName: funcs.firstName(),
         lastName: funcs.lastName(),
-        dateOfBirth: funcs.date({ minDate: new Date("1950-01-01"), maxDate: new Date("2005-12-31") }),
-        phone: funcs.phoneNumber(),
-        address: funcs.streetAddress(),
-        city: funcs.city(),
-        country: funcs.country(),
-        profilePicture: funcs.default({ defaultValue: "profile.jpg" }),
-        bio: funcs.loremIpsum(),
-        isActive: funcs.boolean(),
-        lastLoginAt: funcs.date(),
+        role: funcs.valuesFromArray({
+          values: ["user", "admin"],
+        }),
         createdAt: funcs.date(),
         updatedAt: funcs.date(),
       },
@@ -175,6 +191,123 @@ export async function runSeed(drizzle: DrizzleClient) {
         excerpt: funcs.loremIpsum(),
         synopsis: funcs.loremIpsum(),
         createdAt: funcs.date(),
+      },
+    },
+
+    userRole: {
+      count: 5, // Very low count to avoid duplicates
+      columns: {
+        id: funcs.uuid(),
+        assignedAt: funcs.date(),
+        updatedAt: funcs.date(),
+      },
+    },
+
+    userSession: {
+      count: 50,
+      columns: {
+        id: funcs.uuid(),
+        sessionToken: funcs.string(),
+        refreshToken: funcs.string(),
+        ipAddress: funcs.default({ defaultValue: "192.168.1.1" }),
+        userAgent: funcs.string(),
+        isActive: funcs.boolean(),
+        expiresAt: funcs.date({
+          minDate: new Date(),
+          maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }),
+        createdAt: funcs.date(),
+        lastAccessedAt: funcs.date(),
+        updatedAt: funcs.date(),
+      },
+    },
+
+    passwordResetToken: {
+      count: 10,
+      columns: {
+        id: funcs.uuid(),
+        token: funcs.string(),
+        expiresAt: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 24 * 60 * 60 * 1000) }),
+        isUsed: funcs.boolean(),
+        createdAt: funcs.date(),
+        updatedAt: funcs.date(),
+      },
+    },
+
+    emailVerificationToken: {
+      count: 8,
+      columns: {
+        id: funcs.uuid(),
+        token: funcs.string(),
+        expiresAt: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 24 * 60 * 60 * 1000) }),
+        isUsed: funcs.boolean(),
+        createdAt: funcs.date(),
+        updatedAt: funcs.date(),
+      },
+    },
+
+    accountLockout: {
+      count: 3,
+      columns: {
+        id: funcs.uuid(),
+        lockedAt: funcs.date(),
+        lockedUntil: funcs.date({ minDate: new Date(), maxDate: new Date(Date.now() + 24 * 60 * 60 * 1000) }),
+        reason: funcs.valuesFromArray({
+          values: [
+            "Too many failed login attempts",
+            "Suspicious activity",
+            "Admin lockout",
+            "Security breach",
+          ],
+        }),
+        failedAttempts: funcs.int({ minValue: 3, maxValue: 10 }),
+        isActive: funcs.boolean(),
+      },
+    },
+
+    oauthProfile: {
+      count: 2, // Very low count since we only have 2 providers (google, apple)
+      columns: {
+        id: funcs.uuid(),
+        provider: funcs.valuesFromArray({
+          values: ["google", "apple"],
+        }),
+        providerId: funcs.string(),
+        email: funcs.email(),
+        profileData: funcs.string(),
+        accessToken: funcs.string(),
+        refreshToken: funcs.string(),
+        tokenExpiresAt: funcs.date({
+          minDate: new Date(),
+          maxDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }),
+        createdAt: funcs.date(),
+        updatedAt: funcs.date(),
+      },
+    },
+
+    securityAuditLog: {
+      count: 100,
+      columns: {
+        id: funcs.uuid(),
+        action: funcs.valuesFromArray({
+          values: [
+            "login",
+            "logout",
+            "password_change",
+            "profile_update",
+            "role_assignment",
+            "data_access",
+            "failed_login",
+          ],
+        }),
+        details: funcs.loremIpsum(),
+        ipAddress: funcs.default({ defaultValue: "192.168.1.1" }),
+        userAgent: funcs.string(),
+        timestamp: funcs.date(),
+        severity: funcs.valuesFromArray({
+          values: ["info", "warning", "error", "critical"],
+        }),
       },
     },
   }));
