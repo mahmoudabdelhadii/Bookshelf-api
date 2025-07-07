@@ -302,11 +302,16 @@ async function updateUserOAuthInfo(
 
 async function buildAuthUser(
   drizzle: DrizzleClient,
-  user: any,
+  user: typeof schema.user.$inferSelect & {
+    userAuth: typeof schema.userAuth.$inferSelect;
+    userRoles: (typeof schema.userRole.$inferSelect & {
+      role: typeof schema.userRoleType.$inferSelect;
+    })[];
+  },
   provider: "google" | "apple",
   providerId: string,
 ): Promise<OAuthUser> {
-  const permissions = user.userRoles?.flatMap((ur: any) => ur.role.permissions ?? []) ?? [];
+  const permissions = user.userRoles?.flatMap((ur) => ur.role.permissions ?? []) ?? [];
 
   await drizzle.insert(schema.securityAuditLog).values({
     userId: user.id,

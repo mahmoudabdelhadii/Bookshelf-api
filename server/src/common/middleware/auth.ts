@@ -15,17 +15,21 @@ declare global {
   }
 }
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+export const authenticateJWT = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
   const token = extractTokenFromHeader(authHeader);
 
   if (!token) {
-    const errorResponse = ServiceResponse.failure(
-      "Authentication required. Please provide a valid token.",
-      null,
-      StatusCodes.UNAUTHORIZED,
-    );
-    return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+    res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json(
+        ServiceResponse.failure(
+          "Authentication required. Please provide a valid token.",
+          null,
+          StatusCodes.UNAUTHORIZED,
+        ),
+      );
+    return;
   }
 
   const verification = verifyAccessToken(token);
@@ -36,314 +40,286 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
       ? "Token has expired. Please refresh your token."
       : "Invalid token provided.";
 
-    const errorResponse = ServiceResponse.failure(message, null, status);
-    return res.status(status).json(errorResponse);
+    res.status(status).json(ServiceResponse.failure(message, null, status));
   }
 
-  return passport.authenticate("jwt", { session: false }, (err: any, user: AuthUser | false, info: any) => {
-    if (err) {
-      const errorResponse = ServiceResponse.failure(
-        "Authentication error occurred.",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(errorResponse);
-    }
+  passport.authenticate(
+    "jwt",
+    { session: false },
+    (err: unknown, user: AuthUser | false, info?: { message?: string }) => {
+      if (err instanceof Error) {
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json(
+            ServiceResponse.failure(
+              "Authentication error occurred.",
+              null,
+              StatusCodes.INTERNAL_SERVER_ERROR,
+            ),
+          );
+      }
 
-    if (!user) {
-      const errorResponse = ServiceResponse.failure(
-        info?.message ?? "Authentication failed.",
-        null,
-        StatusCodes.UNAUTHORIZED,
-      );
-      return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
-    }
+      if (!user) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json(
+            ServiceResponse.failure(
+              info?.message ?? "Authentication failed.",
+              null,
+              StatusCodes.UNAUTHORIZED,
+            ),
+          );
+      }
 
-    req.user = user;
-    return next();
-  })(req, res, next);
+      req.user = user;
+      return next();
+    },
+  )(req, res, next);
 };
 
 export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers.authorization;
-  const token = extractTokenFromHeader(authHeader);
-
-  if (!token) {
-    return next();
-  }
+  const token = extractTokenFromHeader(req.headers.authorization);
+  if (!token) return next();
 
   const verification = verifyAccessToken(token);
+  if (!verification.isValid) return next();
 
-  if (!verification.isValid) {
-    return next();
-  }
-
-  passport.authenticate("jwt", { session: false }, (err: any, user: AuthUser | false) => {
-    if (!err && user) {
-      req.user = user;
-    }
-    return next();
+  passport.authenticate("jwt", { session: false }, (err: unknown, user: AuthUser | false) => {
+    if (!err && user) req.user = user;
+    next();
   })(req, res, next);
 };
 
 export const authenticateLocal = (req: Request, res: Response, next: NextFunction): void => {
-  passport.authenticate("local", { session: false }, (err: unknown, user: AuthUser | false, info: any) => {
-    if (err) {
-      const errorResponse = ServiceResponse.failure(
-        "Authentication error occurred.",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(errorResponse);
-    }
+  passport.authenticate(
+    "local",
+    { session: false },
+    (err: unknown, user: AuthUser | false, info?: { message?: string }) => {
+      if (err instanceof Error) {
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json(
+            ServiceResponse.failure(
+              "Authentication error occurred.",
+              null,
+              StatusCodes.INTERNAL_SERVER_ERROR,
+            ),
+          );
+      }
 
-    if (!user) {
-      const errorResponse = ServiceResponse.failure(
-        info?.message ?? "Invalid credentials provided.",
-        null,
-        StatusCodes.UNAUTHORIZED,
-      );
-      return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
-    }
+      if (!user) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json(
+            ServiceResponse.failure(
+              info?.message ?? "Invalid credentials provided.",
+              null,
+              StatusCodes.UNAUTHORIZED,
+            ),
+          );
+      }
 
-    req.user = user;
-    return next();
-  })(req, res, next);
+      req.user = user;
+      return next();
+    },
+  )(req, res, next);
 };
 
-export const requireEmailVerified = (req: Request, res: Response, next: NextFunction) => {
+export const requireEmailVerified = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
-    const errorResponse = ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED);
-    return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+    res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json(ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED));
+    return;
   }
-
   if (!req.user.isEmailVerified) {
-    const errorResponse = ServiceResponse.failure(
-      "Email verification required. Please verify your email address.",
-      null,
-      StatusCodes.FORBIDDEN,
-    );
-    return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
+    res
+      .status(StatusCodes.FORBIDDEN)
+      .json(ServiceResponse.failure("Email verification required.", null, StatusCodes.FORBIDDEN));
+    return;
   }
-
-  return next();
+  next();
 };
 
-export const requireActiveAccount = (req: Request, res: Response, next: NextFunction) => {
+export const requireActiveAccount = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
-    const errorResponse = ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED);
-    return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+    res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json(ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED));
+    return;
   }
-
   if (!req.user.isActive) {
-    const errorResponse = ServiceResponse.failure(
-      "Account is deactivated. Please contact support.",
-      null,
-      StatusCodes.FORBIDDEN,
-    );
-    return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
+    res
+      .status(StatusCodes.FORBIDDEN)
+      .json(ServiceResponse.failure("Account is deactivated.", null, StatusCodes.FORBIDDEN));
+    return;
   }
-
   if (req.user.isSuspended) {
-    const errorResponse = ServiceResponse.failure(
-      "Account is suspended. Please contact support.",
-      null,
-      StatusCodes.FORBIDDEN,
-    );
-    return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
+    res
+      .status(StatusCodes.FORBIDDEN)
+      .json(ServiceResponse.failure("Account is suspended.", null, StatusCodes.FORBIDDEN));
+    return;
   }
-
-  return next();
+  next();
 };
 
-export const requireRoles = (...allowedRoles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const requireRoles =
+  (...allowedRoles: string[]) =>
+  (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      const errorResponse = ServiceResponse.failure(
-        "Authentication required.",
-        null,
-        StatusCodes.UNAUTHORIZED,
-      );
-      return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json(ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED));
+      return;
     }
-
     if (!allowedRoles.includes(req.user.role)) {
-      const errorResponse = ServiceResponse.failure(
-        `Insufficient permissions. Required roles: ${allowedRoles.join(", ")}`,
-        null,
-        StatusCodes.FORBIDDEN,
-      );
-      return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json(
+          ServiceResponse.failure(
+            `Insufficient roles. Required: ${allowedRoles.join(", ")}`,
+            null,
+            StatusCodes.FORBIDDEN,
+          ),
+        );
+      return;
     }
-
-    return next();
+    next();
   };
-};
 
-export const requirePermissions = (...requiredPermissions: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const requirePermissions =
+  (...requiredPermissions: string[]) =>
+  (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      const errorResponse = ServiceResponse.failure(
-        "Authentication required.",
-        null,
-        StatusCodes.UNAUTHORIZED,
-      );
-      return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json(ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED));
+      return;
     }
-
-    const hasPermission = PermissionValidator.hasAllPermissions(req.user.permissions, requiredPermissions);
-
-    if (!hasPermission) {
-      const errorResponse = ServiceResponse.failure(
-        `Insufficient permissions. Required permissions: ${requiredPermissions.join(", ")}`,
-        { requiredPermissions, userPermissions: req.user.permissions },
-        StatusCodes.FORBIDDEN,
-      );
-      return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
+    if (!PermissionValidator.hasAllPermissions(req.user.permissions, requiredPermissions)) {
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json(
+          ServiceResponse.failure(
+            `Missing permissions: ${requiredPermissions.join(", ")}`,
+            { requiredPermissions, userPermissions: req.user.permissions },
+            StatusCodes.FORBIDDEN,
+          ),
+        );
+      return;
     }
-
-    return next();
+    next();
   };
-};
 
-export const requireAnyPermission = (...requiredPermissions: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const requireAnyPermission =
+  (...requiredPermissions: string[]) =>
+  (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      const errorResponse = ServiceResponse.failure(
-        "Authentication required.",
-        null,
-        StatusCodes.UNAUTHORIZED,
-      );
-      return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json(ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED));
+      return;
     }
-
-    const hasPermission = PermissionValidator.hasAnyPermission(req.user.permissions, requiredPermissions);
-
-    if (!hasPermission) {
-      const errorResponse = ServiceResponse.failure(
-        `Insufficient permissions. Required at least one of: ${requiredPermissions.join(", ")}`,
-        { requiredPermissions, userPermissions: req.user.permissions },
-        StatusCodes.FORBIDDEN,
-      );
-      return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
+    if (!PermissionValidator.hasAnyPermission(req.user.permissions, requiredPermissions)) {
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json(
+          ServiceResponse.failure(
+            `Requires at least one of: ${requiredPermissions.join(", ")}`,
+            { requiredPermissions, userPermissions: req.user.permissions },
+            StatusCodes.FORBIDDEN,
+          ),
+        );
+      return;
     }
-
-    return next();
+    next();
   };
-};
 
-export const requireOwnershipOrAdmin = (userIdField = "userId") => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const requireOwnershipOrAdmin =
+  (userIdField = "userId") =>
+  (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      const errorResponse = ServiceResponse.failure(
-        "Authentication required.",
-        null,
-        StatusCodes.UNAUTHORIZED,
-      );
-      return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json(ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED));
+      return;
     }
-
-    if (req.user.role === "admin" || req.user.role === "Super Administrator") {
+    if (
+      ["admin", "Super Administrator"].includes(req.user.role) ||
+      req.user.permissions.some((p) => p.includes(":manage") || p.includes("system:manage"))
+    ) {
       return next();
     }
 
-    const hasManagementPermission = req.user.permissions.some(
-      (p) => p.includes(":manage") || p.includes("system:manage"),
-    );
-
-    if (hasManagementPermission) {
-      return next();
+    const id = req.params[userIdField] ?? req.body?.[userIdField] ?? req.query?.[userIdField];
+    if (!id) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json(ServiceResponse.failure("Resource ID not provided.", null, StatusCodes.BAD_REQUEST));
+      return;
     }
 
-    const resourceUserId = req.params[userIdField] || req.body[userIdField] || req.query[userIdField];
-
-    if (!resourceUserId) {
-      const errorResponse = ServiceResponse.failure(
-        "Resource identifier not found.",
-        null,
-        StatusCodes.BAD_REQUEST,
-      );
-      return res.status(StatusCodes.BAD_REQUEST).json(errorResponse);
+    if (id !== req.user.id) {
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json(ServiceResponse.failure("Access denied. Not your resource.", null, StatusCodes.FORBIDDEN));
+      return;
     }
-
-    if (resourceUserId !== req.user.id) {
-      const errorResponse = ServiceResponse.failure(
-        "Access denied. You can only access your own resources.",
-        null,
-        StatusCodes.FORBIDDEN,
-      );
-      return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
-    }
-
-    return next();
+    next();
   };
-};
 
-export const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
   if (!req.user) {
-    const errorResponse = ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED);
-    return res.status(StatusCodes.UNAUTHORIZED).json(errorResponse);
+    res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json(ServiceResponse.failure("Authentication required.", null, StatusCodes.UNAUTHORIZED));
+    return;
   }
 
   const isAdmin =
-    req.user.role === "admin" ||
-    req.user.role === "Super Administrator" ||
+    ["admin", "Super Administrator"].includes(req.user.role) ||
     req.user.permissions.includes("system:manage");
-
   if (!isAdmin) {
-    const errorResponse = ServiceResponse.failure(
-      "Administrator access required.",
-      null,
-      StatusCodes.FORBIDDEN,
-    );
-    return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
+    res
+      .status(StatusCodes.FORBIDDEN)
+      .json(ServiceResponse.failure("Administrator access required.", null, StatusCodes.FORBIDDEN));
+    return;
   }
-
-  return next();
+  next();
 };
 
-export const developmentOnly = (_req: Request, res: Response, next: NextFunction) => {
+export const developmentOnly = (_req: Request, res: Response, next: NextFunction): void => {
   if (process.env.NODE_ENV !== "development") {
-    const errorResponse = ServiceResponse.failure(
-      "This endpoint is only available in development mode.",
-      null,
-      StatusCodes.FORBIDDEN,
-    );
-    return res.status(StatusCodes.FORBIDDEN).json(errorResponse);
+    res
+      .status(StatusCodes.FORBIDDEN)
+      .json(ServiceResponse.failure("Development only endpoint.", null, StatusCodes.FORBIDDEN));
+    return;
   }
-
-  return next();
+  next();
 };
 
 export const combineAuthMiddleware = (
-  ...middlewares: Array<(req: Request, res: Response, next: NextFunction) => unknown>
+  ...middlewares: ((req: Request, res: Response, next: NextFunction) => unknown)[]
 ) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       for (const middleware of middlewares) {
         await new Promise<void>((resolve, reject) => {
-          middleware(req, res, (err?: any) => {
-            if (err) reject(err);
-            else resolve();
-          });
+          middleware(req, res, (err) => (err ? reject(err) : resolve()));
         });
       }
-      return next();
+      next();
     } catch (err) {
-      return next(err);
+      next(err instanceof Error ? err : new Error("Middleware failure"));
     }
   };
 };
 
-export const hasPermission = (user: AuthUser | undefined, permission: string): boolean => {
-  if (!user) return false;
-  return PermissionValidator.hasPermission(user.permissions, permission);
-};
+export const hasPermission = (user: AuthUser | undefined, permission: string): boolean =>
+  !!user && PermissionValidator.hasPermission(user.permissions, permission);
 
-export const hasAnyPermission = (user: AuthUser | undefined, permissions: string[]): boolean => {
-  if (!user) return false;
-  return PermissionValidator.hasAnyPermission(user.permissions, permissions);
-};
+export const hasAnyPermission = (user: AuthUser | undefined, permissions: string[]): boolean =>
+  !!user && PermissionValidator.hasAnyPermission(user.permissions, permissions);
 
 export const authRequired = combineAuthMiddleware(authenticateJWT, requireActiveAccount);
 export const authRequiredWithEmail = combineAuthMiddleware(

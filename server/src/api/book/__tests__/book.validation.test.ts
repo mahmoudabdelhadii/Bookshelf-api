@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { ZodError } from "zod";
 
-import {
-  bookSchema,
-  createBookSchema,
+import { 
+  bookSchema, 
+  createBookSchema, 
   updateBookSchema,
   getBookSchema,
-  createBooksBulkSchema,
+  createBooksBulkSchema
 } from "../book.model.js";
 
 describe("Book Validation Schemas", () => {
@@ -70,7 +70,7 @@ describe("Book Validation Schemas", () => {
     it("should reject book with title exceeding max length", () => {
       const invalidBook = {
         id: "123e4567-e89b-12d3-a456-426614174000",
-        title: "a".repeat(201),
+        title: "a".repeat(201), 
         authorId: "456e7890-e89b-12d3-a456-426614174000",
         publisherId: "789e1234-e89b-12d3-a456-426614174000",
         createdAt: new Date(),
@@ -108,6 +108,7 @@ describe("Book Validation Schemas", () => {
 
       expect(() => bookSchema.parse(invalidBook)).toThrow(ZodError);
     });
+
   });
 
   describe("createBookSchema", () => {
@@ -178,7 +179,12 @@ describe("Book Validation Schemas", () => {
     });
 
     it("should validate different ISBN formats", () => {
-      const validISBNs = ["9780743273565", "0743273567", "978074327356X", "074327356X"];
+      const validISBNs = [
+        "9780743273565", 
+        "0743273567",    
+        "978074327356X", 
+        "074327356X",    
+      ];
 
       for (const isbn of validISBNs) {
         const validCreateData = {
@@ -307,6 +313,8 @@ describe("Book Validation Schemas", () => {
     it("should reject empty array", () => {
       const invalidBulkData: any[] = [];
 
+      
+      
       const result = createBooksBulkSchema.parse(invalidBulkData);
       expect(result).toEqual(invalidBulkData);
     });
@@ -329,7 +337,7 @@ describe("Book Validation Schemas", () => {
   describe("Edge Cases and Boundary Values", () => {
     it("should handle boundary values for title length", () => {
       const validCreateData = {
-        title: "AB",
+        title: "AB", 
         author: "Test Author",
         publisher: "Test Publisher",
         isbn: "9780743273565",
@@ -343,7 +351,7 @@ describe("Book Validation Schemas", () => {
 
     it("should handle maximum title length", () => {
       const validCreateData = {
-        title: "a".repeat(200),
+        title: "a".repeat(200), 
         author: "Test Author",
         publisher: "Test Publisher",
         isbn: "9780743273565",
@@ -381,7 +389,7 @@ describe("Book Validation Schemas", () => {
         publisher: "Test Publisher",
         isbn: "9780743273565",
         genre: "Test",
-        publishedYear: currentYear,
+        publishedYear: currentYear, 
         language: "en" as const,
       };
 
@@ -396,7 +404,7 @@ describe("Book Validation Schemas", () => {
         publisher: "Ancient Publisher",
         isbn: "9780743273565",
         genre: "Historical",
-        publishedYear: 0,
+        publishedYear: 0, 
         language: "en" as const,
       };
 

@@ -10,6 +10,7 @@ import type { ServiceResponse } from "../../../common/models/serviceResponse.js"
 import type { Library, CreateLibrary, UpdateLibrary } from "../library.model.js";
 import { setupTestDb } from "database/test-utils";
 
+
 const mockLibraryService = {
   findAll: vi.fn(),
   findById: vi.fn(),
@@ -18,15 +19,14 @@ const mockLibraryService = {
   delete: vi.fn(),
 };
 
+
 Object.assign(LibraryService, mockLibraryService);
 
 const mockLibrary: Library = {
   id: "123e4567-e89b-12d3-a456-426614174000",
   name: "Central Library",
   location: "Downtown",
-  ownerId: "owner123-e89b-12d3-a456-426614174000",
   createdAt: new Date("2024-01-01T00:00:00.000Z"),
-  updatedAt: new Date("2024-01-01T00:00:00.000Z"),
 };
 
 describe("Library API endpoints", () => {
@@ -42,6 +42,7 @@ describe("Library API endpoints", () => {
     app = express();
     app.use(express.json());
 
+    
     app.use((req: any, res, next) => {
       req.drizzle = testDb;
       next();
@@ -333,3 +334,4 @@ describe("Library API endpoints", () => {
     });
   });
 });
+

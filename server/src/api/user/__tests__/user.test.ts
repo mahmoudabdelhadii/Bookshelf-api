@@ -10,6 +10,7 @@ import type { ServiceResponse } from "../../../common/models/serviceResponse.js"
 import type { User } from "../user.model.js";
 import { setupTestDb } from "database/test-utils";
 
+
 const mockUserService = {
   findAll: vi.fn(),
   findById: vi.fn(),
@@ -17,6 +18,7 @@ const mockUserService = {
   updateUser: vi.fn(),
   deleteUser: vi.fn(),
 };
+
 
 Object.assign(UserService, mockUserService);
 
@@ -44,6 +46,7 @@ describe("User API endpoints", () => {
     app = express();
     app.use(express.json());
 
+    
     app.use((req: any, res, next) => {
       req.drizzle = testDb;
       next();
@@ -388,3 +391,4 @@ describe("User API endpoints", () => {
     });
   });
 });
+

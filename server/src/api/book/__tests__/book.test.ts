@@ -9,6 +9,7 @@ import { BookService } from "../book.service.js";
 import type { ServiceResponse } from "../../../common/models/serviceResponse.js";
 import { setupTestDb } from "database/test-utils";
 
+
 const mockBookService = {
   createBook: vi.fn(),
   createBooksBulk: vi.fn(),
@@ -25,6 +26,7 @@ const mockBookService = {
   searchPublishers: vi.fn(),
   searchAll: vi.fn(),
 };
+
 
 Object.assign(BookService, mockBookService);
 
@@ -61,6 +63,7 @@ describe("Book API endpoints", () => {
     app = express();
     app.use(express.json());
 
+    
     app.use((req: any, res, next) => {
       req.drizzle = testDb;
       next();
@@ -482,3 +485,4 @@ describe("Book API endpoints", () => {
     });
   });
 });
+

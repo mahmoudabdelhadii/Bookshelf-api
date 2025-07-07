@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { ZodError } from "zod";
 
-import {
-  librarySchema,
-  createLibrarySchema,
+import { 
+  librarySchema, 
+  createLibrarySchema, 
   updateLibrarySchema,
-  getLibrarySchema,
+  getLibrarySchema 
 } from "../library.model.js";
 
 describe("Library Validation Schemas", () => {
@@ -56,7 +56,7 @@ describe("Library Validation Schemas", () => {
     it("should reject library with name exceeding max length", () => {
       const invalidLibrary = {
         id: "123e4567-e89b-12d3-a456-426614174000",
-        name: "a".repeat(101),
+        name: "a".repeat(101), 
         createdAt: new Date(),
       };
 
@@ -67,7 +67,7 @@ describe("Library Validation Schemas", () => {
       const invalidLibrary = {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "Central Library",
-        location: "a".repeat(201),
+        location: "a".repeat(201), 
         createdAt: new Date(),
       };
 
@@ -110,6 +110,7 @@ describe("Library Validation Schemas", () => {
         location: "Uptown",
       };
 
+      
       const result = createLibrarySchema.parse(dataWithWhitespace);
       expect(result).toEqual(dataWithWhitespace);
     });
@@ -187,9 +188,7 @@ describe("Library Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "Central Library",
         location: null,
-        ownerId: "owner123-e89b-12d3-a456-426614174000",
         createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
       const result = librarySchema.parse(libraryWithNullLocation);
@@ -202,13 +201,14 @@ describe("Library Validation Schemas", () => {
         location: "Downtown",
       };
 
+      
       const result = createLibrarySchema.parse(createDataWithWhitespace);
       assert.deepStrictEqual(result, createDataWithWhitespace);
     });
 
     it("should handle boundary values for name length", () => {
       const validCreateData = {
-        name: "a".repeat(100),
+        name: "a".repeat(100), 
       };
 
       const result = createLibrarySchema.parse(validCreateData);
@@ -218,7 +218,7 @@ describe("Library Validation Schemas", () => {
     it("should handle boundary values for location length", () => {
       const validCreateData = {
         name: "Central Library",
-        location: "a".repeat(200),
+        location: "a".repeat(200), 
       };
 
       const result = createLibrarySchema.parse(validCreateData);

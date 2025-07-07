@@ -7,74 +7,37 @@ import { DrizzleClient, logger } from "database";
 
 export let redisClient: ReturnType<typeof createClient> | null = null;
 
-
 export async function initializeRedis(): Promise<ReturnType<typeof createClient>> {
-  try {
-    if (redisClient && redisClient.isOpen) {
-      return redisClient;
-    }
+  if (redisClient && redisClient.isOpen) return redisClient;
 
-    redisClient = createClient({
-      url: env.REDIS_URL,
-      socket: {
-        connectTimeout: 10000,
-        reconnectStrategy: (retries) => {
-          if (retries > 5) {
-            return false;
-          }
-          return Math.min(retries * 100, 3000);
-        },
-      },
-    });
+  redisClient = createClient({
+    url: env.REDIS_URL,
+    socket: {
+      connectTimeout: 10000,
+      reconnectStrategy: (retries) => (retries > 5 ? false : Math.min(retries * 100, 3000)),
+    },
+  });
 
-    redisClient.on("error", (err) => {
-      console.error("Redis error", err);
-    });
+  redisClient.on("error", (err) => logger.error(err, "Redis error"));
+  await redisClient.connect();
+  await redisClient.ping();
 
-    redisClient.on("connect", () => {});
-
-    redisClient.on("ready", () => {});
-
-    redisClient.on("end", () => {});
-
-    redisClient.on("reconnecting", () => {});
-
-    const connectTimeout = setTimeout(() => {
-      if (redisClient && !redisClient.isOpen) {
-        redisClient.destroy();
-        throw new Error("Redis connection timeout after 10 seconds");
-      }
-    }, 10000);
-
-    await redisClient.connect();
-    clearTimeout(connectTimeout);
-
-    await redisClient.ping();
-
-    return redisClient;
-  } catch (err) {
-    redisClient = null;
-    throw err;
-  }
+  return redisClient;
 }
-
 
 export async function closeRedis(): Promise<void> {
   if (redisClient) {
     try {
-      redisClient.destroy();
+      await redisClient.quit();
       redisClient = null;
     } catch (err) {
-      console.error("Redis close error", err);
+      logger.error(err, "Redis close error");
     }
   }
 }
 
-
 export function configureSession(app: Application): void {
-  if (!redisClient) {
-    throw new Error("Redis client not initialized. Call initializeRedis() first.");
-  }
+  if (!redisClient) throw new Error("Redis client not initialized. Call initializeRedis() first.");
 
   const redisStore = new RedisStore({
     client: redisClient,
@@ -83,31 +46,28 @@ export function configureSession(app: Application): void {
     disableTouch: false,
   });
 
-  const sessionConfig: session.SessionOptions = {
-    store: redisStore,
-    name: env.SESSION_NAME,
-    secret: env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    rolling: true,
-    cookie: {
-      secure: env.isProduction,
-      httpOnly: true,
-      maxAge: env.SESSION_MAX_AGE,
-      sameSite: env.isProduction ? "strict" : "lax",
-    },
-  };
+  app.use(
+    session({
+      store: redisStore,
+      name: env.SESSION_NAME,
+      secret: env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      rolling: true,
+      cookie: {
+        secure: env.isProduction,
+        httpOnly: true,
+        maxAge: env.SESSION_MAX_AGE,
+        sameSite: env.isProduction ? "strict" : "lax",
+      },
+    }),
+  );
 
-  if (env.isProduction) {
-    app.set("trust proxy", 1);
-  }
-
-  app.use(session(sessionConfig));
+  if (env.isProduction) app.set("trust proxy", 1);
 }
 
-
 interface SessionRequest {
-  session: {
+  session: session.Session & {
     user?: {
       userId: string;
       username: string;
@@ -118,70 +78,48 @@ interface SessionRequest {
       sessionStartTime: Date;
       lastActivity?: Date;
     };
-    destroy: (callback: (err?: Error) => void) => void;
-    regenerate: (callback: (err?: Error) => void) => void;
   };
   sessionID: string;
 }
 
-export namespace SessionManager {
-  
-  export function storeUserSession(
+export const SessionManager = {
+  storeUserSession(
     req: SessionRequest,
-    userData: {
-      userId: string;
-      username: string;
-      email: string;
-      role: string;
-      permissions: string[];
-      lastLogin: Date;
-    },
+    userData: Omit<NonNullable<SessionRequest["session"]["user"]>, "sessionStartTime">,
   ): void {
     req.session.user = {
       ...userData,
       sessionStartTime: new Date(),
     };
-  }
+  },
 
-  
-  export function getUserFromSession(req: SessionRequest): SessionRequest["session"]["user"] | null {
+  getUserFromSession(req: SessionRequest) {
     return req.session.user ?? null;
-  }
+  },
 
-  
-  export function clearUserSession(req: SessionRequest): Promise<void> {
+  clearUserSession(req: SessionRequest): Promise<void> {
     return new Promise((resolve, reject) => {
-      req.session.destroy((err?: Error) => {
-        if (err) {
-          reject(new Error(`Failed to destroy session: ${err.message}`));
-        } else {
-          resolve();
-        }
+      req.session.destroy((err) => {
+        if (err) reject(new Error("Failed to destroy session"));
+        else resolve();
       });
     });
-  }
+  },
 
-  
-  export function regenerateSession(req: SessionRequest): Promise<void> {
+  regenerateSession(req: SessionRequest): Promise<void> {
     return new Promise((resolve, reject) => {
-      req.session.regenerate((err?: Error) => {
-        if (err) {
-          reject(new Error(`Failed to regenerate session: ${err.message}`));
-        } else {
-          resolve();
-        }
+      req.session.regenerate((err) => {
+        if (err) reject(new Error("Failed to regenerate session"));
+        else resolve();
       });
     });
-  }
+  },
 
-  
-  export function updateSession(
+  updateSession(
     req: SessionRequest,
-    updates: Partial<{
-      permissions: string[];
-      role: string;
-      lastActivity: Date;
-    }>,
+    updates: Partial<
+      Pick<NonNullable<SessionRequest["session"]["user"]>, "permissions" | "role" | "lastActivity">
+    >,
   ): void {
     if (req.session.user) {
       Object.assign(req.session.user, {
@@ -189,56 +127,34 @@ export namespace SessionManager {
         lastActivity: new Date(),
       });
     }
-  }
+  },
 
-  
-  export function isSessionValid(req: SessionRequest): boolean {
-    if (!req.session.user) {
-      return false;
-    }
+  isSessionValid(req: SessionRequest): boolean {
+    const start = req.session.user?.sessionStartTime;
+    return !!start && Date.now() - new Date(start).getTime() < env.SESSION_MAX_AGE;
+  },
 
-    const sessionStartTime = new Date(req.session.user.sessionStartTime);
-    const now = new Date();
-    const sessionAge = now.getTime() - sessionStartTime.getTime();
-
-    return sessionAge < env.SESSION_MAX_AGE;
-  }
-
-  
-  export function getSessionInfo(req: SessionRequest): {
-    id: string;
-    isAuthenticated: boolean;
-    user?: SessionRequest["session"]["user"];
-    startTime?: Date;
-    lastActivity?: Date;
-    age: number;
-  } {
-    const sessionId = req.sessionID;
+  getSessionInfo(req: SessionRequest) {
     const user = req.session.user;
-    const startTime = user?.sessionStartTime ? new Date(user.sessionStartTime) : undefined;
-    const lastActivity = user?.lastActivity ? new Date(user.lastActivity) : undefined;
-    const age = startTime ? Date.now() - startTime.getTime() : 0;
-
+    const start = user?.sessionStartTime ? new Date(user.sessionStartTime) : undefined;
+    const last = user?.lastActivity ? new Date(user.lastActivity) : undefined;
     return {
-      id: sessionId,
+      id: req.sessionID,
       isAuthenticated: !!user,
       user,
-      startTime,
-      lastActivity,
-      age,
+      startTime: start,
+      lastActivity: last,
+      age: start ? Date.now() - start.getTime() : 0,
     };
-  }
-}
-
+  },
+};
 
 interface ExpressRequest extends SessionRequest {
-  user?: SessionRequest["session"]["user"];
+  user?: NonNullable<SessionRequest["session"]["user"]>;
 }
 
 interface ExpressResponse {
-  status: (code: number) => {
-    json: (data: unknown) => void;
-  };
+  status: (code: number) => { json: (data: unknown) => void };
 }
 
 export function validateSession(
@@ -251,7 +167,7 @@ export function validateSession(
       .then(() => {
         res.status(401).json({
           success: false,
-          message: "Session expired. Please log in again.",
+          message: "Session expired.",
           responseObject: null,
           statusCode: 401,
         });
@@ -261,42 +177,28 @@ export function validateSession(
       });
     return;
   }
-
   if (req.session.user) {
     SessionManager.updateSession(req, { lastActivity: new Date() });
   }
-
   next();
 }
-
 
 export function requireSession(req: ExpressRequest, res: ExpressResponse, next: (err?: Error) => void): void {
-  if (!req.session.user) {
+  if (!req.session.user || !SessionManager.isSessionValid(req)) {
     res.status(401).json({
       success: false,
-      message: "Session authentication required. Please log in.",
+      message: "Authentication required.",
       responseObject: null,
       statusCode: 401,
-    }); return;
+    });
+    return;
   }
-
-  if (!SessionManager.isSessionValid(req)) {
-    res.status(401).json({
-      success: false,
-      message: "Session expired. Please log in again.",
-      responseObject: null,
-      statusCode: 401,
-    }); return;
-  }
-
   next();
-  
 }
-
 
 export function authenticateSession(
   req: ExpressRequest,
-  res: ExpressResponse,
+  _res: ExpressResponse,
   next: (err?: Error) => void,
 ): void {
   if (req.session.user && SessionManager.isSessionValid(req)) {
@@ -304,111 +206,72 @@ export function authenticateSession(
     SessionManager.updateSession(req, { lastActivity: new Date() });
   }
   next();
-  
 }
 
-
 interface RequestWithHeaders extends ExpressRequest {
-  headers: {
-    authorization?: string;
-  };
+  headers: { authorization?: string };
 }
 
 export function hybridAuth(req: RequestWithHeaders, res: ExpressResponse, next: (err?: Error) => void): void {
-  const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith("Bearer ")) {
-    next(); return;
+  if (req.headers.authorization?.startsWith("Bearer ")) {
+    next();
+    return;
   }
-
   authenticateSession(req, res, next);
 }
 
-
-export namespace SessionCleanup {
-  
-  export async function cleanupExpiredSessions(): Promise<void> {
-    if (!redisClient) {
-      return;
-    }
-
+export const SessionCleanup = {
+  async cleanupExpiredSessions(): Promise<void> {
+    if (!redisClient) return;
     try {
-      const pattern = `${env.REDIS_SESSION_PREFIX}*`;
-      const keys = await redisClient.keys(pattern);
-
-      if (keys.length === 0) {
-        return;
-      }
+      const keys = await redisClient.keys(`${env.REDIS_SESSION_PREFIX}*`);
+      if (!keys.length) return;
 
       const pipeline = redisClient.multi();
-
       for (const key of keys) {
         pipeline.ttl(key);
       }
 
       const ttls = await pipeline.exec();
-
-      const keysToDelete = keys.filter((key, index) => {
-        const ttl = ttls[index] as unknown as number;
-        return ttl !== null && ttl >= 0 && ttl < 60;
+      const toDelete = keys.filter((k, i) => {
+        const ttl = ttls[i] as unknown as number;
+        return ttl >= 0 && ttl < 60;
       });
 
-      if (keysToDelete.length > 0) {
-        await redisClient.del(keysToDelete);
+      if (toDelete.length > 0) {
+        await redisClient.del(toDelete);
       }
-    } catch (err) {
-      console.error("Redis error", err);
+    } catch (err: unknown) {
+      logger.error(err, "Error during session cleanup");
     }
-  }
+  },
 
-  
-  export async function getSessionStats(): Promise<{
-    totalSessions: number;
-    activeSessions: number;
-    expiringSoon: number;
-  }> {
-    if (!redisClient) {
-      return { totalSessions: 0, activeSessions: 0, expiringSoon: 0 };
-    }
-
+  async getSessionStats(): Promise<{ totalSessions: number; activeSessions: number; expiringSoon: number }> {
+    if (!redisClient) return { totalSessions: 0, activeSessions: 0, expiringSoon: 0 };
     try {
-      const pattern = `${env.REDIS_SESSION_PREFIX}*`;
-      const keys = await redisClient.keys(pattern);
-      const totalSessions = keys.length;
-
-      if (totalSessions === 0) {
-        return { totalSessions: 0, activeSessions: 0, expiringSoon: 0 };
-      }
-
+      const keys = await redisClient.keys(`${env.REDIS_SESSION_PREFIX}*`);
       const pipeline = redisClient.multi();
       for (const key of keys) {
         pipeline.ttl(key);
       }
-
       const ttls = await pipeline.exec();
-      let activeSessions = 0;
-      let expiringSoon = 0;
 
-      if (ttls) {
-        for (const ttl of ttls) {
-          const ttlValue = ttl as unknown as number;
-          if (ttlValue > 0) {
-            activeSessions++;
-            if (ttlValue < 300) {
-              expiringSoon++;
-            }
-          }
+      let active = 0;
+      let soon = 0;
+      for (const ttl of ttls) {
+        const t = ttl as unknown as number;
+        if (t > 0) {
+          active++;
+          if (t < 300) soon++;
         }
       }
-
-      return { totalSessions, activeSessions, expiringSoon };
-    } catch (err) {
-      console.error("Redis error", err);
-
+      return { totalSessions: keys.length, activeSessions: active, expiringSoon: soon };
+    } catch (err: unknown) {
+      logger.error(err, "Error getting session stats");
       return { totalSessions: 0, activeSessions: 0, expiringSoon: 0 };
     }
-  }
-}
-
+  },
+};
 
 export function setupSessionCleanup(): NodeJS.Timeout {
   return setInterval(
@@ -418,7 +281,6 @@ export function setupSessionCleanup(): NodeJS.Timeout {
     15 * 60 * 1000,
   );
 }
-
 
 export async function createSessionRecord(
   drizzle: DrizzleClient,

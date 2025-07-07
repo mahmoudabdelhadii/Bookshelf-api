@@ -5,6 +5,11 @@ import type { Logger } from "pino";
 import { ApiError } from "../../errors.js";
 import { ServiceResponse } from "../models/serviceResponse.js";
 
+interface ExtendedError extends Error {
+  code?: string | number;
+  type?: string;
+}
+
 export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRequestHandler)[] {
   const notFoundHandler: RequestHandler = (req, res) => {
     logger?.warn({ url: req.url, method: req.method }, "Route not found");
@@ -12,44 +17,45 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
     res.status(StatusCodes.NOT_FOUND).send(response);
   };
 
-  const errorMiddleware: ErrorRequestHandler = (err, req, res, _next) => {
+  const errorMiddleware: ErrorRequestHandler = (err: unknown, req, res, _next) => {
+    const safeErr = err as ExtendedError;
+
     const errorContext = {
       url: req.url,
       method: req.method,
       userAgent: req.get("User-Agent"),
       ip: req.ip,
-      stack: err.stack,
+      stack: safeErr.stack,
     };
 
-    logger?.error({ err, ...errorContext }, "Error occurred in request");
-    console.error(err);
-    if (err instanceof ApiError) {
-      const response = ServiceResponse.failure(err.message, err.context, err.statusCode);
-      return res.status(err.statusCode).send(response);
+    logger?.error({ err: safeErr, ...errorContext }, "Error occurred in request");
+
+    if (safeErr instanceof ApiError) {
+      const response = ServiceResponse.failure(safeErr.message, safeErr.context, safeErr.statusCode);
+      return res.status(safeErr.statusCode).send(response);
     }
 
-    if (err instanceof ZodError) {
-      const formattedErrors = err.errors.map((error) => ({
+    if (safeErr instanceof ZodError) {
+      const formattedErrors = safeErr.errors.map((error) => ({
         field: error.path.join("."),
         message: error.message,
         code: error.code,
       }));
 
-      const message = "Validation failed";
       const response = ServiceResponse.failure(
-        message,
+        "Validation failed",
         { validationErrors: formattedErrors },
         StatusCodes.BAD_REQUEST,
       );
       return res.status(StatusCodes.BAD_REQUEST).send(response);
     }
 
-    if (err.name === "CastError") {
+    if (safeErr.name === "CastError") {
       const response = ServiceResponse.failure("Invalid ID format provided", null, StatusCodes.BAD_REQUEST);
       return res.status(StatusCodes.BAD_REQUEST).send(response);
     }
 
-    if (err.code === "ECONNREFUSED") {
+    if (safeErr.code === "ECONNREFUSED") {
       const response = ServiceResponse.failure(
         "Service temporarily unavailable",
         null,
@@ -58,7 +64,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       return res.status(StatusCodes.SERVICE_UNAVAILABLE).send(response);
     }
 
-    if (err.type === "entity.too.large") {
+    if (safeErr.type === "entity.too.large") {
       const response = ServiceResponse.failure(
         "Request payload too large",
         null,
@@ -67,7 +73,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       return res.status(StatusCodes.REQUEST_TOO_LONG).send(response);
     }
 
-    if (err instanceof SyntaxError && err.message.includes("JSON")) {
+    if (safeErr instanceof SyntaxError && safeErr.message.includes("JSON")) {
       const response = ServiceResponse.failure(
         "Invalid JSON format in request body",
         null,
@@ -76,7 +82,10 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
       return res.status(StatusCodes.BAD_REQUEST).send(response);
     }
 
-    if (err.code === "ETIMEDOUT" || err.message.includes("timeout")) {
+    if (
+      safeErr.code === "ETIMEDOUT" ||
+      (typeof safeErr.message === "string" && safeErr.message.includes("timeout"))
+    ) {
       const response = ServiceResponse.failure("Request timeout", null, StatusCodes.REQUEST_TIMEOUT);
       return res.status(StatusCodes.REQUEST_TIMEOUT).send(response);
     }
@@ -84,7 +93,7 @@ export default function errorHandler(logger?: Logger): (RequestHandler | ErrorRe
     const isDevelopment = process.env.NODE_ENV === "development";
     const response = ServiceResponse.failure(
       "An unexpected error occurred",
-      isDevelopment ? { stack: err.stack, name: err.name } : null,
+      isDevelopment ? { stack: safeErr.stack, name: safeErr.name } : null,
       StatusCodes.INTERNAL_SERVER_ERROR,
     );
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(response);

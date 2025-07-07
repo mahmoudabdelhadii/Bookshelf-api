@@ -145,7 +145,7 @@ describe("Password Security", () => {
         expect(result.score).toBeLessThan(70);
         expect(
           result.feedback.some(
-            (fb) => fb.toLowerCase().includes("common") ?? fb.toLowerCase().includes("dictionary"),
+            (fb) => fb.toLowerCase().includes("common") || fb.toLowerCase().includes("dictionary"),
           ),
         ).toBe(true);
       }
@@ -399,6 +399,25 @@ describe("Password Security", () => {
       expect(duration).toBeLessThan(2000);
 
       expect(duration).toBeGreaterThan(10);
+    });
+
+    it("should handle concurrent password operations", async () => {
+      const password = "ConcurrentTest123!";
+      const concurrentOps = 20;
+
+      const start = Date.now();
+
+      const promises = Array.from({ length: concurrentOps }, async (_, i) => {
+        const hash = await hashPassword(password + i);
+        return verifyPassword(password + i, hash);
+      });
+
+      const results = await Promise.all(promises);
+      const duration = Date.now() - start;
+
+      expect(results.every((result) => result)).toBe(true);
+
+      expect(duration).toBeLessThan(10000);
     });
 
     it("should limit resource consumption", () => {
