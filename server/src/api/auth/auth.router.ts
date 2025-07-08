@@ -1,23 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import type { DrizzleClient } from "database";
 
-interface AuthRequest extends Request {
-  drizzle: DrizzleClient;
-  user?: {
-    id: string;
-    username: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    permissions: string[];
-    isActive: boolean;
-    isEmailVerified: boolean;
-    isSuspended: boolean;
-  };
-}
-
-type AuthResponse = Response;
 // eslint-disable-next-line import-x/no-named-as-default
 import rateLimit from "express-rate-limit";
 import { body, param, validationResult } from "express-validator";

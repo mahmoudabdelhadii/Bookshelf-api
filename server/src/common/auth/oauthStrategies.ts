@@ -1,12 +1,20 @@
 import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as AppleStrategy } from "passport-apple";
+import {
+  Strategy as GoogleStrategy,
+  Profile as GoogleProfileType,
+  VerifyCallback as VerifyCallbackGoogle,
+} from "passport-google-oauth20";
+import {
+  Strategy as AppleStrategy,
+  Profile as AppleProfileType,
+  VerifyCallback as VerifyCallbackApple,
+} from "passport-apple";
 import type { DrizzleClient } from "database";
 import { eq, schema } from "database";
 import { env } from "../utils/envConfig.js";
 import { generateSecurePassword, hashPassword } from "../utils/password.js";
-import emailService from "../services/email.js";
-
+import { emailService } from "../services/email.js";
+import { logger } from "../../server.js";
 export interface GoogleProfile {
   id: string;
   provider: "google";
@@ -53,11 +61,16 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
           clientSecret: env.GOOGLE_CLIENT_SECRET,
           callbackURL: env.GOOGLE_CALLBACK_URL,
           scope: ["profile", "email"],
+          passReqToCallback: false,
         },
-        async (accessToken, refreshToken, profile, done) => {
+        async (
+          accessToken: string,
+          refreshToken: string,
+          profile: GoogleProfileType,
+          done: VerifyCallbackGoogle,
+        ) => {
           try {
-            const googleProfile = profile as any as GoogleProfile;
-            const email = googleProfile.emails[0]?.value;
+            const email = profile.emails?.[0]?.value;
 
             if (!email) {
               done(new Error("No email provided by Google"), false);
@@ -69,26 +82,33 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             if (user) {
               await updateUserOAuthInfo(drizzle, user.id, {
                 provider: "google",
-                providerId: googleProfile.id,
-                avatar: googleProfile.photos[0]?.value,
+                providerId: profile.id,
+                avatar: profile.photos?.[0]?.value,
               });
             } else {
-              const newUser = await createOAuthUser(drizzle, {
+              await createOAuthUser(drizzle, {
                 email,
-                firstName: googleProfile.name.givenName ?? "User",
-                lastName: googleProfile.name.familyName ?? "",
+                firstName: profile.name?.givenName ?? "User",
+                lastName: profile.name?.familyName ?? "",
                 provider: "google",
-                providerId: googleProfile.id,
-                avatar: googleProfile.photos[0]?.value,
+                providerId: profile.id,
+                avatar: profile.photos?.[0]?.value,
+                accessToken,
+                refreshToken,
               });
 
               user = await findUserByEmail(drizzle, email);
             }
 
-            const authUser = await buildAuthUser(drizzle, user, "google", googleProfile.id);
+            if (!user) {
+              done(new Error("Failed to create or find user"), false);
+              return;
+            }
+
+            const authUser = await buildAuthUser(drizzle, user, "google", profile.id);
             done(null, authUser);
           } catch (err) {
-            done(err as Error, undefined);
+            done(err as Error, false);
           }
         },
       ),
@@ -104,18 +124,21 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
           keyID: env.APPLE_KEY_ID,
           privateKeyString: env.APPLE_PRIVATE_KEY,
           callbackURL: env.APPLE_CALLBACK_URL,
-          scope: ["email", "name"],
-          passReqToCallback: true,
+          scope: ["email", "name", "profile"],
+          passReqToCallback: false,
         },
-        async (req, accessToken, refreshToken, idToken, profile, done) => {
+        async (
+          accessToken: string,
+          refreshToken: string,
+          idToken: string,
+          profile: AppleProfileType,
+          done: VerifyCallbackApple,
+        ) => {
           try {
-            const appleProfile = profile as any as AppleProfile;
-
-            const email = appleProfile.email;
+            const email = profile.email;
 
             if (!email) {
-              done(new Error("No email provided by Apple"), undefined);
-              return;
+              done(new Error("No email provided by Apple")); return;
             }
 
             let user = await findUserByEmail(drizzle, email);
@@ -123,24 +146,30 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             if (user) {
               await updateUserOAuthInfo(drizzle, user.id, {
                 provider: "apple",
-                providerId: appleProfile.id,
+                providerId: profile.id,
               });
             } else {
-              const newUser = await createOAuthUser(drizzle, {
+              await createOAuthUser(drizzle, {
                 email,
-                firstName: appleProfile.name?.firstName ?? "User",
-                lastName: appleProfile.name?.lastName ?? "",
+                firstName: profile.name?.firstName ?? "User",
+                lastName: profile.name?.lastName ?? "",
                 provider: "apple",
-                providerId: appleProfile.id,
+                providerId: profile.id,
+                idToken,
+                accessToken,
+                refreshToken,
               });
-
               user = await findUserByEmail(drizzle, email);
             }
 
-            const authUser = await buildAuthUser(drizzle, user, "apple", appleProfile.id);
-            done(null, authUser);
+            if (!user) {
+              done(new Error("Failed to create or find user")); return;
+            }
+
+            const authUser = await buildAuthUser(drizzle, user, "apple", profile.id);
+            done(null, authUser); 
           } catch (err) {
-            done(err as Error, undefined);
+            done(err instanceof Error ? err : new Error("Unhandled error")); 
           }
         },
       ),
@@ -173,6 +202,9 @@ async function createOAuthUser(
     provider: "google" | "apple";
     providerId: string;
     avatar?: string;
+    accessToken?: string;
+    refreshToken?: string;
+    idToken?: string;
   },
 ) {
   return await drizzle.transaction(async (tx) => {
@@ -231,7 +263,9 @@ async function createOAuthUser(
         username,
         loginUrl: `${env.FRONTEND_URL}/login`,
       })
-      .catch(console.error);
+      .catch((err) => {
+        logger.error(err, "Failed to send welcome email");
+      });
 
     await tx.insert(schema.securityAuditLog).values({
       userId: newUser.id,
@@ -310,7 +344,7 @@ async function buildAuthUser(
   provider: "google" | "apple",
   providerId: string,
 ): Promise<OAuthUser> {
-  const permissions = user.userRoles?.flatMap((ur) => ur.role.permissions ?? []) ?? [];
+  const permissions = user.userRoles.flatMap((ur) => ur.role.permissions || []);
 
   await drizzle.insert(schema.securityAuditLog).values({
     userId: user.id,
@@ -331,9 +365,9 @@ async function buildAuthUser(
     lastName: user.lastName,
     role: user.role,
     permissions,
-    isActive: user.userAuth?.isActive ?? true,
-    isEmailVerified: user.userAuth?.isEmailVerified ?? true,
-    isSuspended: user.userAuth?.isSuspended ?? false,
+    isActive: user.userAuth.isActive,
+    isEmailVerified: user.userAuth.isEmailVerified,
+    isSuspended: user.userAuth.isSuspended,
     provider,
     providerId,
   };
@@ -358,77 +392,69 @@ export class OAuthService {
       profileData: any;
     },
   ) {
-    try {
-      const existingLink = await drizzle.query.oauthProfile.findFirst({
-        where: (profile, { eq, and }) =>
-          and(eq(profile.provider, oauthData.provider), eq(profile.providerId, oauthData.providerId)),
-      });
+    const existingLink = await drizzle.query.oauthProfile.findFirst({
+      where: (profile, { eq, and }) =>
+        and(eq(profile.provider, oauthData.provider), eq(profile.providerId, oauthData.providerId)),
+    });
 
-      if (existingLink && existingLink.userId !== userId) {
-        throw new Error("This OAuth account is already linked to another user");
-      }
+    if (existingLink && existingLink.userId !== userId) {
+      throw new Error("This OAuth account is already linked to another user");
+    }
 
-      if (existingLink) {
-        await drizzle
-          .update(schema.oauthProfile)
-          .set({
-            email: oauthData.email,
-            profileData: JSON.stringify(oauthData.profileData),
-            updatedAt: new Date(),
-          })
-          .where(eq(schema.oauthProfile.id, existingLink.id));
-      } else {
-        await drizzle.insert(schema.oauthProfile).values({
-          userId,
-          provider: oauthData.provider,
-          providerId: oauthData.providerId,
+    if (existingLink) {
+      await drizzle
+        .update(schema.oauthProfile)
+        .set({
           email: oauthData.email,
           profileData: JSON.stringify(oauthData.profileData),
-        });
-      }
-
-      await drizzle.insert(schema.securityAuditLog).values({
+          updatedAt: new Date(),
+        })
+        .where(eq(schema.oauthProfile.id, existingLink.id));
+    } else {
+      await drizzle.insert(schema.oauthProfile).values({
         userId,
-        action: `oauth_account_linked_${oauthData.provider}`,
-        details: JSON.stringify({
-          provider: oauthData.provider,
-          email: oauthData.email,
-        }),
-        severity: "info",
+        provider: oauthData.provider,
+        providerId: oauthData.providerId,
+        email: oauthData.email,
+        profileData: JSON.stringify(oauthData.profileData),
       });
-
-      return true;
-    } catch (err) {
-      throw err;
     }
+
+    await drizzle.insert(schema.securityAuditLog).values({
+      userId,
+      action: `oauth_account_linked_${oauthData.provider}`,
+      details: JSON.stringify({
+        provider: oauthData.provider,
+        email: oauthData.email,
+      }),
+      severity: "info",
+    });
+
+    return true;
   }
 
   static async unlinkOAuthAccount(drizzle: DrizzleClient, userId: string, provider: "google" | "apple") {
-    try {
-      const profile = await drizzle.query.oauthProfile.findFirst({
-        where: (p, { eq, and }) => and(eq(p.userId, userId), eq(p.provider, provider)),
-      });
+    const profile = await drizzle.query.oauthProfile.findFirst({
+      where: (p, { eq, and }) => and(eq(p.userId, userId), eq(p.provider, provider)),
+    });
 
-      if (!profile) {
-        throw new Error("OAuth account not found");
-      }
-
-      await drizzle.delete(schema.oauthProfile).where(eq(schema.oauthProfile.id, profile.id));
-
-      await drizzle.insert(schema.securityAuditLog).values({
-        userId,
-        action: `oauth_account_unlinked_${provider}`,
-        details: JSON.stringify({
-          provider,
-          email: profile.email,
-        }),
-        severity: "warning",
-      });
-
-      return true;
-    } catch (err) {
-      throw err;
+    if (!profile) {
+      throw new Error("OAuth account not found");
     }
+
+    await drizzle.delete(schema.oauthProfile).where(eq(schema.oauthProfile.id, profile.id));
+
+    await drizzle.insert(schema.securityAuditLog).values({
+      userId,
+      action: `oauth_account_unlinked_${provider}`,
+      details: JSON.stringify({
+        provider,
+        email: profile.email,
+      }),
+      severity: "warning",
+    });
+
+    return true;
   }
 
   static async getUserOAuthAccounts(drizzle: DrizzleClient, userId: string) {

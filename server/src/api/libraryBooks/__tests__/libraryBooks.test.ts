@@ -10,7 +10,6 @@ import type { ServiceResponse } from "../../../common/models/serviceResponse.js"
 import type { LibraryBook, CreateLibraryBook, UpdateLibraryBook } from "../libraryBooks.model.js";
 import { setupTestDb } from "database/test-utils";
 
-
 const mockLibraryBooksService = {
   findByLibraryId: vi.fn(),
   findById: vi.fn(),
@@ -20,16 +19,17 @@ const mockLibraryBooksService = {
   findAllLibraryBooks: vi.fn(),
 };
 
-
 Object.assign(LibraryBooksService, mockLibraryBooksService);
 
 const mockLibraryBook: LibraryBook = {
   id: "123e4567-e89b-12d3-a456-426614174000",
   libraryId: "123e4567-e89b-12d3-a456-426614174000",
   bookId: "123e4567-e89b-12d3-a456-426614174000",
+  quantity: 1,
   shelfLocation: "A1-Top",
   condition: "Excellent",
   addedAt: new Date("2024-01-01T00:00:00.000Z"),
+  updatedAt: new Date("2024-01-01T00:00:00.000Z"),
 };
 
 const mockLibraryBookWithDetails = {
@@ -63,7 +63,6 @@ describe("LibraryBooks API endpoints", () => {
     app = express();
     app.use(express.json());
 
-    
     app.use((req: any, res, next) => {
       req.drizzle = testDb;
       next();
@@ -154,7 +153,7 @@ describe("LibraryBooks API endpoints", () => {
         }),
       );
 
-      const response = await request(app).get("/libraries
+      const response = await request(app).get("/libraries");
       const result = response.body as ServiceResponse;
 
       expect(response.statusCode).toBe(StatusCodes.UNPROCESSABLE_ENTITY);
@@ -376,4 +375,3 @@ describe("LibraryBooks API endpoints", () => {
     });
   });
 });
-

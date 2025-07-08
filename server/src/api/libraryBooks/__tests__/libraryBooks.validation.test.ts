@@ -17,9 +17,11 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         shelfLocation: "A1-Top",
         condition: "Excellent",
         addedAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       };
 
       const result = libraryBookSchema.parse(validLibraryBook);
@@ -31,7 +33,9 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         addedAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       };
 
       const result = libraryBookSchema.parse(validLibraryBook);
@@ -43,13 +47,15 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         shelfLocation: null,
         condition: null,
         addedAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       };
 
       const result = libraryBookSchema.parse(libraryBookWithNulls);
-      assert.deepStrictEqual(result, libraryBookWithNulls);
+      expect(result).toEqual(libraryBookWithNulls);
     });
 
     it("should reject library book with invalid UUID", () => {
@@ -57,7 +63,9 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "invalid-uuid",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         addedAt: new Date(),
+        updatedAt: new Date(),
       };
 
       expect(() => libraryBookSchema.parse(invalidLibraryBook)).toThrow(ZodError);
@@ -68,8 +76,10 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         shelfLocation: "a".repeat(101), 
         addedAt: new Date(),
+        updatedAt: new Date(),
       };
 
       expect(() => libraryBookSchema.parse(invalidLibraryBook)).toThrow(ZodError);
@@ -80,8 +90,10 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         condition: "a".repeat(51), 
         addedAt: new Date(),
+        updatedAt: new Date(),
       };
 
       expect(() => libraryBookSchema.parse(invalidLibraryBook)).toThrow(ZodError);
@@ -94,9 +106,11 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         shelfLocation: "A1-Top",
         condition: "Excellent",
         addedAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
         book: {
           id: "123e4567-e89b-12d3-a456-426614174000",
           title: "Test Book",
@@ -122,7 +136,9 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         addedAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
         book: {
           id: "123e4567-e89b-12d3-a456-426614174000",
           title: "Test Book",
@@ -301,7 +317,9 @@ describe("LibraryBooks Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
+        quantity: 1,
         addedAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
         book: {
           id: "123e4567-e89b-12d3-a456-426614174000",
           title: "كتاب عربي",

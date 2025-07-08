@@ -17,4 +17,14 @@ export const borrowRequestRelations = relations(borrowRequest, ({ one }) => ({
     references: [user.id],
     relationName: "approvedBorrowRequests",
   }),
+  rejecter: one(user, {
+    fields: [borrowRequest.rejectedBy],
+    references: [user.id],
+    relationName: "rejectedBorrowRequests",
+  }),
+  returner: one(user, {
+    fields: [borrowRequest.returnedBy],
+    references: [user.id],
+    relationName: "returnedBorrowRequests",
+  }),
 }));

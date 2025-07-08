@@ -175,7 +175,6 @@ export const LibraryMemberService = {
 
   create: async (drizzle: DrizzleClient, memberData: CreateLibraryMember, invitedBy?: string) => {
     try {
-
       const user = await drizzle.query.user.findFirst({
         where: eq(schema.user.id, memberData.userId),
       });
@@ -189,7 +188,6 @@ export const LibraryMemberService = {
         );
       }
 
-
       const library = await drizzle.query.library.findFirst({
         where: eq(schema.library.id, memberData.libraryId),
       });
@@ -202,7 +200,6 @@ export const LibraryMemberService = {
           validationError.statusCode,
         );
       }
-
 
       const existingMember = await drizzle.query.libraryMember.findFirst({
         where: and(
@@ -219,7 +216,6 @@ export const LibraryMemberService = {
           conflictError.statusCode,
         );
       }
-
 
       if (invitedBy && memberData.role && ["owner", "manager"].includes(memberData.role)) {
         const inviterMembership = await drizzle.query.libraryMember.findFirst({
@@ -269,7 +265,6 @@ export const LibraryMemberService = {
         throw new NotFoundError("Library member not found");
       }
 
-
       if (updateData.role && updatedBy) {
         const updaterMembership = await drizzle.query.libraryMember.findFirst({
           where: and(
@@ -286,7 +281,6 @@ export const LibraryMemberService = {
             forbiddenError.statusCode,
           );
         }
-
 
         if (updateData.role === "owner" && updaterMembership.role !== "owner") {
           const forbiddenError = new ForbiddenError("Only owners can assign owner role");
@@ -335,7 +329,6 @@ export const LibraryMemberService = {
         throw new NotFoundError("Library member not found");
       }
 
-
       if (deletedBy) {
         const deleterMembership = await drizzle.query.libraryMember.findFirst({
           where: and(
@@ -353,13 +346,11 @@ export const LibraryMemberService = {
           );
         }
 
-
         if (existingMember.role === "owner" && deleterMembership.role !== "owner") {
           const forbiddenError = new ForbiddenError("Only owners can remove owner memberships");
           return ServiceResponse.failure(forbiddenError.message, null, forbiddenError.statusCode);
         }
       }
-
 
       const activeBorrows = await drizzle
         .select({ count: sql<number>`count(*)` })
@@ -432,7 +423,6 @@ export const LibraryMemberService = {
         throw new NotFoundError("Library member not found");
       }
 
-
       const borrowStats = await drizzle
         .select({
           status: schema.borrowRequest.status,
@@ -455,7 +445,6 @@ export const LibraryMemberService = {
           overdueBorrows += stat.count;
         }
       }
-
 
       const lastActivityResult = await drizzle
         .select({
@@ -485,7 +474,6 @@ export const LibraryMemberService = {
 
   getLibraryStats: async (drizzle: DrizzleClient, libraryId: string) => {
     try {
-
       const memberStats = await drizzle
         .select({
           role: schema.libraryMember.role,

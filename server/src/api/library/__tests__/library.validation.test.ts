@@ -15,7 +15,9 @@ describe("Library Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "Central Library",
         location: "Downtown",
+        ownerId: "owner-123",
         createdAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       };
 
       const result = librarySchema.parse(validLibrary);
@@ -26,7 +28,9 @@ describe("Library Validation Schemas", () => {
       const validLibrary = {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "Central Library",
+        ownerId: "owner-123",
         createdAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
       };
 
       const result = librarySchema.parse(validLibrary);
@@ -37,7 +41,9 @@ describe("Library Validation Schemas", () => {
       const invalidLibrary = {
         id: "invalid-uuid",
         name: "Central Library",
+        ownerId: "owner-123",
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       expect(() => librarySchema.parse(invalidLibrary)).toThrow(ZodError);
@@ -47,7 +53,9 @@ describe("Library Validation Schemas", () => {
       const invalidLibrary = {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "",
+        ownerId: "owner-123",
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       expect(() => librarySchema.parse(invalidLibrary)).toThrow(ZodError);
@@ -57,7 +65,9 @@ describe("Library Validation Schemas", () => {
       const invalidLibrary = {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "a".repeat(101), 
+        ownerId: "owner-123",
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       expect(() => librarySchema.parse(invalidLibrary)).toThrow(ZodError);
@@ -68,7 +78,9 @@ describe("Library Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "Central Library",
         location: "a".repeat(201), 
+        ownerId: "owner-123",
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       expect(() => librarySchema.parse(invalidLibrary)).toThrow(ZodError);
@@ -188,11 +200,13 @@ describe("Library Validation Schemas", () => {
         id: "123e4567-e89b-12d3-a456-426614174000",
         name: "Central Library",
         location: null,
+        ownerId: "owner-123",
         createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       const result = librarySchema.parse(libraryWithNullLocation);
-      assert.deepStrictEqual(result, libraryWithNullLocation);
+      expect(result).toEqual(libraryWithNullLocation);
     });
 
     it("should trim whitespace from name in create schema", () => {
@@ -203,7 +217,7 @@ describe("Library Validation Schemas", () => {
 
       
       const result = createLibrarySchema.parse(createDataWithWhitespace);
-      assert.deepStrictEqual(result, createDataWithWhitespace);
+      expect(result).toEqual(createDataWithWhitespace);
     });
 
     it("should handle boundary values for name length", () => {

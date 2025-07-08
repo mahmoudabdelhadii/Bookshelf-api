@@ -180,7 +180,7 @@ export const AuthService = {
         },
         201,
       );
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to register user: ${errorMessage}`);
       return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
@@ -338,7 +338,7 @@ export const AuthService = {
       };
 
       return ServiceResponse.success("Login successful", loginResult);
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to login: ${errorMessage}`);
       return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
@@ -360,7 +360,7 @@ export const AuthService = {
       });
 
       return ServiceResponse.success("Logout successful", null);
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to logout: ${errorMessage}`);
       return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
@@ -440,7 +440,7 @@ export const AuthService = {
         expiresIn: newTokens.expiresIn,
         refreshExpiresIn: newTokens.refreshExpiresIn,
       });
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to refresh token: ${errorMessage}`);
       return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
@@ -485,7 +485,7 @@ export const AuthService = {
         "If an account with that email exists, password reset instructions have been sent.",
         { resetToken },
       );
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to request password reset: ${errorMessage}`);
       return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
@@ -543,7 +543,7 @@ export const AuthService = {
       });
 
       return ServiceResponse.success("Password reset successfully", null);
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to reset password: ${errorMessage}`);
       return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
@@ -589,7 +589,7 @@ export const AuthService = {
       });
 
       return ServiceResponse.success("Email verified successfully", null);
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to verify email: ${errorMessage}`);
       return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
@@ -635,7 +635,7 @@ export const AuthService = {
       });
 
       return ServiceResponse.success("Password changed successfully", null);
-    } catch (err) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
       const dbError = new DatabaseError(`Failed to change password: ${errorMessage}`);
       return ServiceResponse.failure(dbError.message, { originalError: errorMessage }, dbError.statusCode);
@@ -662,7 +662,7 @@ export const AuthService = {
         userAgent: event.userAgent ?? null,
         severity: event.severity ?? "info",
       });
-    } catch (err) {
+    } catch (err: unknown) {
       // eslint-disable-next-line no-console
       console.error("Failed to log security event:", err);
     }
@@ -686,7 +686,7 @@ export const AuthService = {
         isSuccessful: attempt.isSuccessful,
         failureReason: attempt.failureReason ?? null,
       });
-    } catch (err) {
+    } catch (err: unknown) {
       // eslint-disable-next-line no-console
       console.error("Failed to log security event:", err);
     }

@@ -28,7 +28,6 @@ export const BorrowRequestService = {
         whereConditions.push(eq(schema.borrowRequest.status, filters.status as any));
       }
       if (filters?.libraryId) {
-
         whereConditions.push(eq(schema.libraryBooks.libraryId, filters.libraryId));
       }
 
@@ -64,6 +63,20 @@ export const BorrowRequestService = {
             },
           },
           approver: {
+            columns: {
+              id: true,
+              email: true,
+              firstName: true,
+            },
+          },
+          rejecter: {
+            columns: {
+              id: true,
+              email: true,
+              firstName: true,
+            },
+          },
+          returner: {
             columns: {
               id: true,
               email: true,
@@ -120,6 +133,20 @@ export const BorrowRequestService = {
               firstName: true,
             },
           },
+          rejecter: {
+            columns: {
+              id: true,
+              email: true,
+              firstName: true,
+            },
+          },
+          returner: {
+            columns: {
+              id: true,
+              email: true,
+              firstName: true,
+            },
+          },
         },
       });
 
@@ -148,7 +175,6 @@ export const BorrowRequestService = {
 
   create: async (drizzle: DrizzleClient, userId: string, requestData: CreateBorrowRequest) => {
     try {
-
       const libraryBook = await drizzle.query.libraryBooks.findFirst({
         where: eq(schema.libraryBooks.id, requestData.libraryBookId),
       });
@@ -161,7 +187,6 @@ export const BorrowRequestService = {
           validationError.statusCode,
         );
       }
-
 
       const [borrowedCount] = await drizzle
         .select({ count: count() })
@@ -184,7 +209,6 @@ export const BorrowRequestService = {
         );
       }
 
-
       const existingRequest = await drizzle.query.borrowRequest.findFirst({
         where: and(
           eq(schema.borrowRequest.userId, userId),
@@ -202,11 +226,16 @@ export const BorrowRequestService = {
         );
       }
 
+      // Calculate due date (default 14 days from now)
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 14);
+
       const [newBorrowRequest] = await drizzle
         .insert(schema.borrowRequest)
         .values({
           userId,
           libraryBookId: requestData.libraryBookId,
+          dueDate,
           notes: requestData.notes,
           status: "pending",
         })
@@ -237,7 +266,6 @@ export const BorrowRequestService = {
         throw new NotFoundError("Borrow request not found");
       }
 
-
       const updateFields: any = {
         ...updateData,
         updatedAt: new Date(),
@@ -246,24 +274,21 @@ export const BorrowRequestService = {
       if (updateData.status) {
         switch (updateData.status) {
           case "approved":
-            updateFields.approvedDate = new Date();
             updateFields.approvedBy = updatedBy;
-
-            if (!updateData.dueDate) {
-              const dueDate = new Date();
-              dueDate.setDate(dueDate.getDate() + 14);
-              updateFields.dueDate = dueDate;
+            // dueDate should already be set when creating the request
+            if (updateData.dueDate) {
+              updateFields.dueDate = updateData.dueDate;
             }
             break;
           case "borrowed":
-
+            // No additional fields needed for borrowed status
             break;
           case "returned":
             updateFields.returnDate = new Date();
-
+            updateFields.returnedBy = updatedBy;
             break;
           case "rejected":
-
+            updateFields.rejectedBy = updatedBy;
             break;
         }
       }
@@ -299,7 +324,6 @@ export const BorrowRequestService = {
         throw new NotFoundError("Borrow request not found");
       }
 
-
       if (!["pending", "rejected"].includes(existingRequest.status)) {
         const conflictError = new ConflictError("Cannot delete active borrow request");
         return ServiceResponse.failure(
@@ -333,15 +357,25 @@ export const BorrowRequestService = {
         whereConditions.push(eq(schema.borrowRequest.userId, filters.userId));
       }
       if (filters?.libraryId) {
-
+        whereConditions.push(eq(schema.libraryBooks.libraryId, filters.libraryId));
       }
 
-      const stats = await drizzle
+      let statsQuery = drizzle
         .select({
           status: schema.borrowRequest.status,
           count: sql<number>`count(*)`,
         })
         .from(schema.borrowRequest)
+        .$dynamic();
+
+      if (filters?.libraryId) {
+        statsQuery = statsQuery.innerJoin(
+          schema.libraryBooks,
+          eq(schema.borrowRequest.libraryBookId, schema.libraryBooks.id),
+        );
+      }
+
+      const stats = await statsQuery
         .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
         .groupBy(schema.borrowRequest.status);
 

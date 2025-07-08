@@ -79,14 +79,20 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
 export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
   const token = extractTokenFromHeader(req.headers.authorization);
-  if (!token) return next();
+  if (!token) {
+    next();
+    return;
+  }
 
   const verification = verifyAccessToken(token);
-  if (!verification.isValid) return next();
+  if (!verification.isValid) {
+    next();
+    return;
+  }
 
   passport.authenticate("jwt", { session: false }, (err: unknown, user: AuthUser | false) => {
     if (!err && user) req.user = user;
-    next();
+    return next();
   })(req, res, next);
 };
 
@@ -138,7 +144,7 @@ export const requireEmailVerified = (req: Request, res: Response, next: NextFunc
       .json(ServiceResponse.failure("Email verification required.", null, StatusCodes.FORBIDDEN));
     return;
   }
-  next();
+  return next();
 };
 
 export const requireActiveAccount = (req: Request, res: Response, next: NextFunction): void => {
@@ -160,7 +166,7 @@ export const requireActiveAccount = (req: Request, res: Response, next: NextFunc
       .json(ServiceResponse.failure("Account is suspended.", null, StatusCodes.FORBIDDEN));
     return;
   }
-  next();
+  return next();
 };
 
 export const requireRoles =
@@ -184,7 +190,7 @@ export const requireRoles =
         );
       return;
     }
-    next();
+    return next();
   };
 
 export const requirePermissions =
@@ -208,7 +214,7 @@ export const requirePermissions =
         );
       return;
     }
-    next();
+    return next();
   };
 
 export const requireAnyPermission =
@@ -232,7 +238,7 @@ export const requireAnyPermission =
         );
       return;
     }
-    next();
+    return next();
   };
 
 export const requireOwnershipOrAdmin =
@@ -248,10 +254,11 @@ export const requireOwnershipOrAdmin =
       ["admin", "Super Administrator"].includes(req.user.role) ||
       req.user.permissions.some((p) => p.includes(":manage") || p.includes("system:manage"))
     ) {
-      return next();
+      next();
+      return;
     }
 
-    const id = req.params[userIdField] ?? req.body?.[userIdField] ?? req.query?.[userIdField];
+    const id = req.params[userIdField] ?? req.body?.[userIdField] ?? req.query[userIdField];
     if (!id) {
       res
         .status(StatusCodes.BAD_REQUEST)
@@ -265,7 +272,7 @@ export const requireOwnershipOrAdmin =
         .json(ServiceResponse.failure("Access denied. Not your resource.", null, StatusCodes.FORBIDDEN));
       return;
     }
-    next();
+    return next();
   };
 
 export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
@@ -285,7 +292,7 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction): v
       .json(ServiceResponse.failure("Administrator access required.", null, StatusCodes.FORBIDDEN));
     return;
   }
-  next();
+  return next();
 };
 
 export const developmentOnly = (_req: Request, res: Response, next: NextFunction): void => {
@@ -295,7 +302,7 @@ export const developmentOnly = (_req: Request, res: Response, next: NextFunction
       .json(ServiceResponse.failure("Development only endpoint.", null, StatusCodes.FORBIDDEN));
     return;
   }
-  next();
+  return next();
 };
 
 export const combineAuthMiddleware = (
@@ -305,10 +312,12 @@ export const combineAuthMiddleware = (
     try {
       for (const middleware of middlewares) {
         await new Promise<void>((resolve, reject) => {
-          middleware(req, res, (err) => (err ? reject(err) : resolve()));
+          middleware(req, res, (err) => {
+            err ? reject(err) : resolve();
+          });
         });
       }
-      next();
+      return next();
     } catch (err) {
       next(err instanceof Error ? err : new Error("Middleware failure"));
     }

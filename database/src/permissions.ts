@@ -306,6 +306,32 @@ export function hasAllPermissions(userPermissions: string[], requiredPermissions
   return requiredPermissions.every((permission) => hasPermission(userPermissions, permission));
 }
 
+export class PermissionValidator {
+  static hasPermission(userPermissions: string[], requiredPermission: string): boolean {
+    return hasPermission(userPermissions, requiredPermission);
+  }
+
+  static hasAnyPermission(userPermissions: string[], requiredPermissions: string[]): boolean {
+    return hasAnyPermission(userPermissions, requiredPermissions);
+  }
+
+  static hasAllPermissions(userPermissions: string[], requiredPermissions: string[]): boolean {
+    return hasAllPermissions(userPermissions, requiredPermissions);
+  }
+
+  static isValidPermission(permission: string): permission is PermissionString {
+    return isValidPermission(permission);
+  }
+
+  static parsePermission(permission: string): {
+    resource: string;
+    action: string;
+    scope?: string;
+  } | null {
+    return parsePermission(permission);
+  }
+}
+
 export type Permission = keyof typeof PERMISSIONS;
 export type PermissionString = (typeof PERMISSIONS)[Permission];
 export type RoleTemplate = keyof typeof ROLE_TEMPLATES;

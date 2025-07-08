@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS "server"."author" (
 	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
 	"name" text NOT NULL,
 	"biography" text,
-	"birth_date" text,
+	"birth_date" date,
 	"nationality" text,
 	"books_count" integer DEFAULT 0,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,

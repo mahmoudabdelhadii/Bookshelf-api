@@ -50,12 +50,7 @@ export const bookSchema = z
     publisherId: idSchema.openapi({ description: "Publisher ID" }),
     subjectId: idSchema.nullable().optional().openapi({ description: "Subject ID" }),
     genre: z.string().nullable().optional().openapi({ description: "Book genre" }),
-    datePublished: z
-      .date()
-      .max(new Date(), "Publication date cannot be in the future")
-      .nullable()
-      .optional()
-      .openapi({ description: "Publication date" }),
+    publishedYear: z.number().int().min(0).max(new Date().getFullYear()).nullable().optional().openapi({ description: "Year the book was published" }),
     edition: z.string().nullable().optional().openapi({ description: "Book edition" }),
     pages: z.number().int().min(0).nullable().optional().openapi({ description: "Number of pages" }),
     overview: z.string().nullable().optional().openapi({ description: "Book overview" }),
@@ -113,11 +108,7 @@ export const createBookWithIdsSchema = z
     publisherId: idSchema.openapi({ description: "Publisher ID" }),
     subjectId: idSchema.optional().openapi({ description: "Subject ID" }),
     genre: z.string().optional().openapi({ description: "Book genre" }),
-    datePublished: z
-      .date()
-      .max(new Date(), "Publication date cannot be in the future")
-      .optional()
-      .openapi({ description: "Publication date" }),
+    publishedYear: z.number().int().min(0).max(new Date().getFullYear()).optional().openapi({ description: "Year the book was published" }),
     edition: z.string().optional().openapi({ description: "Book edition" }),
     pages: z.number().int().min(0).optional().openapi({ description: "Number of pages" }),
     overview: z.string().optional().openapi({ description: "Book overview" }),

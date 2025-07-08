@@ -3,7 +3,7 @@ import { RedisStore } from "rate-limit-redis";
 import { StatusCodes } from "http-status-codes";
 import { env } from "../utils/envConfig.js";
 import { redisClient } from "./session.js";
-import type { Request, Response } from "express";
+import type { Request } from "express";
 
 declare global {
   namespace Express {
