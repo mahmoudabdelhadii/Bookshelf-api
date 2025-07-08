@@ -3,6 +3,7 @@ import type { Application, Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import crypto from "node:crypto";
 import { env } from "../utils/envConfig.js";
+import { logger } from "database";
 
 export function configureSecurityHeaders(app: Application): void {
   app.use(
@@ -19,7 +20,7 @@ export function configureSecurityHeaders(app: Application): void {
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
           formAction: ["'self'"],
-          upgradeInsecureRequests: env.isProduction ? [] : null,
+          upgradeInsecureRequests: env.isProduction ? [] : undefined,
         },
         reportOnly: !env.isProduction, // Report only in development
       },
@@ -79,7 +80,7 @@ export function sanitizeRequest(req: Request, _res: Response, next: NextFunction
         req.query[key] = value
           .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
           .replace(/<[^>]+>/g, "")
-          .replace(/[<>\"']/g, "");
+          .replace(/[<>"']/g, "");
       }
     }
   }
@@ -91,7 +92,7 @@ export function sanitizeRequest(req: Request, _res: Response, next: NextFunction
   next();
 }
 
-function sanitizeObject(obj: any): void {
+function sanitizeObject(obj: Record<string, unknown>): void {
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === "string") {
       obj[key] = value
@@ -118,24 +119,26 @@ export class IPAccessControl {
       const clientIP = this.getClientIP(req);
 
       if (this.blacklist.has(clientIP)) {
-        return res.status(StatusCodes.FORBIDDEN).json({
+        res.status(StatusCodes.FORBIDDEN).json({
           success: false,
           message: "Access denied from this IP address",
           responseObject: null,
           statusCode: StatusCodes.FORBIDDEN,
         });
+        return;
       }
 
       if (this.whitelist.size > 0 && !this.whitelist.has(clientIP)) {
-        return res.status(StatusCodes.FORBIDDEN).json({
+        res.status(StatusCodes.FORBIDDEN).json({
           success: false,
           message: "Access denied. IP not in whitelist",
           responseObject: null,
           statusCode: StatusCodes.FORBIDDEN,
         });
+        return;
       }
 
-      return next();
+      next();
     };
   }
 
@@ -143,7 +146,7 @@ export class IPAccessControl {
     return (
       req.ip ??
       req.socket.remoteAddress ??
-      (req.headers["x-forwarded-for"] as string).split(",")[0]?.trim() ??
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ??
       "unknown"
     );
   }
@@ -192,7 +195,7 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
   );
 
   if (isSuspicious) {
-    console.warn("Suspicious request detected:", {
+    logger.warn("Suspicious request detected", {
       ip: req.ip,
       userAgent,
       url,
@@ -205,7 +208,7 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
   res.on("finish", () => {
     const duration = Date.now() - startTime;
     if (duration > 5000) {
-      console.warn("Slow request detected:", {
+      logger.warn("Slow request detected", {
         ip: req.ip,
         url,
         method: req.method,

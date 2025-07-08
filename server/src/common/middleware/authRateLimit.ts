@@ -3,10 +3,11 @@ import { RedisStore } from "rate-limit-redis";
 import { StatusCodes } from "http-status-codes";
 import { env } from "../utils/envConfig.js";
 import { redisClient } from "./session.js";
+import { logger } from "database";
 import type { Request } from "express";
 
 declare global {
-  namespace Express {
+  module Express {
     interface Request {
       rateLimit?: {
         limit: number;
@@ -66,7 +67,7 @@ export const loginRateLimit = rateLimit({
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
   keyGenerator: (req: Request) =>
-    `login:${req.ip ?? req.socket.remoteAddress ?? "unknown"}:${req.body?.email ?? "no-email"}`,
+    `login:${req.ip ?? req.socket.remoteAddress ?? "unknown"}:${(req.body as { email?: string })?.email ?? "no-email"}`,
   handler: (_req, res) => {
     res.status(StatusCodes.TOO_MANY_REQUESTS).json(rateLimitResponse(5, 15 * 60 * 1000));
   },
@@ -80,7 +81,7 @@ export const passwordResetRateLimit = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
-  keyGenerator: (req: Request) => `password-reset:${req.body?.email ?? "no-email"}`,
+  keyGenerator: (req: Request) => `password-reset:${(req.body as { email?: string })?.email ?? "no-email"}`,
   handler: (_req, res) => {
     res.status(StatusCodes.TOO_MANY_REQUESTS).json({
       success: false,
@@ -104,7 +105,7 @@ export const emailVerificationRateLimit = rateLimit({
   legacyHeaders: false,
   skip: (_req: Request) => process.env.NODE_ENV === "test",
   keyGenerator: (req: Request) =>
-    `email-verify:${req.ip ?? req.socket.remoteAddress ?? "unknown"}:${(req.body?.token ?? "no-token").substring(0, 8)}`,
+    `email-verify:${req.ip ?? req.socket.remoteAddress ?? "unknown"}:${((req.body as { token?: string })?.token ?? "no-token").substring(0, 8)}`,
   handler: (_req, res) => {
     res.status(StatusCodes.TOO_MANY_REQUESTS).json({
       success: false,
@@ -223,18 +224,28 @@ export const authSecurityRateLimit = [
   createAdaptiveRateLimit(env.AUTH_RATE_LIMIT_MAX_REQUESTS, env.AUTH_RATE_LIMIT_WINDOW_MS),
 ];
 
-export class RateLimitUtils {
-  static async resetRateLimit(key: string): Promise<void> {
+interface RateLimitUtilsType {
+  resetRateLimit(key: string): Promise<void>;
+  getRateLimitStatus(key: string): Promise<{
+    remaining: number;
+    resetTime: Date | null;
+    total: number;
+  }>;
+  isRateLimited(ip: string, limitType?: string): Promise<boolean>;
+}
+
+export const RateLimitUtils: RateLimitUtilsType = {
+  async resetRateLimit(key: string): Promise<void> {
     if (!redisClient) return;
     try {
       const keys = await redisClient.keys(`rl:*${key}*`);
       if (keys.length > 0) await redisClient.del(keys);
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      logger.error(err, "Rate limit error");
     }
-  }
+  },
 
-  static async getRateLimitStatus(key: string): Promise<{
+  async getRateLimitStatus(key: string): Promise<{
     remaining: number;
     resetTime: Date | null;
     total: number;
@@ -259,24 +270,24 @@ export class RateLimitUtils {
         resetTime,
         total: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
       };
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      logger.error(err, "Rate limit error");
       return {
         remaining: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
         resetTime: null,
         total: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
       };
     }
-  }
+  },
 
-  static async isRateLimited(ip: string, limitType = "auth"): Promise<boolean> {
+  async isRateLimited(ip: string, limitType = "auth"): Promise<boolean> {
     if (!redisClient) return false;
     try {
       const current = await redisClient.get(`rl:${limitType}:${ip}`);
       return (current ? parseInt(current, 10) : 0) >= env.AUTH_RATE_LIMIT_MAX_REQUESTS;
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      logger.error(err, "Rate limit error");
       return false;
     }
-  }
-}
+  },
+};

@@ -30,7 +30,7 @@ export function configurePassport(drizzle: DrizzleClient) {
         passwordField: "password",
         passReqToCallback: true,
       },
-      async (req, email: string, password: string, done) => {
+      async (req, email: string, password: string, done): Promise<void> => {
         try {
           const userWithAuth = await drizzle.query.user.findFirst({
             where: (user, { eq }) => eq(user.email, email),
@@ -51,7 +51,9 @@ export function configurePassport(drizzle: DrizzleClient) {
 
           const { userAuth, userRoles, ...user } = userWithAuth;
 
-          if (!userAuth) {
+          if (userAuth) {
+            // Account is properly configured
+          } else {
             done(null, false, { message: "Account not properly configured" });
             return;
           }
@@ -151,7 +153,7 @@ export function configurePassport(drizzle: DrizzleClient) {
         algorithms: ["HS256"],
         passReqToCallback: true,
       },
-      async (req, payload: JwtPayload, done) => {
+      async (req, payload: JwtPayload, done): Promise<void> => {
         try {
           if (payload.type !== "access") {
             done(null, false, { message: "Invalid token type" });
@@ -177,7 +179,9 @@ export function configurePassport(drizzle: DrizzleClient) {
 
           const { userAuth, userRoles, ...user } = userWithAuth;
 
-          if (!userAuth) {
+          if (userAuth) {
+            // Account is properly configured
+          } else {
             done(null, false, { message: "Account not properly configured" });
             return;
           }
@@ -238,7 +242,7 @@ export function configurePassport(drizzle: DrizzleClient) {
     done(null, user.id);
   });
 
-  passport.deserializeUser(async (id: string, done) => {
+  passport.deserializeUser(async (id: string, done): Promise<void> => {
     try {
       const userWithAuth = await drizzle.query.user.findFirst({
         where: (user, { eq }) => eq(user.id, id),
@@ -259,7 +263,9 @@ export function configurePassport(drizzle: DrizzleClient) {
 
       const { userAuth, userRoles, ...user } = userWithAuth;
 
-      if (!userAuth || !userAuth.isActive || userAuth.isSuspended) {
+      if (userAuth?.isActive && !userAuth.isSuspended) {
+        // User is active and not suspended
+      } else {
         done(null, false);
         return;
       }
