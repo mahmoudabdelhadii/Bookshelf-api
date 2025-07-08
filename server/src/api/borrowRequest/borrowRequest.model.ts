@@ -11,17 +11,20 @@ export const borrowRequestSchema = z
     userId: idSchema.openapi({ description: "ID of the user making the request" }),
     libraryBookId: idSchema.openapi({ description: "ID of the library book being requested" }),
     requestDate: z.date().openapi({ description: "Date when the request was made" }),
-    approvedDate: z
-      .date()
-      .nullable()
-      .optional()
-      .openapi({ description: "Date when the request was approved" }),
+    dueDate: z.date().openapi({ description: "Due date for returning the book" }),
+    returnDate: z.date().nullable().optional().openapi({ description: "Actual return date" }),
     approvedBy: idSchema
       .nullable()
       .optional()
       .openapi({ description: "ID of the user who approved the request" }),
-    dueDate: z.date().nullable().optional().openapi({ description: "Due date for returning the book" }),
-    returnDate: z.date().nullable().optional().openapi({ description: "Actual return date" }),
+    rejectedBy: idSchema
+      .nullable()
+      .optional()
+      .openapi({ description: "ID of the user who rejected the request" }),
+    returnedBy: idSchema
+      .nullable()
+      .optional()
+      .openapi({ description: "ID of the user who processed the return" }),
     status: z
       .enum(["pending", "approved", "rejected", "borrowed", "returned", "overdue"])
       .default("pending")
@@ -42,9 +45,11 @@ export const createBorrowRequestSchema = z
 export const updateBorrowRequestSchema = z
   .object({
     status: z.enum(["pending", "approved", "rejected", "borrowed", "returned", "overdue"]).optional(),
-    approvedBy: idSchema.optional().openapi({ description: "ID of the user approving the request" }),
     dueDate: z.date().optional().openapi({ description: "Due date for returning the book" }),
     returnDate: z.date().optional().openapi({ description: "Actual return date" }),
+    approvedBy: idSchema.optional().openapi({ description: "ID of the user approving the request" }),
+    rejectedBy: idSchema.optional().openapi({ description: "ID of the user rejecting the request" }),
+    returnedBy: idSchema.optional().openapi({ description: "ID of the user processing the return" }),
     notes: z.string().optional().openapi({ description: "Additional notes" }),
   })
   .openapi({ description: "Borrow request update data" });

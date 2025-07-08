@@ -1,4 +1,4 @@
-import { text, uniqueIndex, timestamp, integer } from "drizzle-orm/pg-core";
+import { text, uniqueIndex, timestamp, integer, date } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 
 export const author = server.table(
@@ -7,7 +7,7 @@ export const author = server.table(
     id: idpk("id"),
     name: text("name").notNull(),
     biography: text("biography"),
-    birthDate: text("birth_date"),
+    birthDate: date("birth_date"),
     nationality: text("nationality"),
     booksCount: integer("books_count").default(0),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),

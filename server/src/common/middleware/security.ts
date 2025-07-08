@@ -57,7 +57,6 @@ export function configureSecurityHeaders(app: Application): void {
   );
 }
 
-
 export function apiSecurityHeaders(_req: Request, res: Response, next: NextFunction) {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
@@ -170,7 +169,7 @@ export function requestId(req: Request, res: Response, next: NextFunction) {
   const id = crypto.randomUUID();
   req.headers["x-request-id"] = id;
   res.setHeader("X-Request-ID", id);
-  return next();
+  next();
 }
 
 export function securityMonitoring(req: Request, res: Response, next: NextFunction) {
@@ -217,7 +216,7 @@ export function securityMonitoring(req: Request, res: Response, next: NextFuncti
     }
   });
 
-  return next();
+  next();
 }
 
 export function setupSecurity(app: Application) {

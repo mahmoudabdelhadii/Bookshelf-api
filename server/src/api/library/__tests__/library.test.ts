@@ -26,7 +26,9 @@ const mockLibrary: Library = {
   id: "123e4567-e89b-12d3-a456-426614174000",
   name: "Central Library",
   location: "Downtown",
+  ownerId: "owner-123",
   createdAt: new Date("2024-01-01T00:00:00.000Z"),
+  updatedAt: new Date("2024-01-01T00:00:00.000Z"),
 };
 
 describe("Library API endpoints", () => {

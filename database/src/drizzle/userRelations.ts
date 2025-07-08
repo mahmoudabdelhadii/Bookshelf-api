@@ -29,5 +29,14 @@ export const userRelations = relations(user, ({ one, many }) => ({
   accountLockouts: many(accountLockout),
   oauthProfiles: many(oauthProfile),
   borrowRequests: many(borrowRequest),
+  approvedBorrowRequests: many(borrowRequest, {
+    relationName: "approvedBorrowRequests",
+  }),
+  rejectedBorrowRequests: many(borrowRequest, {
+    relationName: "rejectedBorrowRequests",
+  }),
+  returnedBorrowRequests: many(borrowRequest, {
+    relationName: "returnedBorrowRequests",
+  }),
   libraryMemberships: many(libraryMember),
 }));

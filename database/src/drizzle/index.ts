@@ -6,6 +6,7 @@ export * from "./libraryRelations.js";
 export * from "./libraryBooks.js";
 export * from "./libraryBooksRelations.js";
 export * from "./user.js";
+export * from "./userRelations.js";
 export * from "./userAuth.js";
 export * from "./userSession.js";
 export * from "./passwordResetToken.js";

@@ -11,6 +11,7 @@ export const libraryBookSchema = z
     id: idSchema,
     libraryId: idSchema.openapi({ description: "ID of the library" }),
     bookId: idSchema.openapi({ description: "ID of the book" }),
+    quantity: z.number().int().min(1).default(1).openapi({ description: "Number of copies" }),
     shelfLocation: z
       .string()
       .max(100)
@@ -19,6 +20,7 @@ export const libraryBookSchema = z
       .openapi({ description: "Location of the book on shelf" }),
     condition: z.string().max(50).nullable().optional().openapi({ description: "Condition of the book" }),
     addedAt: z.date().openapi({ description: "Timestamp when the book was added to library" }),
+    updatedAt: z.date().openapi({ description: "Timestamp when the book entry was last updated" }),
   })
   .openapi({ description: "Library book entry information" });
 
@@ -47,12 +49,14 @@ export const createLibraryBookSchema = z
   .object({
     libraryId: idSchema.openapi({ description: "ID of the library" }),
     bookId: idSchema.openapi({ description: "ID of the book" }),
+    quantity: z.number().int().min(1).default(1).optional().openapi({ description: "Number of copies" }),
     shelfLocation: z.string().max(100).optional().openapi({ description: "Location of the book on shelf" }),
     condition: z.string().max(50).optional().openapi({ description: "Condition of the book" }),
   })
   .openapi({ description: "Library book creation data" });
 
 export const updateLibraryBookSchema = z.object({
+  quantity: z.number().int().min(1).optional().openapi({ description: "Number of copies" }),
   shelfLocation: z.string().max(100).optional().openapi({ description: "The shelf location of the book" }),
   condition: z.string().max(50).optional().openapi({ description: "The condition of the book" }),
 });

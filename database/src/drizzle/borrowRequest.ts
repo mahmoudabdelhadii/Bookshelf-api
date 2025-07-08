@@ -1,9 +1,16 @@
-import { timestamp, uniqueIndex, index, uuid } from "drizzle-orm/pg-core";
+import { timestamp, uniqueIndex, index, uuid, text } from "drizzle-orm/pg-core";
 import { idpk, server } from "./_common.js";
 import { user } from "./user.js";
 import { libraryBooks } from "./libraryBooks.js";
 
-export const borrowStatusEnum = server.enum("borrow_status", ["pending", "approved", "rejected", "returned"]);
+export const borrowStatusEnum = server.enum("borrow_status", [
+  "pending",
+  "approved",
+  "rejected",
+  "returned",
+  "borrowed",
+  "overdue",
+]);
 
 export const borrowRequest = server.table(
   "borrow_request",
@@ -19,6 +26,7 @@ export const borrowRequest = server.table(
     dueDate: timestamp("due_date", { withTimezone: true, mode: "date" }).notNull(),
     returnDate: timestamp("return_date", { withTimezone: true, mode: "date" }),
     status: borrowStatusEnum("status").default("pending").notNull(),
+    notes: text("notes"),
     approvedBy: uuid("approved_by").references(() => user.id, { onDelete: "set null", onUpdate: "cascade" }),
     rejectedBy: uuid("rejected_by").references(() => user.id, { onDelete: "set null", onUpdate: "cascade" }),
     returnedBy: uuid("returned_by").references(() => user.id, { onDelete: "set null", onUpdate: "cascade" }),
