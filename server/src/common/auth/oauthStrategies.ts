@@ -68,7 +68,7 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
           refreshToken: string,
           profile: GoogleProfileType,
           done: VerifyCallbackGoogle,
-        ) => {
+        ): Promise<void> => {
           try {
             const email = profile.emails?.[0]?.value;
 
@@ -133,9 +133,9 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
           idToken: string,
           profile: AppleProfileType,
           done: VerifyCallbackApple,
-        ) => {
+        ): Promise<void> => {
           try {
-            const email = profile.email;
+            const email = profile.email as string;
 
             if (!email) {
               done(new Error("No email provided by Apple")); return;
@@ -146,27 +146,27 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             if (user) {
               await updateUserOAuthInfo(drizzle, user.id, {
                 provider: "apple",
-                providerId: profile.id,
+                providerId: profile.id as string,
               });
             } else {
               await createOAuthUser(drizzle, {
                 email,
-                firstName: profile.name?.firstName ?? "User",
-                lastName: profile.name?.lastName ?? "",
+                firstName: (profile.name?.firstName as string) ?? "User",
+                lastName: (profile.name?.lastName as string) ?? "",
                 provider: "apple",
-                providerId: profile.id,
+                providerId: profile.id as string,
                 idToken,
                 accessToken,
                 refreshToken,
               });
-              user = await findUserByEmail(drizzle, email);
+              user = await findUserByEmail(drizzle, email as string);
             }
 
             if (!user) {
               done(new Error("Failed to create or find user")); return;
             }
 
-            const authUser = await buildAuthUser(drizzle, user, "apple", profile.id);
+            const authUser = await buildAuthUser(drizzle, user, "apple", profile.id as string);
             done(null, authUser); 
           } catch (err) {
             done(err instanceof Error ? err : new Error("Unhandled error")); 
@@ -263,7 +263,7 @@ async function createOAuthUser(
         username,
         loginUrl: `${env.FRONTEND_URL}/login`,
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         logger.error(err, "Failed to send welcome email");
       });
 
@@ -344,7 +344,7 @@ async function buildAuthUser(
   provider: "google" | "apple",
   providerId: string,
 ): Promise<OAuthUser> {
-  const permissions = user.userRoles.flatMap((ur) => ur.role.permissions || []);
+  const permissions = user.userRoles.flatMap((ur) => ur.role.permissions ?? []);
 
   await drizzle.insert(schema.securityAuditLog).values({
     userId: user.id,
@@ -381,16 +381,18 @@ function generateUsernameFromEmail(email: string): string {
   return `${cleanUsername}_${randomSuffix}`;
 }
 
+interface OAuthData {
+  provider: "google" | "apple";
+  providerId: string;
+  email: string;
+  profileData: Record<string, unknown>;
+}
+
 export class OAuthService {
   static async linkOAuthAccount(
     drizzle: DrizzleClient,
     userId: string,
-    oauthData: {
-      provider: "google" | "apple";
-      providerId: string;
-      email: string;
-      profileData: any;
-    },
+    oauthData: OAuthData,
   ) {
     const existingLink = await drizzle.query.oauthProfile.findFirst({
       where: (profile, { eq, and }) =>

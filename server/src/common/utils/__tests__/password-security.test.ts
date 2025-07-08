@@ -219,12 +219,12 @@ describe("Password Security", () => {
       expect(password).toMatch(/[a-z]/);
       expect(password).toMatch(/[A-Z]/);
       expect(password).toMatch(/\d/);
-      expect(password).toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/);
+      expect(password).toMatch(/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/);
 
       const lowercase = (password.match(/[a-z]/g) ?? []).length;
       const uppercase = (password.match(/[A-Z]/g) ?? []).length;
       const digits = (password.match(/\d/g) ?? []).length;
-      const special = (password.match(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/g) ?? []).length;
+      const special = (password.match(/[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/g) ?? []).length;
 
       expect(lowercase).toBeGreaterThan(0);
       expect(uppercase).toBeGreaterThan(0);
@@ -330,13 +330,13 @@ describe("Password Security", () => {
   describe("Security Edge Cases", () => {
     it("should handle null and undefined inputs safely", async () => {
       expect(await verifyPassword("", "")).toBe(false);
-      expect(await verifyPassword(null as any, "hash")).toBe(false);
-      expect(await verifyPassword("password", null as any)).toBe(false);
-      expect(await verifyPassword(undefined as any, "hash")).toBe(false);
+      expect(await verifyPassword(null as unknown as string, "hash")).toBe(false);
+      expect(await verifyPassword("password", null as unknown as string)).toBe(false);
+      expect(await verifyPassword(undefined as unknown as string, "hash")).toBe(false);
 
       expect(verifyToken("", "hash")).toBe(false);
       expect(verifyToken("token", "")).toBe(false);
-      expect(verifyToken(null as any, "hash")).toBe(false);
+      expect(verifyToken(null as unknown as string, "hash")).toBe(false);
     });
 
     it("should handle extremely long inputs", async () => {
@@ -368,7 +368,7 @@ describe("Password Security", () => {
 
     it("should resist memory-based attacks", () => {
       const sensitiveData = "SuperSecretPassword123!";
-      hashPassword(sensitiveData);
+      void hashPassword(sensitiveData);
 
       expect(true).toBe(true);
     });
@@ -408,8 +408,8 @@ describe("Password Security", () => {
       const start = Date.now();
 
       const promises = Array.from({ length: concurrentOps }, async (_, i) => {
-        const hash = await hashPassword(password + i);
-        return verifyPassword(password + i, hash);
+        const hash = await hashPassword(password + i.toString());
+        return verifyPassword(password + i.toString(), hash);
       });
 
       const results = await Promise.all(promises);
