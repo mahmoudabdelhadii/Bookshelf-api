@@ -15,12 +15,10 @@ import {
 export const subjectRegistry = new OpenAPIRegistry();
 export const subjectRouter: Router = Router();
 
-
 subjectRegistry.register("Subject", subjectSchema);
 subjectRegistry.register("CreateSubject", createSubjectSchema);
 subjectRegistry.register("UpdateSubject", updateSubjectSchema);
 subjectRegistry.register("SubjectWithChildren", subjectWithChildrenSchema);
-
 
 subjectRegistry.registerPath({
   method: "get",
@@ -29,7 +27,6 @@ subjectRegistry.registerPath({
   responses: createApiResponse(subjectArraySchema, "Subjects retrieved successfully"),
 });
 subjectRouter.get("/", subjectController.getSubjects);
-
 
 subjectRegistry.registerPath({
   method: "get",
@@ -41,7 +38,6 @@ subjectRegistry.registerPath({
   ),
 });
 subjectRouter.get("/hierarchy", subjectController.getSubjectHierarchy);
-
 
 subjectRegistry.registerPath({
   method: "post",
@@ -60,7 +56,6 @@ subjectRegistry.registerPath({
 });
 subjectRouter.post("/", subjectController.createSubject);
 
-
 subjectRegistry.registerPath({
   method: "get",
   path: "/subjects/{id}",
@@ -73,7 +68,6 @@ subjectRegistry.registerPath({
   responses: createApiResponse(subjectSchema, "Subject retrieved successfully"),
 });
 subjectRouter.get("/:id", subjectController.getSubject);
-
 
 subjectRegistry.registerPath({
   method: "patch",
@@ -94,7 +88,6 @@ subjectRegistry.registerPath({
   responses: createApiResponse(subjectSchema, "Subject updated successfully"),
 });
 subjectRouter.patch("/:id", subjectController.updateSubject);
-
 
 subjectRegistry.registerPath({
   method: "delete",

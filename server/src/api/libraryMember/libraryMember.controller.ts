@@ -98,7 +98,6 @@ class LibraryMemberController {
       return res.status(401).json({ success: false, message: "Authentication required" });
     }
 
-
     const membershipResponse = await LibraryMemberService.findUserInLibrary(req.drizzle, userId, libraryId);
 
     if (!membershipResponse.success || !membershipResponse.responseObject) {

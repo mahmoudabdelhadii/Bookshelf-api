@@ -263,7 +263,10 @@ export const requireOwnershipOrAdmin =
       return;
     }
 
-    const id = req.params[userIdField] ?? (req.body as Record<string, unknown>)?.[userIdField] ?? req.query[userIdField];
+    const id =
+      req.params[userIdField] ??
+      (req.body as Record<string, unknown>)?.[userIdField] ??
+      req.query[userIdField];
     if (!id) {
       res
         .status(StatusCodes.BAD_REQUEST)

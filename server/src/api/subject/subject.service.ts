@@ -48,7 +48,6 @@ export const SubjectService = {
         orderBy: [schema.subject.name],
       });
 
-
       const buildHierarchy = async (parentId: string): Promise<SubjectWithChildren[]> => {
         const children = await drizzle.query.subject.findMany({
           where: eq(schema.subject.parent, parentId),
@@ -103,7 +102,6 @@ export const SubjectService = {
           conflictError.statusCode,
         );
       }
-
 
       if (subjectData.parent) {
         const parentSubject = await drizzle.query.subject.findFirst({
@@ -164,7 +162,6 @@ export const SubjectService = {
           );
         }
       }
-
 
       if (subjectData.parent) {
         if (subjectData.parent === id) {
@@ -227,7 +224,6 @@ export const SubjectService = {
         throw new NotFoundError("Subject not found");
       }
 
-
       const booksCount = await drizzle
         .select({ count: sql<number>`count(*)` })
         .from(schema.book)
@@ -241,7 +237,6 @@ export const SubjectService = {
           conflictError.statusCode,
         );
       }
-
 
       const childrenCount = await drizzle
         .select({ count: sql<number>`count(*)` })

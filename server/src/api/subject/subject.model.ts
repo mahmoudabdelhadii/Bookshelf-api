@@ -4,7 +4,6 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-
 export const subjectSchema = z
   .object({
     id: idSchema,
@@ -56,7 +55,6 @@ export const updateSubjectSchema = createSubjectSchema
   .partial()
   .openapi({ description: "Subject update data" });
 
-
 export const getSubjectSchema = z
   .object({
     params: z.object({
@@ -65,10 +63,7 @@ export const getSubjectSchema = z
   })
   .openapi({ description: "Get subject by ID parameters" });
 
-
 export const subjectArraySchema = z.array(subjectSchema).openapi({ description: "Array of subjects" });
-
-
 
 export const subjectWithChildrenSchema = subjectSchema
   .extend({
@@ -86,7 +81,6 @@ export const subjectWithChildrenSchema = subjectSchema
     path: z.array(z.string()).optional().openapi({ description: "Path from root to this subject" }),
   })
   .openapi({ description: "Subject with nested children" });
-
 
 export const subjectWithStatsSchema = subjectSchema
   .extend({
@@ -110,7 +104,6 @@ export const subjectWithStatsSchema = subjectSchema
     childrenCount: z.number().int().min(0).optional().openapi({ description: "Number of child subjects" }),
   })
   .openapi({ description: "Subject with computed statistics" });
-
 
 export type Subject = z.infer<typeof subjectSchema>;
 export type CreateSubject = z.infer<typeof createSubjectSchema>;

@@ -138,7 +138,8 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             const email = profile.email as string;
 
             if (!email) {
-              done(new Error("No email provided by Apple")); return;
+              done(new Error("No email provided by Apple"));
+              return;
             }
 
             let user = await findUserByEmail(drizzle, email);
@@ -163,13 +164,14 @@ export function configureOAuthStrategies(drizzle: DrizzleClient) {
             }
 
             if (!user) {
-              done(new Error("Failed to create or find user")); return;
+              done(new Error("Failed to create or find user"));
+              return;
             }
 
             const authUser = await buildAuthUser(drizzle, user, "apple", profile.id as string);
-            done(null, authUser); 
+            done(null, authUser);
           } catch (err) {
-            done(err instanceof Error ? err : new Error("Unhandled error")); 
+            done(err instanceof Error ? err : new Error("Unhandled error"));
           }
         },
       ),
@@ -389,11 +391,7 @@ interface OAuthData {
 }
 
 export class OAuthService {
-  static async linkOAuthAccount(
-    drizzle: DrizzleClient,
-    userId: string,
-    oauthData: OAuthData,
-  ) {
+  static async linkOAuthAccount(drizzle: DrizzleClient, userId: string, oauthData: OAuthData) {
     const existingLink = await drizzle.query.oauthProfile.findFirst({
       where: (profile, { eq, and }) =>
         and(eq(profile.provider, oauthData.provider), eq(profile.providerId, oauthData.providerId)),

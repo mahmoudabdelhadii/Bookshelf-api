@@ -18,7 +18,9 @@ export async function initializeRedis(): Promise<ReturnType<typeof createClient>
     },
   });
 
-  redisClient.on("error", (err) => { logger.error(err, "Redis error"); });
+  redisClient.on("error", (err) => {
+    logger.error(err, "Redis error");
+  });
   await redisClient.connect();
   await redisClient.ping();
 

@@ -14,11 +14,9 @@ import {
 export const publisherRegistry = new OpenAPIRegistry();
 export const publisherRouter: Router = Router();
 
-
 publisherRegistry.register("Publisher", publisherSchema);
 publisherRegistry.register("CreatePublisher", createPublisherSchema);
 publisherRegistry.register("UpdatePublisher", updatePublisherSchema);
-
 
 publisherRegistry.registerPath({
   method: "get",
@@ -27,7 +25,6 @@ publisherRegistry.registerPath({
   responses: createApiResponse(publisherArraySchema, "Publishers retrieved successfully"),
 });
 publisherRouter.get("/", publisherController.getPublishers);
-
 
 publisherRegistry.registerPath({
   method: "post",
@@ -46,7 +43,6 @@ publisherRegistry.registerPath({
 });
 publisherRouter.post("/", publisherController.createPublisher);
 
-
 publisherRegistry.registerPath({
   method: "get",
   path: "/publishers/{id}",
@@ -59,7 +55,6 @@ publisherRegistry.registerPath({
   responses: createApiResponse(publisherSchema, "Publisher retrieved successfully"),
 });
 publisherRouter.get("/:id", publisherController.getPublisher);
-
 
 publisherRegistry.registerPath({
   method: "patch",
@@ -81,7 +76,6 @@ publisherRegistry.registerPath({
 });
 publisherRouter.patch("/:id", publisherController.updatePublisher);
 
-
 publisherRegistry.registerPath({
   method: "delete",
   path: "/publishers/{id}",
@@ -95,7 +89,6 @@ publisherRegistry.registerPath({
 });
 publisherRouter.delete("/:id", publisherController.deletePublisher);
 
-
 publisherRegistry.registerPath({
   method: "get",
   path: "/publishers/by-name/{name}",
@@ -108,7 +101,6 @@ publisherRegistry.registerPath({
   responses: createApiResponse(publisherSchema, "Publisher retrieved successfully"),
 });
 publisherRouter.get("/by-name/:name", publisherController.getPublisherByName);
-
 
 publisherRegistry.registerPath({
   method: "get",

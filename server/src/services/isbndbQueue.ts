@@ -39,7 +39,6 @@ class SimpleISBNDBQueue {
       callback,
     };
 
-
     if (priority === "high") {
       this.queue.unshift(item);
     } else {
@@ -69,7 +68,6 @@ class SimpleISBNDBQueue {
   }
 
   private async processItem(item: QueueItem): Promise<void> {
-
     const now = Date.now();
     const timeSinceLastCall = now - this.lastApiCall;
 
@@ -105,7 +103,6 @@ class SimpleISBNDBQueue {
     item.retries++;
 
     if (item.retries <= this.MAX_RETRIES) {
-
       setTimeout(() => {
         this.queue.unshift(item); // Add back to front for retry
       }, this.RETRY_DELAY_MS);
@@ -142,9 +139,7 @@ class SimpleISBNDBQueue {
   }
 }
 
-
 export const isbndbQueue = new SimpleISBNDBQueue();
-
 
 export function queueBookLookup(isbn: string, priority: "high" | "low" = "low"): Promise<Book> {
   return new Promise((resolve, reject) => {
@@ -158,7 +153,6 @@ export function queueBookLookup(isbn: string, priority: "high" | "low" = "low"):
   });
 }
 
-
 export function queueAuthorLookup(name: string, priority: "high" | "low" = "low"): Promise<Author> {
   return new Promise((resolve, reject) => {
     isbndbQueue.addToQueue("author", { name }, priority, (error, result) => {
@@ -170,7 +164,6 @@ export function queueAuthorLookup(name: string, priority: "high" | "low" = "low"
     });
   });
 }
-
 
 export function queuePublisherLookup(name: string, priority: "high" | "low" = "low"): Promise<Publisher> {
   return new Promise((resolve, reject) => {

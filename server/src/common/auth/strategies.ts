@@ -21,7 +21,6 @@ export interface AuthUser {
   passwordHash?: string;
 }
 
-
 export function configurePassport(drizzle: DrizzleClient) {
   passport.use(
     new LocalStrategy(
@@ -134,10 +133,8 @@ export function configurePassport(drizzle: DrizzleClient) {
           };
 
           done(null, authUser);
-          
         } catch (err) {
           done(err);
-          
         }
       },
     ),

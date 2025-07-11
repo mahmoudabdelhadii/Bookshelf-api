@@ -285,7 +285,6 @@ class BooksController {
     }
   };
 
-
   public queueBookLookup: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { isbn } = req.params;
@@ -299,7 +298,6 @@ class BooksController {
     }
 
     try {
-
       const result = await BookLookupService.getBookByISBN(drizzle, isbn, false);
 
       return handleServiceResponse(
@@ -316,7 +314,6 @@ class BooksController {
       );
     }
   };
-
 
   public getQueueStatus: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
@@ -340,7 +337,6 @@ class BooksController {
     }
   };
 
-
   public searchBooksWithCache: RequestHandler = async (req, res) => {
     const drizzle = req.drizzle;
     const { query } = req.params;
@@ -354,7 +350,6 @@ class BooksController {
     }
 
     try {
-
       const cachedResults = await BookLookupService.searchCachedBooks(drizzle, query);
 
       if (cachedResults.length > 0) {
@@ -367,7 +362,6 @@ class BooksController {
           res,
         );
       }
-
 
       if (useQueue === "true") {
         const serviceResponse = await BookService.searchAll(drizzle, "books", 1, 20, {
@@ -406,7 +400,6 @@ class BooksController {
     }
   };
 
-
   public getISBNServiceStatus: RequestHandler = async (req, res) => {
     try {
       const config = isbnService.getConfig();
@@ -426,7 +419,6 @@ class BooksController {
       );
     }
   };
-
 
   public getBookByISBNDirect: RequestHandler = async (req, res) => {
     const { isbn } = req.params;

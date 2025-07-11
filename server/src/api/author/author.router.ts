@@ -1,11 +1,6 @@
 import { Router } from "express";
 import { authorController } from "./author.controller.js";
-import {
-  authorSchema,
-  createAuthorSchema,
-  updateAuthorSchema,
-  authorArraySchema,
-} from "./author.model.js";
+import { authorSchema, createAuthorSchema, updateAuthorSchema, authorArraySchema } from "./author.model.js";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders.js";
 import z from "zod";
@@ -122,4 +117,3 @@ authorRegistry.registerPath({
   responses: createApiResponse(authorArraySchema, "Authors search completed"),
 });
 authorRouter.get("/search/:query", authorController.searchAuthors);
-

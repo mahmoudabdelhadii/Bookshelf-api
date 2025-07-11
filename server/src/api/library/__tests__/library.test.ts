@@ -10,7 +10,6 @@ import type { ServiceResponse } from "../../../common/models/serviceResponse.js"
 import type { Library, CreateLibrary, UpdateLibrary } from "../library.model.js";
 import { setupTestDb } from "database/test-utils";
 
-
 const mockLibraryService = {
   findAll: vi.fn(),
   findById: vi.fn(),
@@ -18,7 +17,6 @@ const mockLibraryService = {
   update: vi.fn(),
   delete: vi.fn(),
 };
-
 
 Object.assign(LibraryService, mockLibraryService);
 
@@ -44,7 +42,6 @@ describe("Library API endpoints", () => {
     app = express();
     app.use(express.json());
 
-    
     app.use((req: any, res, next) => {
       req.drizzle = testDb;
       next();
@@ -336,4 +333,3 @@ describe("Library API endpoints", () => {
     });
   });
 });
-

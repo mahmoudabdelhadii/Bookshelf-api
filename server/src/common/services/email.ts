@@ -2,8 +2,6 @@ import { createTransport } from "nodemailer";
 import type { Transporter } from "nodemailer";
 import { env } from "../utils/envConfig.js";
 
-
-
 export interface EmailOptions {
   to: string;
   subject: string;
@@ -46,7 +44,6 @@ class EmailService {
   private transporter: Transporter | null = null;
   private isConfigured = false;
 
-  
   async initialize(): Promise<void> {
     try {
       if (!env.EMAIL_USER || !env.EMAIL_PASS) {
@@ -76,7 +73,6 @@ class EmailService {
     }
   }
 
-  
   async sendEmail(options: EmailOptions): Promise<boolean> {
     if (!this.isConfigured || !this.transporter) {
       return false;
@@ -109,7 +105,6 @@ class EmailService {
     return false;
   }
 
-  
   async sendEmailVerification(data: EmailVerificationData): Promise<boolean> {
     const html = this.getEmailVerificationTemplate(data);
 
@@ -120,7 +115,6 @@ class EmailService {
     });
   }
 
-  
   async sendPasswordReset(data: PasswordResetData): Promise<boolean> {
     const html = this.getPasswordResetTemplate(data);
 
@@ -131,7 +125,6 @@ class EmailService {
     });
   }
 
-  
   async sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean> {
     const html = this.getWelcomeTemplate(data);
 
@@ -142,7 +135,6 @@ class EmailService {
     });
   }
 
-  
   async sendSecurityAlert(data: SecurityAlertData): Promise<boolean> {
     const html = this.getSecurityAlertTemplate(data);
 
@@ -153,7 +145,6 @@ class EmailService {
     });
   }
 
-  
   private getEmailVerificationTemplate(data: EmailVerificationData): string {
     return `
 <!DOCTYPE html>
@@ -208,7 +199,6 @@ class EmailService {
 </html>`;
   }
 
-  
   private getPasswordResetTemplate(data: PasswordResetData): string {
     return `
 <!DOCTYPE html>
@@ -273,7 +263,6 @@ class EmailService {
 </html>`;
   }
 
-  
   private getWelcomeTemplate(data: WelcomeEmailData): string {
     return `
 <!DOCTYPE html>
@@ -343,7 +332,6 @@ class EmailService {
 </html>`;
   }
 
-  
   private getSecurityAlertTemplate(data: SecurityAlertData): string {
     return `
 <!DOCTYPE html>
@@ -408,7 +396,6 @@ class EmailService {
 </html>`;
   }
 
-  
   private htmlToText(html: string): string {
     return html
       .replace(/<[^>]+>/g, "")
@@ -422,7 +409,6 @@ class EmailService {
       .trim();
   }
 
-  
   async testConnection(): Promise<boolean> {
     if (!this.transporter) {
       return false;
@@ -436,7 +422,6 @@ class EmailService {
     }
   }
 
-  
   async sendTestEmail(to: string): Promise<boolean> {
     return this.sendEmail({
       to,
@@ -450,7 +435,6 @@ class EmailService {
     });
   }
 
-  
   getStatus(): {
     configured: boolean;
     transporter: boolean;

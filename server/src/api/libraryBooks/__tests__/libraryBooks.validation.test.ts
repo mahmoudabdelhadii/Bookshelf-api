@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { ZodError } from "zod";
 
-import { 
-  libraryBookSchema, 
+import {
+  libraryBookSchema,
   libraryBookWithDetailsSchema,
-  createLibraryBookSchema, 
+  createLibraryBookSchema,
   updateLibraryBookSchema,
   getLibraryBookSchema,
-  getLibraryBooksSchema
+  getLibraryBooksSchema,
 } from "../libraryBooks.model.js";
 
 describe("LibraryBooks Validation Schemas", () => {
@@ -77,7 +77,7 @@ describe("LibraryBooks Validation Schemas", () => {
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
         quantity: 1,
-        shelfLocation: "a".repeat(101), 
+        shelfLocation: "a".repeat(101),
         addedAt: new Date(),
         updatedAt: new Date(),
       };
@@ -91,7 +91,7 @@ describe("LibraryBooks Validation Schemas", () => {
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
         quantity: 1,
-        condition: "a".repeat(51), 
+        condition: "a".repeat(51),
         addedAt: new Date(),
         updatedAt: new Date(),
       };
@@ -191,7 +191,6 @@ describe("LibraryBooks Validation Schemas", () => {
     it("should reject create data with missing required fields", () => {
       const invalidCreateData = {
         libraryId: "lib-123e4567-e89b-12d3-a456-426614174000",
-        
       };
 
       expect(() => createLibraryBookSchema.parse(invalidCreateData)).toThrow(ZodError);
@@ -294,7 +293,7 @@ describe("LibraryBooks Validation Schemas", () => {
       const validCreateData = {
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
-        shelfLocation: "a".repeat(100), 
+        shelfLocation: "a".repeat(100),
       };
 
       const result = createLibraryBookSchema.parse(validCreateData);
@@ -305,7 +304,7 @@ describe("LibraryBooks Validation Schemas", () => {
       const validCreateData = {
         libraryId: "123e4567-e89b-12d3-a456-426614174000",
         bookId: "123e4567-e89b-12d3-a456-426614174000",
-        condition: "a".repeat(50), 
+        condition: "a".repeat(50),
       };
 
       const result = createLibraryBookSchema.parse(validCreateData);

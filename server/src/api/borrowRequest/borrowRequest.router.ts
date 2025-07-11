@@ -15,12 +15,10 @@ import {
 export const borrowRequestRegistry = new OpenAPIRegistry();
 export const borrowRequestRouter: Router = Router();
 
-
 borrowRequestRegistry.register("BorrowRequest", borrowRequestSchema);
 borrowRequestRegistry.register("CreateBorrowRequest", createBorrowRequestSchema);
 borrowRequestRegistry.register("UpdateBorrowRequest", updateBorrowRequestSchema);
 borrowRequestRegistry.register("BorrowRequestWithDetails", borrowRequestWithDetailsSchema);
-
 
 borrowRequestRegistry.registerPath({
   method: "get",
@@ -39,7 +37,6 @@ borrowRequestRegistry.registerPath({
 });
 borrowRequestRouter.get("/", borrowRequestController.getBorrowRequests);
 
-
 borrowRequestRegistry.registerPath({
   method: "post",
   path: "/borrow-requests",
@@ -56,7 +53,6 @@ borrowRequestRegistry.registerPath({
   responses: createApiResponse(borrowRequestSchema, "Borrow request created successfully"),
 });
 borrowRequestRouter.post("/", borrowRequestController.createBorrowRequest);
-
 
 borrowRequestRegistry.registerPath({
   method: "get",
@@ -83,7 +79,6 @@ borrowRequestRegistry.registerPath({
 });
 borrowRequestRouter.get("/stats", borrowRequestController.getBorrowRequestStats);
 
-
 borrowRequestRegistry.registerPath({
   method: "post",
   path: "/borrow-requests/mark-overdue",
@@ -94,7 +89,6 @@ borrowRequestRegistry.registerPath({
   ),
 });
 borrowRequestRouter.post("/mark-overdue", borrowRequestController.markOverdueRequests);
-
 
 borrowRequestRegistry.registerPath({
   method: "get",
@@ -116,7 +110,6 @@ borrowRequestRegistry.registerPath({
 });
 borrowRequestRouter.get("/user/:userId", borrowRequestController.getUserBorrowRequests);
 
-
 borrowRequestRegistry.registerPath({
   method: "get",
   path: "/borrow-requests/library/{libraryId}",
@@ -137,7 +130,6 @@ borrowRequestRegistry.registerPath({
 });
 borrowRequestRouter.get("/library/:libraryId", borrowRequestController.getLibraryBorrowRequests);
 
-
 borrowRequestRegistry.registerPath({
   method: "get",
   path: "/borrow-requests/{id}",
@@ -150,7 +142,6 @@ borrowRequestRegistry.registerPath({
   responses: createApiResponse(borrowRequestWithDetailsSchema, "Borrow request retrieved successfully"),
 });
 borrowRequestRouter.get("/:id", borrowRequestController.getBorrowRequest);
-
 
 borrowRequestRegistry.registerPath({
   method: "patch",
@@ -172,7 +163,6 @@ borrowRequestRegistry.registerPath({
 });
 borrowRequestRouter.patch("/:id", borrowRequestController.updateBorrowRequest);
 
-
 borrowRequestRegistry.registerPath({
   method: "delete",
   path: "/borrow-requests/{id}",
@@ -185,7 +175,6 @@ borrowRequestRegistry.registerPath({
   responses: createApiResponse(z.null(), "Borrow request deleted successfully"),
 });
 borrowRequestRouter.delete("/:id", borrowRequestController.deleteBorrowRequest);
-
 
 borrowRequestRegistry.registerPath({
   method: "post",
@@ -209,7 +198,6 @@ borrowRequestRegistry.registerPath({
 });
 borrowRequestRouter.post("/:id/approve", borrowRequestController.approveBorrowRequest);
 
-
 borrowRequestRegistry.registerPath({
   method: "post",
   path: "/borrow-requests/{id}/reject",
@@ -232,7 +220,6 @@ borrowRequestRegistry.registerPath({
 });
 borrowRequestRouter.post("/:id/reject", borrowRequestController.rejectBorrowRequest);
 
-
 borrowRequestRegistry.registerPath({
   method: "post",
   path: "/borrow-requests/{id}/borrow",
@@ -245,7 +232,6 @@ borrowRequestRegistry.registerPath({
   responses: createApiResponse(borrowRequestSchema, "Book borrowed successfully"),
 });
 borrowRequestRouter.post("/:id/borrow", borrowRequestController.borrowBook);
-
 
 borrowRequestRegistry.registerPath({
   method: "post",

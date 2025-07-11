@@ -3,7 +3,6 @@ import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 
 extendZodWithOpenApi(z);
 
-
 export const statisticItemSchema = z
   .object({
     label: z.string().openapi({ description: "Label for the statistic" }),
@@ -16,7 +15,6 @@ export const statisticItemSchema = z
       .openapi({ description: "Percentage change from previous period" }),
   })
   .openapi({ description: "Individual statistic item" });
-
 
 export const timeBasedStatisticSchema = z
   .object({
@@ -33,7 +31,6 @@ export const timeSeriesSchema = z
     unit: z.string().optional().openapi({ description: "Unit of measurement" }),
   })
   .openapi({ description: "Time series statistics" });
-
 
 export const libraryStatisticsSchema = z
   .object({
@@ -70,7 +67,6 @@ export const libraryStatisticsSchema = z
   })
   .openapi({ description: "Comprehensive library statistics" });
 
-
 export const userStatisticsSchema = z
   .object({
     totalBorrowedBooks: z.number().openapi({ description: "Total books borrowed by user" }),
@@ -105,7 +101,6 @@ export const userStatisticsSchema = z
       .openapi({ description: "Book completion rate percentage" }),
   })
   .openapi({ description: "User reading statistics" });
-
 
 export const systemStatisticsSchema = z
   .object({
@@ -144,7 +139,6 @@ export const systemStatisticsSchema = z
   })
   .openapi({ description: "System-wide statistics" });
 
-
 export const bookStatisticsSchema = z
   .object({
     totalCopies: z.number().openapi({ description: "Total copies across all libraries" }),
@@ -167,7 +161,6 @@ export const bookStatisticsSchema = z
       .openapi({ description: "Availability across libraries" }),
   })
   .openapi({ description: "Book-specific statistics" });
-
 
 export const authorStatisticsSchema = z
   .object({
@@ -210,7 +203,6 @@ export const authorStatisticsSchema = z
   })
   .openapi({ description: "Author statistics" });
 
-
 export const publisherStatisticsSchema = z
   .object({
     totalBooks: z.number().openapi({ description: "Total books published" }),
@@ -243,7 +235,6 @@ export const publisherStatisticsSchema = z
       .openapi({ description: "Books by genre/subject" }),
   })
   .openapi({ description: "Publisher statistics" });
-
 
 export const analyticsDashboardSchema = z
   .object({
@@ -304,7 +295,6 @@ export const analyticsDashboardSchema = z
   })
   .openapi({ description: "Analytics dashboard data" });
 
-
 export const statisticalSummarySchema = z
   .object({
     count: z.number().openapi({ description: "Total count" }),
@@ -325,7 +315,6 @@ export const statisticalSummarySchema = z
       .openapi({ description: "Percentile values" }),
   })
   .openapi({ description: "Statistical summary" });
-
 
 export const reportConfigSchema = z
   .object({
@@ -352,7 +341,6 @@ export const reportConfigSchema = z
     }),
   })
   .openapi({ description: "Report configuration" });
-
 
 export type StatisticItem = z.infer<typeof statisticItemSchema>;
 export type TimeBasedStatistic = z.infer<typeof timeBasedStatisticSchema>;

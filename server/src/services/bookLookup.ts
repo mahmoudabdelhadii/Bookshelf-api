@@ -3,7 +3,6 @@ import { isbnService } from "./isbnService.js";
 import type { Book as ISBNdbBook } from "../common/types/shared/isbndbAPI.js";
 
 export const BookLookupService = {
-
   getBookByISBN: async (drizzle: DrizzleClient, isbn: string, forceRefresh = false) => {
     try {
       const cleanISBN = isbn.replace(/[^0-9X]/gi, "");
@@ -36,7 +35,6 @@ export const BookLookupService = {
         }
       }
 
-
       if (isbnService.isEnabled()) {
         try {
           logger.info("Fetching book from ISBNDB: %s", cleanISBN);
@@ -58,10 +56,8 @@ export const BookLookupService = {
     }
   },
 
-
   cacheBook: async (drizzle: DrizzleClient, isbndbBook: NonNullable<ISBNdbBook["book"]>): Promise<void> => {
     try {
-
       let authorId: string;
       let publisherId: string;
 
@@ -77,7 +73,6 @@ export const BookLookupService = {
         publisherId = await BookLookupService.ensurePublisher(drizzle, "Unknown Publisher");
       }
 
-
       let existingBook = null;
       if (isbndbBook.isbn) {
         existingBook = await drizzle.query.book.findFirst({
@@ -86,7 +81,6 @@ export const BookLookupService = {
       }
 
       if (!existingBook) {
-
         await drizzle.insert(schema.book).values({
           isbn: isbndbBook.isbn ?? null,
           isbn13: isbndbBook.isbn13 ?? null,
@@ -101,7 +95,6 @@ export const BookLookupService = {
 
         logger.info("Cached book in database: %s", isbndbBook.isbn);
       } else if (isbndbBook.isbn) {
-
         await drizzle
           .update(schema.book)
           .set({
@@ -124,10 +117,8 @@ export const BookLookupService = {
     }
   },
 
-
   ensureAuthor: async (drizzle: DrizzleClient, authorName: string): Promise<string> => {
     try {
-
       const existingAuthor = await drizzle.query.author.findFirst({
         where: eq(schema.author.name, authorName),
       });
@@ -135,7 +126,6 @@ export const BookLookupService = {
       if (existingAuthor) {
         return existingAuthor.id;
       }
-
 
       const [newAuthor] = await drizzle
         .insert(schema.author)
@@ -151,10 +141,8 @@ export const BookLookupService = {
     }
   },
 
-
   ensurePublisher: async (drizzle: DrizzleClient, publisherName: string): Promise<string> => {
     try {
-
       const existingPublisher = await drizzle.query.publisher.findFirst({
         where: eq(schema.publisher.name, publisherName),
       });
@@ -162,7 +150,6 @@ export const BookLookupService = {
       if (existingPublisher) {
         return existingPublisher.id;
       }
-
 
       const [newPublisher] = await drizzle
         .insert(schema.publisher)
@@ -177,7 +164,6 @@ export const BookLookupService = {
       throw err;
     }
   },
-
 
   searchCachedBooks: async (drizzle: DrizzleClient, query: string, limit = 20) => {
     try {
@@ -209,7 +195,6 @@ export const BookLookupService = {
       return [];
     }
   },
-
 
   searchBooksViaISBNdb: async (
     query: string,
@@ -255,7 +240,6 @@ export const BookLookupService = {
       return [];
     }
   },
-
 
   getCacheStats: async (
     drizzle: DrizzleClient,

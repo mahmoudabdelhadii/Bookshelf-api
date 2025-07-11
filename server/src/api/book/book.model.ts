@@ -4,7 +4,6 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-
 const titleSchema = z
   .string()
   .min(2, "Title must be at least 2 characters long")
@@ -31,7 +30,6 @@ const publishedYearSchema = z
   .optional()
   .openapi({ description: "The year the book was published" });
 
-
 export const bookSchema = z
   .object({
     id: idSchema,
@@ -50,7 +48,14 @@ export const bookSchema = z
     publisherId: idSchema.openapi({ description: "Publisher ID" }),
     subjectId: idSchema.nullable().optional().openapi({ description: "Subject ID" }),
     genre: z.string().nullable().optional().openapi({ description: "Book genre" }),
-    publishedYear: z.number().int().min(0).max(new Date().getFullYear()).nullable().optional().openapi({ description: "Year the book was published" }),
+    publishedYear: z
+      .number()
+      .int()
+      .min(0)
+      .max(new Date().getFullYear())
+      .nullable()
+      .optional()
+      .openapi({ description: "Year the book was published" }),
     edition: z.string().nullable().optional().openapi({ description: "Book edition" }),
     pages: z.number().int().min(0).nullable().optional().openapi({ description: "Number of pages" }),
     overview: z.string().nullable().optional().openapi({ description: "Book overview" }),
@@ -68,7 +73,6 @@ export const getBookSchema = z
     }),
   })
   .openapi({ description: "Get book by ID parameters" });
-
 
 export const createBookSchema = z
   .object({
@@ -90,7 +94,6 @@ export const createBookSchema = z
   })
   .openapi({ description: "Book creation data" });
 
-
 export const createBookWithIdsSchema = z
   .object({
     title: z
@@ -108,7 +111,13 @@ export const createBookWithIdsSchema = z
     publisherId: idSchema.openapi({ description: "Publisher ID" }),
     subjectId: idSchema.optional().openapi({ description: "Subject ID" }),
     genre: z.string().optional().openapi({ description: "Book genre" }),
-    publishedYear: z.number().int().min(0).max(new Date().getFullYear()).optional().openapi({ description: "Year the book was published" }),
+    publishedYear: z
+      .number()
+      .int()
+      .min(0)
+      .max(new Date().getFullYear())
+      .optional()
+      .openapi({ description: "Year the book was published" }),
     edition: z.string().optional().openapi({ description: "Book edition" }),
     pages: z.number().int().min(0).optional().openapi({ description: "Number of pages" }),
     overview: z.string().optional().openapi({ description: "Book overview" }),
@@ -125,7 +134,6 @@ export const createBooksBulkSchema = z
   .min(1)
   .max(100)
   .openapi({ description: "Array of books for bulk creation" });
-
 
 export const bookWithRelationsSchema = bookSchema
   .extend({
@@ -155,7 +163,6 @@ export const bookWithRelationsSchema = bookSchema
   })
   .openapi({ description: "Book with related entity details" });
 
-
 export const bookWithStatsSchema = bookWithRelationsSchema
   .extend({
     totalCopies: z.number().int().min(0).openapi({ description: "Total copies across all libraries" }),
@@ -181,7 +188,6 @@ export const bookWithStatsSchema = bookWithRelationsSchema
       .openapi({ description: "Libraries where this book is most popular" }),
   })
   .openapi({ description: "Book with computed statistics" });
-
 
 export type Book = z.infer<typeof bookSchema>;
 export type CreateBook = z.infer<typeof createBookSchema>;

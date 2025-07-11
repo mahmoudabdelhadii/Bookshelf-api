@@ -10,7 +10,6 @@ const usernameSchema = z
   .max(50)
   .openapi({ description: "User's unique username" });
 
-
 export const userSchema = z
   .object({
     id: idSchema,
@@ -55,7 +54,6 @@ export const updateUserSchema = z
     lastName: nameSchema.optional(),
   })
   .openapi({ description: "User update data" });
-
 
 export type User = z.infer<typeof userSchema>;
 export type CreateUser = z.infer<typeof createUserSchema>;
