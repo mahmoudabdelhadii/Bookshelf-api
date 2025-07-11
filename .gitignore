@@ -37,3 +37,8 @@ node_modules/
 
 # Docker
 .dockerignore
+
+terraform/terraform.tfvars
+terraform/.terraform
+terraform/.terraform.lock.hcl
+
