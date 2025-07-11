@@ -2,9 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: ["master"]
-  pull_request:
-    branches: ["master"]
+    branches: [main]
 
 jobs:
   build:
@@ -13,26 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Login step only executed for pushes to main
       - name: Login to GitHub Container Registry
-        if: github.ref == 'refs/heads/master'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_Token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Build and tag the production Docker image
-      - name: Build the Docker image
+      - name: Build and push Docker image
         run: |
-          docker build . --file Dockerfile --tag ghcr.io/${{ github.repository }}:${{ github.sha }}
-          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:latest
-          fi
-
-      # Push the production Docker image
-      - name: Push the Docker image
-        if: github.ref == 'refs/heads/master'
-        run: |
+          docker build . --file server/Dockerfile --tag ghcr.io/${{ github.repository }}:${{ github.sha }}
+          docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:latest
           docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
           docker push ghcr.io/${{ github.repository }}:latest

@@ -1,4 +1,4 @@
-name: TypeScript CI
+name: Code Quality
 on:
   push:
     branches:
@@ -70,8 +70,35 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:45432/kitab
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/kitab
+      REDIS_URL: redis://localhost:6379
     if: github.event.pull_request.draft == false
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: kitab
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -87,13 +114,7 @@ jobs:
       - name: Install node_modules
         run: npm ci
       - name: Run tests
-        run: |
-          just start-e2e postgres
-          just tstest
-      - name: Docker teardown
-        if: ${{ always() }}
-        run: |
-          just stop-e2e
+        run: just tstest
   build:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false

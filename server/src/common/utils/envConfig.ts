@@ -48,9 +48,6 @@ const envSchema = z.object({
   AUTH_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(5),
   AUTH_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000),
 
-  TWO_FA_ISSUER: z.string().default("Bookshelf API"),
-  TWO_FA_WINDOW: z.coerce.number().int().positive().default(2),
-
   EMAIL_SERVICE: z.string().default("gmail"),
   EMAIL_HOST: z.string().default("smtp.gmail.com"),
   EMAIL_PORT: z.coerce.number().int().positive().default(587),
