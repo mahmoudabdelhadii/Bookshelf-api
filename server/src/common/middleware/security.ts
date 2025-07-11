@@ -20,7 +20,7 @@ export function configureSecurityHeaders(app: Application): void {
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
           formAction: ["'self'"],
-          upgradeInsecureRequests: env.isProduction ? [] : undefined,
+          upgradeInsecureRequests: env.isProduction ? [] : null,
         },
         reportOnly: !env.isProduction, // Report only in development
       },
@@ -100,7 +100,7 @@ function sanitizeObject(obj: Record<string, unknown>): void {
         .replace(/javascript:/gi, "")
         .replace(/on\w+\s*=/gi, "");
     } else if (typeof value === "object" && value !== null) {
-      sanitizeObject(value);
+      sanitizeObject(value as Record<string, unknown>);
     }
   }
 }

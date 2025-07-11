@@ -1,7 +1,7 @@
 
 
 
-FROM node:v22.9.0-alpine AS database-builder
+FROM node:22.9.0-alpine AS database-builder
 
 WORKDIR /workspace
 
@@ -19,7 +19,7 @@ COPY database ./database
 RUN npm run build -w database
 
 
-FROM node:v22.9.0-alpine AS database
+FROM node:22.9.0-alpine AS database
 
 WORKDIR /workspace
 
@@ -33,7 +33,7 @@ ENTRYPOINT ["npm", "run", "deploy", "-w", "database"]
 
 
 
-FROM node:v22.9.0-alpine AS server-builder
+FROM node:22.9.0-alpine AS server-builder
 
 WORKDIR /workspace
 
@@ -56,7 +56,7 @@ RUN npm run build -w database
 RUN npm run build -w server
 
 
-FROM node:v22.9.0-alpine AS server
+FROM node:22.9.0-alpine AS server
 
 WORKDIR /workspace
 
@@ -75,4 +75,4 @@ ENV NODE_ENV=production
 EXPOSE 8080
 
 
-ENTRYPOINT ["npm", "start", "-w", "server"]
+ENTRYPOINT ["npm", "run", "start", "-w", "server"]

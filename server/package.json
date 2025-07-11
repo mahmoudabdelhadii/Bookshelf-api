@@ -18,15 +18,9 @@
     "clean": "tsc --build --clean",
     "generate-swagger": "NODE_ENV=test tsx -r dotenv/config src/api-docs/exportOpenApi.ts",
     "generate-types": "npx swagger-typescript-api generate --path ./src/isbndbSwagger.json --output src/common/types/shared/ --name isbndbApi.ts",
-    "build": "tsc --build .",
-    "start": "node build/src/index.js",
+    "build": "tsup",
+    "start": "node dist/index.js",
     "test": "vitest run",
-    "test:auth": "tsx src/tests/auth-test-runner.ts",
-    "test:auth-integration": "tsx src/tests/auth-integration.test.ts",
-    "test:auth-unit": "vitest run src/common/auth src/api/auth src/common/middleware/__tests__/auth.test.ts src/common/middleware/__tests__/authorization.test.ts src/common/utils/__tests__/password-security.test.ts",
-    "test:redis": "tsx src/tests/redis-test-runner.ts",
-    "test:redis-connection": "tsx src/tests/redis-connection.test.ts",
-    "test:redis-integration": "tsx src/tests/session-middleware.integration.test.ts",
     "dev": "nodemon",
     "export": "NODE_ENV=test tsx -r dotenv/config src/private/export.ts"
   },
@@ -60,7 +54,6 @@
     "qrcode": "^1.5.4",
     "rate-limit-redis": "^4.2.1",
     "redis": "^5.5.6",
-    "speakeasy": "^2.0.0",
     "swagger-ui-express": "^5.0.0",
     "zod": "^3.22.4"
   },
@@ -76,7 +69,6 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/qrcode": "^1.5.5",
-    "@types/speakeasy": "^2.0.10",
     "@types/supertest": "^6.0.2",
     "@types/swagger-ui-express": "^4.1.6",
     "@vitest/coverage-v8": "3.2.0",
@@ -104,13 +96,12 @@
     ],
     "outDir": "dist",
     "format": [
-      "esm",
-      "cjs"
+      "esm"
     ],
     "target": "es2020",
     "sourcemap": true,
     "clean": true,
-    "dts": true,
+    "dts": false,
     "splitting": false,
     "skipNodeModulesBundle": true
   }
