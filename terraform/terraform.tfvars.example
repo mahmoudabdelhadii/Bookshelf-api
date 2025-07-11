@@ -1,26 +1,12 @@
 # AWS Configuration
 aws_region = "us-east-1"
-environment = "development"
 app_name = "bookshelf-api"
 
-# Network Configuration
-vpc_cidr = "10.0.0.0/16"
-
-# ECS Configuration
-ecs_cpu = "256"
-ecs_memory = "512"
-ecs_desired_count = 1
-container_port = 3000
-
-# Application Configuration
-health_check_path = "/health"
-log_retention_days = 7
-
 # Required: External Database (Neon PostgreSQL)
-database_url = "postgresql://username:password@host:5432/database?sslmode=require&channel_binding=require"
+database_url = "postgresql://username:password@host:5432/database?sslmode=require"
 
 # Required: External Redis (Upstash Redis)
-redis_url = "redis://default:your-redis-password@your-redis-host:6379"
+redis_url = "redis://default:password@host:6379"
 
 # Required Secrets (generate secure random values)
 jwt_secret = "your-super-secret-jwt-key-minimum-32-characters"
@@ -34,12 +20,6 @@ email_pass = ""
 # Optional: Google OAuth Configuration
 google_client_id = ""
 google_client_secret = ""
-
-# Optional: Apple OAuth Configuration
-apple_client_id = ""
-apple_team_id = ""
-apple_key_id = ""
-apple_private_key = ""
 
 # Optional: External APIs
 isbndb_api_key = ""
