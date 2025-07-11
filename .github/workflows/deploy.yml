@@ -12,7 +12,55 @@ env:
   ECS_TASK_DEFINITION: bookshelf-api
 
 jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::637423485999:role/GitHubActionsRole
+        aws-region: ${{ env.AWS_REGION }}
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.5.0"
+    
+    - name: Terraform Format Check
+      run: terraform fmt -check
+      working-directory: ./terraform
+    
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+    
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+      working-directory: ./terraform
+      env:
+        TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+        TF_VAR_redis_url: ${{ secrets.REDIS_URL }}
+        TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+        TF_VAR_jwt_refresh_secret: ${{ secrets.JWT_REFRESH_SECRET }}
+        TF_VAR_session_secret: ${{ secrets.SESSION_SECRET }}
+        TF_VAR_email_user: ${{ secrets.EMAIL_USER }}
+        TF_VAR_email_pass: ${{ secrets.EMAIL_PASS }}
+        TF_VAR_google_client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
+        TF_VAR_google_client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        TF_VAR_isbndb_api_key: ${{ secrets.ISBNDB_API_KEY }}
+    
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+      working-directory: ./terraform
+
   deploy:
+    needs: terraform
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -38,8 +86,8 @@ jobs:
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build Docker image
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+        docker build -f server/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
         
         # Push images to ECR
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -47,22 +95,15 @@ jobs:
         
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
     
-    - name: Download task definition
+    - name: Update ECS service
       run: |
-        aws ecs describe-task-definition --task-definition $ECS_TASK_DEFINITION --query taskDefinition > task-definition.json
-    
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definition.json
-        container-name: ${{ env.ECR_REPOSITORY }}
-        image: ${{ steps.build-image.outputs.image }}
-    
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
+        aws ecs update-service \
+          --cluster $ECS_CLUSTER \
+          --service $ECS_SERVICE \
+          --force-new-deployment \
+          --no-cli-pager
+        
+        # Wait for service to be stable
+        aws ecs wait services-stable \
+          --cluster $ECS_CLUSTER \
+          --services $ECS_SERVICE
