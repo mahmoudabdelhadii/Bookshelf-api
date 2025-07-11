@@ -37,7 +37,6 @@ export interface VerificationResult {
   expired?: boolean;
 }
 
-
 export function generateAccessToken(
   payload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">,
 ): string {
@@ -72,7 +71,7 @@ export function generateRefreshToken(
   };
 
   return jwt.sign(tokenPayload, JWT_REFRESH_SECRET, options);
-} 
+}
 export function generateTokenPair(
   userPayload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud">,
 ): TokenPair {
@@ -89,7 +88,6 @@ export function generateTokenPair(
     refreshExpiresIn,
   };
 }
-
 
 export function verifyAccessToken(token: string): VerificationResult {
   try {
@@ -115,7 +113,6 @@ export function verifyAccessToken(token: string): VerificationResult {
   }
 }
 
-
 export function verifyRefreshToken(token: string): VerificationResult {
   try {
     const payload = jwt.verify(token, JWT_REFRESH_SECRET, {
@@ -140,7 +137,6 @@ export function verifyRefreshToken(token: string): VerificationResult {
   }
 }
 
-
 export function decodeToken(token: string): JwtPayload | null {
   try {
     return jwt.decode(token) as JwtPayload;
@@ -148,7 +144,6 @@ export function decodeToken(token: string): JwtPayload | null {
     return null;
   }
 }
-
 
 export function getTokenExpiration(token: string): Date | null {
   const decoded = decodeToken(token);
@@ -158,7 +153,6 @@ export function getTokenExpiration(token: string): Date | null {
   return new Date(decoded.exp * 1000);
 }
 
-
 export function isTokenExpired(token: string): boolean {
   const expiration = getTokenExpiration(token);
   if (!expiration) {
@@ -166,7 +160,6 @@ export function isTokenExpired(token: string): boolean {
   }
   return expiration < new Date();
 }
-
 
 export function extractTokenFromHeader(authHeader: string | undefined): string | null {
   if (!authHeader) {
@@ -181,11 +174,9 @@ export function extractTokenFromHeader(authHeader: string | undefined): string |
   return parts[1];
 }
 
-
 export function generateSessionId(): string {
   return crypto.randomBytes(32).toString("hex");
 }
-
 
 export function validateJwtConfig(): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -220,7 +211,6 @@ export function validateJwtConfig(): { isValid: boolean; errors: string[] } {
   };
 }
 
-
 function parseExpiration(expiration: string): number {
   const units: Record<string, number> = {
     s: 1,
@@ -241,14 +231,11 @@ function parseExpiration(expiration: string): number {
   return value * units[unit];
 }
 
-
 export function createTokenHash(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-
 export const TokenUtils = {
-  
   createTestToken(payload: Partial<JwtPayload>, type: "access" | "refresh" = "access"): string {
     const defaultPayload: Omit<JwtPayload, "type" | "iat" | "exp" | "iss" | "aud"> = {
       userId: "test-user-id",
@@ -264,7 +251,6 @@ export const TokenUtils = {
     return type === "access" ? generateAccessToken(fullPayload) : generateRefreshToken(fullPayload);
   },
 
-  
   createExpiredToken(payload: Partial<JwtPayload> = {}): string {
     const tokenPayload: Omit<JwtPayload, "iat" | "exp"> = {
       userId: "test-user-id",

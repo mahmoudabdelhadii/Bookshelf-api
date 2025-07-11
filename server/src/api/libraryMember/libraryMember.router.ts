@@ -15,13 +15,11 @@ import {
 export const libraryMemberRegistry = new OpenAPIRegistry();
 export const libraryMemberRouter: Router = Router();
 
-
 libraryMemberRegistry.register("LibraryMember", libraryMemberSchema);
 libraryMemberRegistry.register("CreateLibraryMember", createLibraryMemberSchema);
 libraryMemberRegistry.register("UpdateLibraryMember", updateLibraryMemberSchema);
 libraryMemberRegistry.register("LibraryMemberWithDetails", libraryMemberWithDetailsSchema);
 libraryMemberRegistry.register("LibraryMemberWithStats", libraryMemberWithStatsSchema);
-
 
 libraryMemberRegistry.registerPath({
   method: "get",
@@ -44,7 +42,6 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/", libraryMemberController.getLibraryMembers);
 
-
 libraryMemberRegistry.registerPath({
   method: "post",
   path: "/library-members",
@@ -61,7 +58,6 @@ libraryMemberRegistry.registerPath({
   responses: createApiResponse(libraryMemberSchema, "Library member created successfully"),
 });
 libraryMemberRouter.post("/", libraryMemberController.createLibraryMember);
-
 
 libraryMemberRegistry.registerPath({
   method: "get",
@@ -82,7 +78,6 @@ libraryMemberRegistry.registerPath({
   ),
 });
 libraryMemberRouter.get("/library/:libraryId", libraryMemberController.getLibraryMembersByLibrary);
-
 
 libraryMemberRegistry.registerPath({
   method: "get",
@@ -107,7 +102,6 @@ libraryMemberRegistry.registerPath({
   ),
 });
 libraryMemberRouter.get("/library/:libraryId/stats", libraryMemberController.getLibraryMemberStats);
-
 
 libraryMemberRegistry.registerPath({
   method: "post",
@@ -136,7 +130,6 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.post("/library/:libraryId/invite", libraryMemberController.inviteLibraryMember);
 
-
 libraryMemberRegistry.registerPath({
   method: "delete",
   path: "/library-members/library/{libraryId}/leave",
@@ -149,7 +142,6 @@ libraryMemberRegistry.registerPath({
   responses: createApiResponse(z.null(), "Left library successfully"),
 });
 libraryMemberRouter.delete("/library/:libraryId/leave", libraryMemberController.leaveLibrary);
-
 
 libraryMemberRegistry.registerPath({
   method: "get",
@@ -171,7 +163,6 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/user/:userId", libraryMemberController.getUserLibraryMemberships);
 
-
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members/user/{userId}/library/{libraryId}",
@@ -189,7 +180,6 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.get("/user/:userId/library/:libraryId", libraryMemberController.getUserInLibrary);
 
-
 libraryMemberRegistry.registerPath({
   method: "get",
   path: "/library-members/{id}",
@@ -202,7 +192,6 @@ libraryMemberRegistry.registerPath({
   responses: createApiResponse(libraryMemberWithDetailsSchema, "Library member retrieved successfully"),
 });
 libraryMemberRouter.get("/:id", libraryMemberController.getLibraryMember);
-
 
 libraryMemberRegistry.registerPath({
   method: "get",
@@ -219,7 +208,6 @@ libraryMemberRegistry.registerPath({
   ),
 });
 libraryMemberRouter.get("/:id/stats", libraryMemberController.getLibraryMemberWithStats);
-
 
 libraryMemberRegistry.registerPath({
   method: "patch",
@@ -241,7 +229,6 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.patch("/:id", libraryMemberController.updateLibraryMember);
 
-
 libraryMemberRegistry.registerPath({
   method: "delete",
   path: "/library-members/{id}",
@@ -254,7 +241,6 @@ libraryMemberRegistry.registerPath({
   responses: createApiResponse(z.null(), "Library member removed successfully"),
 });
 libraryMemberRouter.delete("/:id", libraryMemberController.removeLibraryMember);
-
 
 libraryMemberRegistry.registerPath({
   method: "post",
@@ -269,7 +255,6 @@ libraryMemberRegistry.registerPath({
 });
 libraryMemberRouter.post("/:id/activate", libraryMemberController.activateLibraryMember);
 
-
 libraryMemberRegistry.registerPath({
   method: "post",
   path: "/library-members/{id}/deactivate",
@@ -282,7 +267,6 @@ libraryMemberRegistry.registerPath({
   responses: createApiResponse(libraryMemberSchema, "Library member deactivated successfully"),
 });
 libraryMemberRouter.post("/:id/deactivate", libraryMemberController.deactivateLibraryMember);
-
 
 libraryMemberRegistry.registerPath({
   method: "patch",
@@ -307,7 +291,6 @@ libraryMemberRegistry.registerPath({
   responses: createApiResponse(libraryMemberSchema, "Member role updated successfully"),
 });
 libraryMemberRouter.patch("/:id/role", libraryMemberController.updateMemberRole);
-
 
 libraryMemberRegistry.registerPath({
   method: "patch",

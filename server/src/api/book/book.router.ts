@@ -207,7 +207,6 @@ booksRegistry.registerPath({
 });
 booksRouter.get("/search/:index", booksController.searchAll);
 
-
 booksRegistry.registerPath({
   method: "post",
   path: "/books/queue/{isbn}",
@@ -263,7 +262,6 @@ booksRegistry.registerPath({
   responses: createApiResponse(z.any(), "Search results with cache"),
 });
 booksRouter.get("/search-cached/:query", booksController.searchBooksWithCache);
-
 
 booksRegistry.registerPath({
   method: "get",

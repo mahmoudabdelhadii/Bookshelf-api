@@ -5,7 +5,6 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-
 export const libraryBookSchema = z
   .object({
     id: idSchema,
@@ -74,7 +73,6 @@ export const libraryBookWithDetailsArraySchema = z.array(libraryBookWithDetailsS
 export const errorMessageSchema = z.object({
   message: z.string(),
 });
-
 
 export type LibraryBook = z.infer<typeof libraryBookSchema>;
 export type CreateLibraryBook = z.infer<typeof createLibraryBookSchema>;

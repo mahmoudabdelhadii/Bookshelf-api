@@ -1,12 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { ZodError } from "zod";
 
-import { 
-  userSchema, 
-  createUserSchema, 
-  updateUserSchema,
-  GetUserSchema 
-} from "../user.model.js";
+import { userSchema, createUserSchema, updateUserSchema, GetUserSchema } from "../user.model.js";
 
 describe("User Validation Schemas", () => {
   describe("userSchema", () => {
@@ -220,7 +215,7 @@ describe("User Validation Schemas", () => {
     it("should handle boundary values for username length", () => {
       const validCreateData = {
         id: "123e4567-e89b-12d3-a456-426614174000",
-        username: "ab", 
+        username: "ab",
         email: "test@example.com",
         firstName: "John",
         lastName: "Doe",
@@ -233,7 +228,7 @@ describe("User Validation Schemas", () => {
     it("should handle maximum username length", () => {
       const validCreateData = {
         id: "123e4567-e89b-12d3-a456-426614174000",
-        username: "a".repeat(50), 
+        username: "a".repeat(50),
         email: "test@example.com",
         firstName: "John",
         lastName: "Doe",

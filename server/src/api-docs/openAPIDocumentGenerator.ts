@@ -26,7 +26,6 @@ export function generateOpenAPIDocument() {
     libraryMemberRegistry,
   ]);
 
-
   registry.registerComponent("securitySchemes", "bearerAuth", {
     type: "http",
     scheme: "bearer",

@@ -19,7 +19,7 @@ describe("Password utilities", () => {
 
       expect(hash).toBeDefined();
       expect(hash).not.toBe(password);
-      expect(hash.length).toBeGreaterThan(50); 
+      expect(hash.length).toBeGreaterThan(50);
     });
 
     it("should throw error for empty password", async () => {
@@ -40,7 +40,7 @@ describe("Password utilities", () => {
       const hash1 = await hashPassword(password);
       const hash2 = await hashPassword(password);
 
-      expect(hash1).not.toBe(hash2); 
+      expect(hash1).not.toBe(hash2);
     });
   });
 
@@ -155,21 +155,21 @@ describe("Password utilities", () => {
     it("should detect common patterns", () => {
       const result = evaluatePasswordStrength("Password123!");
 
-      expect(result.score).toBeLessThan(80); 
+      expect(result.score).toBeLessThan(80);
       expect(result.feedback).toContain("Password should not contain the word 'password'");
     });
 
     it("should detect repeated characters", () => {
       const result = evaluatePasswordStrength("Passsssword123!");
 
-      expect(result.score).toBeLessThan(90); 
+      expect(result.score).toBeLessThan(90);
       expect(result.feedback).toContain("Password should not contain repeated characters");
     });
 
     it("should detect common sequences", () => {
       const result = evaluatePasswordStrength("Password123abc!");
 
-      expect(result.score).toBeLessThan(90); 
+      expect(result.score).toBeLessThan(90);
       expect(result.feedback).toContain("Password should not contain common sequences");
     });
 
@@ -186,10 +186,10 @@ describe("Password utilities", () => {
       const password = generateSecurePassword();
 
       expect(password).toHaveLength(16);
-      expect(password).toMatch(/[A-Z]/); 
-      expect(password).toMatch(/[a-z]/); 
-      expect(password).toMatch(/\d/); 
-      expect(password).toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/); 
+      expect(password).toMatch(/[A-Z]/);
+      expect(password).toMatch(/[a-z]/);
+      expect(password).toMatch(/\d/);
+      expect(password).toMatch(/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/);
     });
 
     it("should generate password with custom length", () => {
@@ -222,14 +222,14 @@ describe("Password utilities", () => {
     it("should generate token with default length", () => {
       const token = generateSecureToken();
 
-      expect(token).toHaveLength(64); 
-      expect(token).toMatch(/^[a-f0-9]+$/); 
+      expect(token).toHaveLength(64);
+      expect(token).toMatch(/^[a-f0-9]+$/);
     });
 
     it("should generate token with custom length", () => {
       const token = generateSecureToken(16);
 
-      expect(token).toHaveLength(32); 
+      expect(token).toHaveLength(32);
     });
 
     it("should generate different tokens each time", () => {
@@ -276,7 +276,7 @@ describe("Password utilities", () => {
       expect(codes).toHaveLength(10);
       for (const code of codes) {
         expect(code).toHaveLength(8);
-        expect(code).toMatch(/^[A-F0-9]+$/); 
+        expect(code).toMatch(/^[A-F0-9]+$/);
       }
     });
 
@@ -309,11 +309,10 @@ describe("Password utilities", () => {
     it("should use constant-time comparison for tokens", () => {
       const token = "a".repeat(32);
       const hash = hashToken(token);
-      
-      
+
       const shortToken = "a".repeat(16);
       const longToken = "a".repeat(64);
-      
+
       expect(verifyToken(shortToken, hash)).toBe(false);
       expect(verifyToken(longToken, hash)).toBe(false);
     });

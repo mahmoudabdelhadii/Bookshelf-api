@@ -1,11 +1,6 @@
 import type { DrizzleClient } from "database";
 import { eq, schema } from "database";
-import {
-  ValidationError,
-  NotFoundError,
-  DatabaseError,
-  ConflictError,
-} from "../../errors.js";
+import { ValidationError, NotFoundError, DatabaseError, ConflictError } from "../../errors.js";
 import { ServiceResponse } from "../../common/models/serviceResponse.js";
 import type { User, CreateUser } from "./user.model.js";
 

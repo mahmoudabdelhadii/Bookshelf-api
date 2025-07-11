@@ -30,7 +30,6 @@ interface AuthRequest extends Request {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace AuthController {
-  
   export async function register(req: AuthRequest, res: Response) {
     try {
       const userData = req.body as RegisterRequest;
@@ -56,7 +55,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function login(req: AuthRequest, res: Response) {
     try {
       const credentials = req.body as LoginRequest;
@@ -98,7 +96,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function refreshToken(req: AuthRequest, res: Response) {
     try {
       const refreshTokenValue =
@@ -153,7 +150,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function logout(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
@@ -187,7 +183,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function requestPasswordReset(req: AuthRequest, res: Response) {
     try {
       const data = req.body as PasswordResetRequest;
@@ -212,7 +207,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function resetPassword(req: AuthRequest, res: Response) {
     try {
       const data = req.body as PasswordResetData;
@@ -238,7 +232,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function verifyEmail(req: AuthRequest, res: Response) {
     try {
       const data = req.body as EmailVerificationData;
@@ -263,7 +256,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function changePassword(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
@@ -299,7 +291,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function getProfile(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
@@ -330,7 +321,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function resendEmailVerification(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
@@ -370,7 +360,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function getUserSessions(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
@@ -413,7 +402,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function revokeSession(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
@@ -452,7 +440,6 @@ export namespace AuthController {
     }
   }
 
-  
   export async function revokeAllSessions(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
@@ -483,4 +470,3 @@ export namespace AuthController {
     }
   }
 }
-

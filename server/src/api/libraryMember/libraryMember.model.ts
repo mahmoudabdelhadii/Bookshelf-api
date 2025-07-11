@@ -4,7 +4,6 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-
 export const libraryMemberSchema = z
   .object({
     id: idSchema,
@@ -51,7 +50,6 @@ export const updateLibraryMemberSchema = z
   })
   .openapi({ description: "Library member update data" });
 
-
 export const getLibraryMemberSchema = z
   .object({
     params: z.object({
@@ -68,11 +66,9 @@ export const getLibraryMembersSchema = z
   })
   .openapi({ description: "Get library members by library ID parameters" });
 
-
 export const libraryMemberArraySchema = z
   .array(libraryMemberSchema)
   .openapi({ description: "Array of library members" });
-
 
 export const libraryMemberWithDetailsSchema = libraryMemberSchema
   .extend({
@@ -105,7 +101,6 @@ export const libraryMemberWithDetailsSchema = libraryMemberSchema
   })
   .openapi({ description: "Library member with detailed information" });
 
-
 export const libraryMemberWithStatsSchema = libraryMemberWithDetailsSchema
   .extend({
     borrowsCount: z.number().int().min(0).openapi({ description: "Number of books borrowed by this member" }),
@@ -119,7 +114,6 @@ export const libraryMemberWithStatsSchema = libraryMemberWithDetailsSchema
     lastActivity: z.date().nullable().optional().openapi({ description: "Last activity timestamp" }),
   })
   .openapi({ description: "Library member with activity statistics" });
-
 
 export type LibraryMember = z.infer<typeof libraryMemberSchema>;
 export type CreateLibraryMember = z.infer<typeof createLibraryMemberSchema>;

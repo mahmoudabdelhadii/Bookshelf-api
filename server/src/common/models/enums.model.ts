@@ -60,7 +60,6 @@ export const permissionEnum = z
   ])
   .openapi({ description: "Available permissions for library members" });
 
-
 export type UserRole = z.infer<typeof userRoleEnum>;
 export type LibraryMemberRole = z.infer<typeof libraryMemberRoleEnum>;
 export type BorrowRequestStatus = z.infer<typeof borrowRequestStatusEnum>;
@@ -71,7 +70,6 @@ export type ImportSource = z.infer<typeof importSourceEnum>;
 export type AuditAction = z.infer<typeof auditActionEnum>;
 export type NotificationType = z.infer<typeof notificationTypeEnum>;
 export type Permission = z.infer<typeof permissionEnum>;
-
 
 export const enums = {
   userRole: userRoleEnum,

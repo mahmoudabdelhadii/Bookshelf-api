@@ -4,7 +4,6 @@ import { idSchema } from "../../types.js";
 
 extendZodWithOpenApi(z);
 
-
 export const publisherSchema = z
   .object({
     id: idSchema,
@@ -73,7 +72,6 @@ export const updatePublisherSchema = createPublisherSchema
   .partial()
   .openapi({ description: "Publisher update data" });
 
-
 export const getPublisherSchema = z
   .object({
     params: z.object({
@@ -104,9 +102,7 @@ export const searchPublishersSchema = z
   })
   .openapi({ description: "Search publishers parameters" });
 
-
 export const publisherArraySchema = z.array(publisherSchema).openapi({ description: "Array of publishers" });
-
 
 export const publisherWithStatsSchema = publisherSchema
   .extend({
@@ -145,7 +141,6 @@ export const publisherWithStatsSchema = publisherSchema
       .openapi({ description: "Publisher's most recent books" }),
   })
   .openapi({ description: "Publisher with computed statistics" });
-
 
 export type Publisher = z.infer<typeof publisherSchema>;
 export type CreatePublisher = z.infer<typeof createPublisherSchema>;

@@ -47,12 +47,6 @@ export async function searchISBNdb(
           },
         };
 
-
-
-
-
-
-
       case "publishers":
         return {
           data: {
